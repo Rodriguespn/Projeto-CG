@@ -11,10 +11,10 @@ const initCameraPosition = {
 
 // the default color of the diferente objects
 const objectsColors = {
-    wire: 0x5e5e5e,
-    cube: 0xee1122,
-    circle: 0x1122ee,
-    ellipse: 0x4edf22
+    wire: '#5e5e5e',
+    cube: '#D8122F',
+    circle: '#44EDED',
+    ellipse: '#0CEE6C'
 }
 
 // draws the object on the canvas
@@ -64,7 +64,7 @@ function createCircle(obj, x, y, z) {
 
 // creates a vertical cable at the (x,y,z) position
 function createVerticalWire(obj, heigth, x, y, z) {
-    geometry = new THREE.CylinderGeometry(0.1, 0.1, heigth, 8)
+    geometry = new THREE.CylinderGeometry(0.05, 0.05, heigth, 8)
 
     material = new THREE.MeshBasicMaterial({ color: objectsColors.wire, wireframe: true })
     mesh = new THREE.Mesh(geometry, material)
@@ -76,7 +76,7 @@ function createVerticalWire(obj, heigth, x, y, z) {
 
 // creates a horizontal cable at the (x,y,z) position
 function createHorizontalWire(obj, height, x, y, z) {
-    geometry = new THREE.CylinderGeometry(0.1, 0.1, height, 8)
+    geometry = new THREE.CylinderGeometry(0.05, 0.05, height, 8)
     material = new THREE.MeshBasicMaterial({ color: objectsColors.wire, wireframe: true })
     mesh = new THREE.Mesh(geometry, material)
 
@@ -143,7 +143,7 @@ function createCamera() {
 // creates the scene object
 function createScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xd5e3e3);
+    scene.background = new THREE.Color('#d0e7e5');
 
     scene.add(new THREE.AxesHelper(10))
 
