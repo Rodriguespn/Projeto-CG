@@ -76,6 +76,8 @@ function createVerticalWire(obj, heigth, x, y, z) {
 
 // creates a horizontal cable at the (x,y,z) position
 function createHorizontalWire(obj, height, x, y, z) {
+    userData = { rotation: false, speed: 0 }
+    
     geometry = new THREE.CylinderGeometry(0.05, 0.05, height, 8)
     material = new THREE.MeshBasicMaterial({ color: objectsColors.wire, wireframe: true })
     mesh = new THREE.Mesh(geometry, material)
