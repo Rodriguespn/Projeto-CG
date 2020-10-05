@@ -88,6 +88,56 @@ function createHorizontalWire(obj, height, x, y, z) {
     obj.add(mesh)
 }
 
+function createFirstMobileSegment(mobile) {
+    segment = new THREE.Object3D()
+
+    createHorizontalWire(segment, 10, 0, 0, 0)
+    createCube(segment, -6, 0, 0)
+    createEllipse(segment, 6, 0, 0)
+
+    mobile.add(segment)
+}
+
+function createSecondMobileSegment(mobile) {
+    segment = new THREE.Object3D()
+
+    createHorizontalWire(segment, 10, 3, -2, 0)
+    createCube(segment, 9, -2, 0)
+    createCircle(segment, -3, -2, 0)
+
+    mobile.add(segment)
+}
+
+function createThirdMobileSegment(mobile) {
+    segment = new THREE.Object3D()
+
+    createHorizontalWire(segment, 10, 6, -4, 0)
+    createCircle(segment, 0, -4, 0)
+    createEllipse(segment, 12, -4, 0)
+
+    mobile.add(segment)
+}
+
+function createFourthMobileSegment(mobile) {
+    segment = new THREE.Object3D()
+
+    createHorizontalWire(segment, 10, 9, -6, 0)
+    createCube(segment, 3, -6, 0)
+    createCircle(segment, 15, -6, 0)
+
+    mobile.add(segment)
+}
+
+function createFifthMobileSegment(mobile) {
+    segment = new THREE.Object3D()
+ 
+    createHorizontalWire(segment, 10, 12, -8, 0)
+    createCube(segment, 6, -8, 0)
+    createCube(segment, 18, -8, 0)
+
+    mobile.add(segment)
+}
+
 // creates the mobile
 function createMobile(x, y, z) {
     const mobile = new THREE.Object3D()
@@ -99,26 +149,11 @@ function createMobile(x, y, z) {
     createVerticalWire(mobile, 2, 9, -5, 0)
     createVerticalWire(mobile, 2, 12, -7, 0)
 
-    // Horizontal wires
-    createHorizontalWire(mobile, 10, 0, 0, 0)
-    createHorizontalWire(mobile, 10, 3, -2, 0)
-    createHorizontalWire(mobile, 10, 6, -4, 0)
-    createHorizontalWire(mobile, 10, 9, -6, 0)
-    createHorizontalWire(mobile, 10, 12, -8, 0)
-
-    // Cubes
-    createCube(mobile, -6, 0, 0)
-    createCube(mobile, 9, -2, 0)
-    createCube(mobile, 3, -6, 0)
-    createCube(mobile, 6, -8, 0)
-    createCube(mobile, 18, -8, 0)
-
-    // Cylinders
-    createEllipse(mobile, 6, 0, 0)
-    createCircle(mobile, -3, -2, 0)
-    createCircle(mobile, 0, -4, 0)
-    createEllipse(mobile, 12, -4, 0)
-    createCircle(mobile, 15, -6, 0)
+    createFirstMobileSegment(mobile)
+    createSecondMobileSegment(mobile)
+    createThirdMobileSegment(mobile)
+    createFourthMobileSegment(mobile)
+    createFifthMobileSegment(mobile)
 
     scene.add(mobile)
 
