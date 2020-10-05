@@ -95,6 +95,8 @@ function createFirstMobileSegment(mobile) {
     createCube(segment, -6, 0, 0)
     createEllipse(segment, 6, 0, 0)
 
+    segment.name = "segment"
+
     mobile.add(segment)
 }
 
@@ -104,6 +106,8 @@ function createSecondMobileSegment(mobile) {
     createHorizontalWire(segment, 10, 3, -2, 0)
     createCube(segment, 9, -2, 0)
     createCircle(segment, -3, -2, 0)
+
+    segment.name = "segment"
 
     mobile.add(segment)
 }
@@ -115,6 +119,8 @@ function createThirdMobileSegment(mobile) {
     createCircle(segment, 0, -4, 0)
     createEllipse(segment, 12, -4, 0)
 
+    segment.name = "segment"
+
     mobile.add(segment)
 }
 
@@ -125,6 +131,8 @@ function createFourthMobileSegment(mobile) {
     createCube(segment, 3, -6, 0)
     createCircle(segment, 15, -6, 0)
 
+    segment.name = "segment"
+
     mobile.add(segment)
 }
 
@@ -134,6 +142,8 @@ function createFifthMobileSegment(mobile) {
     createHorizontalWire(segment, 10, 12, -8, 0)
     createCube(segment, 6, -8, 0)
     createCube(segment, 18, -8, 0)
+
+    segment.name = "segment"
 
     mobile.add(segment)
 }
@@ -160,6 +170,8 @@ function createMobile(x, y, z) {
     mobile.position.x = x
     mobile.position.y = y
     mobile.position.z = z
+
+    console.log(mobile)
 }
 
 // updates the position of the orthogonal camera
