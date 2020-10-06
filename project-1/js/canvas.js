@@ -194,7 +194,24 @@ function onKeyDown(event) {
                 }
             })
             break;
-
+        case 'q':
+            mobile.children[0].rotation.y += 0.02
+            break;
+        case 'w':
+            mobile.children[0].rotation.y -= 0.02
+            break;
+        case 'a':
+            mobile.children[0].children[4].children[4].rotation.y += 0.02
+            break;
+        case 'd':
+            mobile.children[0].children[4].children[4].rotation.y -= 0.02
+            break;
+        case 'z':
+            mobile.children[0].children[4].children[4].children[4].children[4].rotation.y += 0.02
+            break;
+        case 'c':
+            mobile.children[0].children[4].children[4].children[4].children[4].rotation.y -= 0.02
+            break;
         default:
             break;
     }
@@ -203,11 +220,11 @@ function onKeyDown(event) {
 // animates the scene
 function animate() {
     //mobile.rotation.y += 0.04
-    const obj = mobile.children[0].children[4].children[4].children[4]
-    const obj2 = mobile.children[0].children[4].children[4].children[4].children[4]
+    //const obj = mobile.children[0].children[4].children[4].children[4]
+    //const obj2 = mobile.children[0].children[4].children[4].children[4].children[4]
 
-    obj.rotation.y += 0.03
-    obj2.rotation.y += 0.03
+    //obj.rotation.y += 0.03
+    //obj2.rotation.y += 0.03
     render()
 
     requestAnimationFrame(animate)
