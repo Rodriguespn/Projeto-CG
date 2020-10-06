@@ -203,11 +203,17 @@ function onKeyDown(event) {
 // animates the scene
 function animate() {
     //mobile.rotation.y += 0.04
-    const obj = mobile.children[0].children[4].children[4].children[4]
-    const obj2 = mobile.children[0].children[4].children[4].children[4].children[4]
+    /*const obj1 = mobile.children[0]
+    const obj2 = mobile.children[0].children[4]
+    const obj3 = mobile.children[0].children[4].children[4]
+    const obj4 = mobile.children[0].children[4].children[4].children[4]
+    const obj5 = mobile.children[0].children[4].children[4].children[4].children[4]
 
-    obj.rotation.y += 0.03
-    obj2.rotation.y += 0.03
+    obj1.rotation.y += 0.01
+    obj2.rotation.y += 0.01
+    obj3.rotation.y += 0.01
+    obj4.rotation.y += 0.01
+    obj5.rotation.y += 0.01*/
     render()
 
     requestAnimationFrame(animate)
