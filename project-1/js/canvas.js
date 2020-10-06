@@ -2,6 +2,8 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, renderer, geometry, material, mesh, mobile
 
+const numberOfLevels = 5
+
 // inital coordinates of the camera
 const initCameraPosition = {
     cameraX: 15, 
@@ -14,7 +16,8 @@ const objectsColors = {
     wire: '#5e5e5e',
     cube: '#D8122F',
     circle: '#44EDED',
-    ellipse: '#0CEE6C'
+    ellipse: '#0CEE6C',
+    background: '#d0e7e5'
 }
 
 // draws the object on the canvas
@@ -90,7 +93,9 @@ function createHorizontalWire(height, x, y, z) {
 }
 
 function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
-    segment = new THREE.Object3D()
+    let segment = new THREE.Object3D()
+
+    segment.userData = { rotation: false, angle: 0 }
 
     segment.add(vertWire)
     segment.add(horWire)
@@ -110,11 +115,11 @@ function createMobile(x, y, z) {
     mobile = new THREE.Object3D()
 
     // Create Segments
-    const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "1stWire")
-    const seg2 = createMobileSegment(createVerticalWire(2, 0, -1, 0), createHorizontalWire(10, 0, -2, 0), createCube(6, -2, 0), createCircle(-6, -2, 0),  "2ndWire")
-    const seg3 = createMobileSegment(createVerticalWire(2, 0, -3, 0), createHorizontalWire(10, 0, -4, 0), createCircle(-6, -4, 0), createEllipse(6, -4, 0),  "3rdWire")
-    const seg4 = createMobileSegment(createVerticalWire(2, 0, -5, 0), createHorizontalWire(10, 0, -6, 0), createCube(-6, -6, 0), createCircle(6, -6, 0),  "4thWire")
-    const seg5 = createMobileSegment(createVerticalWire(2, 0, -7, 0), createHorizontalWire(10, 0, -8, 0), createCube(-6, -8, 0), createCube(6, -8, 0),  "5thWire")
+    const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "1")
+    const seg2 = createMobileSegment(createVerticalWire(2, 0, -1, 0), createHorizontalWire(10, 0, -2, 0), createCube(6, -2, 0), createCircle(-6, -2, 0),  "2")
+    const seg3 = createMobileSegment(createVerticalWire(2, 0, -3, 0), createHorizontalWire(10, 0, -4, 0), createCircle(-6, -4, 0), createEllipse(6, -4, 0),  "3")
+    const seg4 = createMobileSegment(createVerticalWire(2, 0, -5, 0), createHorizontalWire(10, 0, -6, 0), createCube(-6, -6, 0), createCircle(6, -6, 0),  "4")
+    const seg5 = createMobileSegment(createVerticalWire(2, 0, -7, 0), createHorizontalWire(10, 0, -8, 0), createCube(-6, -8, 0), createCube(6, -8, 0),  "5")
 
     // Object Nesting
     mobile.add(seg1)
@@ -151,11 +156,11 @@ function createCamera() {
 // creates the scene object
 function createScene() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color('#d0e7e5');
+    scene.background = new THREE.Color(objectsColors.background);
 
     scene.add(new THREE.AxesHelper(10))
 
-    createMobile(0,0,0)
+    createMobile(0, 0, 0)
 }
 
 // adjusts the camera position when the window is resized
@@ -195,6 +200,39 @@ function onKeyDown(event) {
             })
             break;
 
+        // controla v1
+        case 'Q':
+        case 'q':
+            mobile.children[0].rotation.y += 0.02
+            break;
+
+        case 'W':
+        case 'w':
+            mobile.children[0].rotation.y -= 0.02
+            break;
+
+        // controla v2
+        case 'A':
+        case 'a':
+            mobile.children[0].children[4].children[4].rotation.y += 0.02
+            break;
+
+        case 'D':
+        case 'd':
+            mobile.children[0].children[4].children[4].rotation.y -= 0.02
+            break;
+
+        // controla v3
+        case 'Z':
+        case 'z':
+            mobile.children[0].children[4].children[4].children[4].children[4].rotation.y += 0.02
+            break;
+
+        case 'C':
+        case 'c':
+            mobile.children[0].children[4].children[4].children[4].children[4].rotation.y -= 0.02
+            break;
+
         default:
             break;
     }
@@ -203,17 +241,11 @@ function onKeyDown(event) {
 // animates the scene
 function animate() {
     //mobile.rotation.y += 0.04
-    /*const obj1 = mobile.children[0]
-    const obj2 = mobile.children[0].children[4]
-    const obj3 = mobile.children[0].children[4].children[4]
-    const obj4 = mobile.children[0].children[4].children[4].children[4]
-    const obj5 = mobile.children[0].children[4].children[4].children[4].children[4]
+    //const obj = mobile.children[0].children[4].children[4].children[4]
+    //const obj2 = mobile.children[0].children[4].children[4].children[4].children[4]
 
-    obj1.rotation.y += 0.01
-    obj2.rotation.y += 0.01
-    obj3.rotation.y += 0.01
-    obj4.rotation.y += 0.01
-    obj5.rotation.y += 0.01*/
+    //obj.rotation.y += 0.03
+    //obj2.rotation.y += 0.03
     render()
 
     requestAnimationFrame(animate)
