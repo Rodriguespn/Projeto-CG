@@ -1,6 +1,6 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let scene, camera, renderer, geometry, material, mesh, ball
+let scene, camera, renderer, geometry, material, mesh, mobile
 
 // inital coordinates of the camera
 const initCameraPosition = {
@@ -75,9 +75,11 @@ function createVerticalWire(heigth, x, y, z) {
 
 // creates a horizontal cable at the (x,y,z) position
 function createHorizontalWire(height, x, y, z) {
-    userData = { rotation: false, speed: 0 }
+    //userData = { rotation: false, speed: 0 }
     
     geometry = new THREE.CylinderGeometry(0.05, 0.05, height, 8)
+    //geometry.translate(x, y, z)
+
     material = new THREE.MeshBasicMaterial({ color: objectsColors.wire, wireframe: true })
     mesh = new THREE.Mesh(geometry, material)
 
@@ -97,19 +99,22 @@ function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
 
     segment.name = name
 
+    segment.position.set(3, 0, 0)
+    //segment.translateOnAxis({x:vertWire.position.x, y:vertWire.position.y, z:vertWire.position.z}, 0.1)
+    console.log(segment.position)
     return segment
 }
 
 // creates the mobile
 function createMobile(x, y, z) {
-    const mobile = new THREE.Object3D()
+    mobile = new THREE.Object3D()
 
     // Create Segments
     const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "1stWire")
-    const seg2 = createMobileSegment(createVerticalWire(2, 3, -1, 0), createHorizontalWire(10, 3, -2, 0), createCube(9, -2, 0), createCircle(-3, -2, 0),  "2ndWire")
-    const seg3 = createMobileSegment(createVerticalWire(2, 6, -3, 0), createHorizontalWire(10, 6, -4, 0), createCircle(0, -4, 0), createEllipse(12, -4, 0),  "3rdWire")
-    const seg4 = createMobileSegment(createVerticalWire(2, 9, -5, 0), createHorizontalWire(10, 9, -6, 0), createCube(3, -6, 0), createCircle(15, -6, 0),  "4thWire")
-    const seg5 = createMobileSegment(createVerticalWire(2, 12, -7, 0), createHorizontalWire(10, 12, -8, 0), createCube(6, -8, 0), createCube(18, -8, 0),  "5thWire")
+    const seg2 = createMobileSegment(createVerticalWire(2, 0, -1, 0), createHorizontalWire(10, 0, -2, 0), createCube(6, -2, 0), createCircle(-6, -2, 0),  "2ndWire")
+    const seg3 = createMobileSegment(createVerticalWire(2, 0, -3, 0), createHorizontalWire(10, 0, -4, 0), createCircle(-6, -4, 0), createEllipse(6, -4, 0),  "3rdWire")
+    const seg4 = createMobileSegment(createVerticalWire(2, 0, -5, 0), createHorizontalWire(10, 0, -6, 0), createCube(-6, -6, 0), createCircle(6, -6, 0),  "4thWire")
+    const seg5 = createMobileSegment(createVerticalWire(2, 0, -7, 0), createHorizontalWire(10, 0, -8, 0), createCube(-6, -8, 0), createCube(6, -8, 0),  "5thWire")
 
     // Object Nesting
     mobile.add(seg1)
@@ -120,9 +125,10 @@ function createMobile(x, y, z) {
 
     scene.add(mobile)
 
-    mobile.position.x = x
+    mobile.position.x = x-3
     mobile.position.y = y
     mobile.position.z = z
+    mobile.name = "mobile"
 
     console.log(mobile)
 }
@@ -196,6 +202,12 @@ function onKeyDown(event) {
 
 // animates the scene
 function animate() {
+    //mobile.rotation.y += 0.04
+    const obj = mobile.children[0].children[4].children[4].children[4]
+    const obj2 = mobile.children[0].children[4].children[4].children[4].children[4]
+
+    obj.rotation.y += 0.03
+    obj2.rotation.y += 0.03
     render()
 
     requestAnimationFrame(animate)
