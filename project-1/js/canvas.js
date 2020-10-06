@@ -90,7 +90,7 @@ function createHorizontalWire(height, x, y, z) {
 }
 
 function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
-    segment = new THREE.Object3D()
+    let segment = new THREE.Object3D()
 
     segment.add(vertWire)
     segment.add(horWire)
