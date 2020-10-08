@@ -2,9 +2,7 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, renderer, geometry, material, mesh, mobile
 
-const numberOfLevels = 5
-
-
+const numberOfLevels = 5, speed = 0.02
 
 // inital coordinates of the camera
 const initCameraPosition = {
@@ -205,34 +203,34 @@ function rotateVs(e) {
         // controla v1
         case 'Q':
         case 'q':
-            mobile.children[0].rotation.y += 0.02
+            mobile.children[0].rotation.y += speed
             break;
 
         case 'W':
         case 'w':
-            mobile.children[0].rotation.y -= 0.02
+            mobile.children[0].rotation.y -= speed
             break;
 
         // controla v2
         case 'A':
         case 'a':
-            mobile.children[0].children[4].children[4].rotation.y += 0.02
+            mobile.children[0].children[4].rotation.y += speed
             break;
 
         case 'D':
         case 'd':
-            mobile.children[0].children[4].children[4].rotation.y -= 0.02
+            mobile.children[0].children[4].rotation.y -= speed
             break;
 
         // controla v3
         case 'Z':
         case 'z':
-            mobile.children[0].children[4].children[4].children[4].children[4].rotation.y += 0.02
+            mobile.children[0].children[4].children[4].rotation.y += speed
             break;
 
         case 'C':
         case 'c':
-            mobile.children[0].children[4].children[4].children[4].children[4].rotation.y -= 0.02
+            mobile.children[0].children[4].children[4].rotation.y -= speed
             break;
 
         default:
