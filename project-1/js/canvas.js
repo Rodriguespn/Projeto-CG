@@ -4,6 +4,8 @@ let scene, camera, renderer, geometry, material, mesh, mobile
 
 const numberOfLevels = 5
 
+
+
 // inital coordinates of the camera
 const initCameraPosition = {
     cameraX: 15, 
@@ -176,10 +178,10 @@ function onResize() {
     }
 }
 
-// handles an event when a key is pressed
-function onKeyDown(event) {
-    console.log('key pressed: ' + event.key)
-    switch (event.key) {
+//roda um determinado V consoante a tecla que foi premida
+function rotateVs(e) {
+    //console.log('key pressed: ' + e)
+    switch (e) {
         case '1':
             updateCameraPosition(initCameraPosition.cameraX, initCameraPosition.cameraY, initCameraPosition.cameraZ)
             break;
@@ -238,6 +240,54 @@ function onKeyDown(event) {
     }
 }
 
+//muda posição da camera e material do mobile
+function switchCameraAndMaterial(event) {
+    switch(event.key) {
+        case '1':
+            updateCameraPosition(initCameraPosition.cameraX, initCameraPosition.cameraY, initCameraPosition.cameraZ)
+            break;
+    
+        case '2':
+            updateCameraPosition(0, 30, 0)
+            break;
+    
+        case '3':
+            updateCameraPosition(0, 0, 30)
+            break;
+    
+        case '4':
+            scene.traverse((node) => {
+                if (node instanceof THREE.Mesh) {
+                    node.material.wireframe = !node.material.wireframe
+                }
+            })
+            break;
+    }
+}
+
+//Guarda as teclas que foram premidas
+const controller = {
+    'q': {pressed: false, func: rotateVs},
+    'Q': {pressed: false, func: rotateVs},
+    'w': {pressed: false, func: rotateVs},
+    'W': {pressed: false, func: rotateVs},
+    'a': {pressed: false, func: rotateVs},
+    'A': {pressed: false, func: rotateVs},
+    'd': {pressed: false, func: rotateVs},
+    'D': {pressed: false, func: rotateVs},
+    'z': {pressed: false, func: rotateVs},
+    'Z': {pressed: false, func: rotateVs},
+    'c': {pressed: false, func: rotateVs},
+    'C': {pressed: false, func: rotateVs},
+  }
+
+//Verifica que keys estão pressionadas e activa o movimento correspondente
+const executeMoves = () => {
+    Object.keys(controller).forEach(key=> {
+      controller[key].pressed && controller[key].func(key)
+    })
+}
+
 // animates the scene
 function animate() {
     //mobile.rotation.y += 0.04
@@ -246,6 +296,9 @@ function animate() {
 
     //obj.rotation.y += 0.03
     //obj2.rotation.y += 0.03
+
+    executeMoves()
+
     render()
 
     requestAnimationFrame(animate)
@@ -265,7 +318,20 @@ function init() {
     render()
 
     window.addEventListener("resize", onResize)
-    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keydown', switchCameraAndMaterial)
+
+    //actualiza controller
+    window.addEventListener("keydown", (e) => {
+        if(controller[e.key]){
+          controller[e.key].pressed = true
+        }
+      })
+    window.addEventListener("keyup", (e) => {
+        if(controller[e.key]){
+          controller[e.key].pressed = false
+        }
+      })
 }
+
 
 
