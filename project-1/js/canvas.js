@@ -176,7 +176,7 @@ function onResize() {
     renderer.setSize(windowWidth, windowHeight)
 
     if (windowHeight > 0 && windowWidth > 0) {
-        camera.aspect = renderer.getSize().width / renderer.getSize().height
+        camera.aspect = windowWidth / windowHeight
         camera.updateProjectionMatrix()
     }
 }
