@@ -2,7 +2,12 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, renderer, geometry, material, mesh, mobile
 
-const numberOfLevels = 5, speed = 0.02
+const numberOfLevels = 5
+
+const objectsSpeed = {
+    segmentSpeed: 0.02,
+    mobileSpeed: 0.1
+}
 
 // inital coordinates of the camera
 const initCameraPosition = {
@@ -47,6 +52,7 @@ function createEllipse(x, y, z) {
 
     mesh.rotation.x = Math.PI/2
     mesh.rotation.z = Math.PI/2
+
     mesh.position.set(x, y, z)
 
     return mesh
@@ -105,8 +111,7 @@ function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
     segment.name = name
 
     segment.position.set(3, 0, 0)
-    //segment.translateOnAxis({x:vertWire.position.x, y:vertWire.position.y, z:vertWire.position.z}, 0.1)
-    console.log(segment.position)
+    //console.log(segment.position)
     return segment
 }
 
@@ -180,62 +185,43 @@ function onResize() {
 function rotateVs(e) {
     //console.log('key pressed: ' + e)
     switch (e) {
-        case '1':
-            updateCameraPosition(initCameraPosition.cameraX, initCameraPosition.cameraY, initCameraPosition.cameraZ)
-            break;
-
-        case '2':
-            updateCameraPosition(0, 30, 0)
-            break;
-
-        case '3':
-            updateCameraPosition(0, 0, 30)
-            break;
-
-        case '4':
-            scene.traverse((node) => {
-                if (node instanceof THREE.Mesh) {
-                    node.material.wireframe = !node.material.wireframe
-                }
-            })
-            break;
-
         // controla v1
         case 'Q':
         case 'q':
-            mobile.children[0].rotation.y += speed
+            mobile.children[0].rotation.y += objectsSpeed.segmentSpeed
             break;
 
         case 'W':
         case 'w':
-            mobile.children[0].rotation.y -= speed
+            mobile.children[0].rotation.y -= objectsSpeed.segmentSpeed
             break;
 
         // controla v2
         case 'A':
         case 'a':
-            mobile.children[0].children[4].rotation.y += speed
+            mobile.children[0].children[4].rotation.y += objectsSpeed.segmentSpeed
             break;
 
         case 'D':
         case 'd':
-            mobile.children[0].children[4].rotation.y -= speed
+            mobile.children[0].children[4].rotation.y -= objectsSpeed.segmentSpeed
             break;
 
         // controla v3
         case 'Z':
         case 'z':
-            mobile.children[0].children[4].children[4].rotation.y += speed
+            mobile.children[0].children[4].children[4].rotation.y += objectsSpeed.segmentSpeed
             break;
 
         case 'C':
         case 'c':
-            mobile.children[0].children[4].children[4].rotation.y -= speed
+            mobile.children[0].children[4].children[4].rotation.y -= objectsSpeed.segmentSpeed
             break;
 
         default:
             break;
     }
+    console.log(e)
 }
 
 //muda posição da camera e material do mobile
@@ -263,6 +249,29 @@ function switchCameraAndMaterial(event) {
     }
 }
 
+function moveMobile(e) {
+    switch (e) {
+        case 'ArrowUp':
+            mobile.position.z -= objectsSpeed.mobileSpeed
+            break;
+
+        case 'ArrowDown':
+            mobile.position.z += objectsSpeed.mobileSpeed
+            break;
+
+        case 'ArrowLeft':
+            mobile.position.x -= objectsSpeed.mobileSpeed
+            break;
+
+        case 'ArrowRight':
+            mobile.position.x += objectsSpeed.mobileSpeed
+            break;
+            
+        default:
+            break;
+    }
+}
+
 //Guarda as teclas que foram premidas
 const controller = {
     'q': {pressed: false, func: rotateVs},
@@ -277,6 +286,10 @@ const controller = {
     'Z': {pressed: false, func: rotateVs},
     'c': {pressed: false, func: rotateVs},
     'C': {pressed: false, func: rotateVs},
+    'ArrowUp': {pressed: false, func: moveMobile},
+    'ArrowDown': {pressed: false, func: moveMobile},
+    'ArrowLeft': {pressed: false, func: moveMobile},
+    'ArrowRight': {pressed: false, func: moveMobile},
   }
 
 //Verifica que keys estão pressionadas e activa o movimento correspondente
