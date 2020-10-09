@@ -4,15 +4,19 @@ let scene, camera, renderer, geometry, material, mesh, mobile
 
 const numberOfLevels = 5
 
-const objectsSpeed = {
-    segmentSpeed: 0.02,
-    mobileSpeed: 0.1
+const speed = 0.02
+
+const cameraProperties = {
+    cameraLeft: -20,
+    cameraRight: 20,
+    cameraTop: 20,
+    cameraBottom: -20
 }
 
 // inital coordinates of the camera
 const initCameraPosition = {
-    cameraX: 15, 
-    cameraY: 10, 
+    cameraX: 0, 
+    cameraY: 0, 
     cameraZ: 30
 }
 
@@ -153,7 +157,7 @@ function updateCameraPosition(x, y, z) {
 
 // creates the camera object
 function createCamera() {
-    camera = new THREE.PerspectiveCamera(70, windowWidth / windowHeight, 1, 1000)
+    camera = new THREE.OrthographicCamera(cameraProperties.cameraLeft, cameraProperties.cameraRight, cameraProperties.cameraTop, cameraProperties.cameraBottom, 1, 1000)
 
     updateCameraPosition(initCameraPosition.cameraX, initCameraPosition.cameraY, initCameraPosition.cameraZ)
 }
@@ -188,34 +192,34 @@ function rotateVs(e) {
         // controla v1
         case 'Q':
         case 'q':
-            mobile.children[0].rotation.y += objectsSpeed.segmentSpeed
+            mobile.children[0].rotation.y += speed
             break;
 
         case 'W':
         case 'w':
-            mobile.children[0].rotation.y -= objectsSpeed.segmentSpeed
+            mobile.children[0].rotation.y -= speed
             break;
 
         // controla v2
         case 'A':
         case 'a':
-            mobile.children[0].children[4].rotation.y += objectsSpeed.segmentSpeed
+            mobile.children[0].children[4].rotation.y += speed
             break;
 
         case 'D':
         case 'd':
-            mobile.children[0].children[4].rotation.y -= objectsSpeed.segmentSpeed
+            mobile.children[0].children[4].rotation.y -= speed
             break;
 
         // controla v3
         case 'Z':
         case 'z':
-            mobile.children[0].children[4].children[4].rotation.y += objectsSpeed.segmentSpeed
+            mobile.children[0].children[4].children[4].rotation.y += speed
             break;
 
         case 'C':
         case 'c':
-            mobile.children[0].children[4].children[4].rotation.y -= objectsSpeed.segmentSpeed
+            mobile.children[0].children[4].children[4].rotation.y -= speed
             break;
 
         default:
@@ -228,15 +232,15 @@ function rotateVs(e) {
 function switchCameraAndMaterial(event) {
     switch(event.key) {
         case '1':
-            updateCameraPosition(initCameraPosition.cameraX, initCameraPosition.cameraY, initCameraPosition.cameraZ)
-            break;
-    
-        case '2':
-            updateCameraPosition(0, 30, 0)
-            break;
-    
-        case '3':
             updateCameraPosition(0, 0, 30)
+            break;
+            
+        case '2':
+            updateCameraPosition(30, 0, 0)
+            break;
+                
+        case '3':
+            updateCameraPosition(0, 30, 0)
             break;
     
         case '4':
@@ -252,19 +256,19 @@ function switchCameraAndMaterial(event) {
 function moveMobile(e) {
     switch (e) {
         case 'ArrowUp':
-            mobile.position.z -= objectsSpeed.mobileSpeed
+            mobile.position.z -= speed
             break;
 
         case 'ArrowDown':
-            mobile.position.z += objectsSpeed.mobileSpeed
+            mobile.position.z += speed
             break;
 
         case 'ArrowLeft':
-            mobile.position.x -= objectsSpeed.mobileSpeed
+            mobile.position.x -= speed
             break;
 
         case 'ArrowRight':
-            mobile.position.x += objectsSpeed.mobileSpeed
+            mobile.position.x += speed
             break;
             
         default:
@@ -274,6 +278,10 @@ function moveMobile(e) {
 
 //Guarda as teclas que foram premidas
 const controller = {
+    '1': {pressed: false, func: switchCameraAndMaterial},
+    '2': {pressed: false, func: switchCameraAndMaterial},
+    '3': {pressed: false, func: switchCameraAndMaterial},
+    '4': {pressed: false, func: switchCameraAndMaterial},
     'q': {pressed: false, func: rotateVs},
     'Q': {pressed: false, func: rotateVs},
     'w': {pressed: false, func: rotateVs},
@@ -301,12 +309,6 @@ const executeMoves = () => {
 
 // animates the scene
 function animate() {
-    //mobile.rotation.y += 0.04
-    //const obj = mobile.children[0].children[4].children[4].children[4]
-    //const obj2 = mobile.children[0].children[4].children[4].children[4].children[4]
-
-    //obj.rotation.y += 0.03
-    //obj2.rotation.y += 0.03
 
     executeMoves()
 
