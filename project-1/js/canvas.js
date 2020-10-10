@@ -4,20 +4,21 @@ let scene, camera, renderer, geometry, material, mesh, mobile
 
 const numberOfLevels = 5
 
-const speed = 0.02
+// the 
+const objectSpeed = {
+    mobile: 0.05, 
+    segment: 0.02
+}
 
+// all the camera properties
 const cameraProperties = {
     cameraLeft: -20,
     cameraRight: 20,
     cameraTop: 20,
-    cameraBottom: -20
-}
-
-// inital coordinates of the camera
-const initCameraPosition = {
-    cameraX: 0, 
-    cameraY: 0, 
-    cameraZ: 30
+    cameraBottom: -20,
+    x: 0, 
+    y: 0, 
+    z: 30
 }
 
 // the default color of the diferente objects
@@ -88,10 +89,8 @@ function createVerticalWire(heigth, x, y, z) {
 
 // creates a horizontal cable at the (x,y,z) position
 function createHorizontalWire(height, x, y, z) {
-    //userData = { rotation: false, speed: 0 }
     
     geometry = new THREE.CylinderGeometry(0.05, 0.05, height, 8)
-    //geometry.translate(x, y, z)
 
     material = new THREE.MeshBasicMaterial({ color: objectsColors.wire, wireframe: true })
     mesh = new THREE.Mesh(geometry, material)
@@ -105,7 +104,7 @@ function createHorizontalWire(height, x, y, z) {
 function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
     let segment = new THREE.Object3D()
 
-    segment.userData = { rotation: false, angle: 0 }
+    segment.userData = { speed: objectSpeed.segment }
 
     segment.add(vertWire)
     segment.add(horWire)
@@ -123,12 +122,14 @@ function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
 function createMobile(x, y, z) {
     mobile = new THREE.Object3D()
 
+    mobile.userData = { speed: objectSpeed.mobile }
+
     // Create Segments
-    const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "1")
-    const seg2 = createMobileSegment(createVerticalWire(2, 0, -1, 0), createHorizontalWire(10, 0, -2, 0), createCube(6, -2, 0), createCircle(-6, -2, 0),  "2")
-    const seg3 = createMobileSegment(createVerticalWire(2, 0, -3, 0), createHorizontalWire(10, 0, -4, 0), createCircle(-6, -4, 0), createEllipse(6, -4, 0),  "3")
-    const seg4 = createMobileSegment(createVerticalWire(2, 0, -5, 0), createHorizontalWire(10, 0, -6, 0), createCube(-6, -6, 0), createCircle(6, -6, 0),  "4")
-    const seg5 = createMobileSegment(createVerticalWire(2, 0, -7, 0), createHorizontalWire(10, 0, -8, 0), createCube(-6, -8, 0), createCube(6, -8, 0),  "5")
+    const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "first")
+    const seg2 = createMobileSegment(createVerticalWire(2, 0, -1, 0), createHorizontalWire(10, 0, -2, 0), createCube(6, -2, 0), createCircle(-6, -2, 0),  "second")
+    const seg3 = createMobileSegment(createVerticalWire(2, 0, -3, 0), createHorizontalWire(10, 0, -4, 0), createCircle(-6, -4, 0), createEllipse(6, -4, 0),  "third")
+    const seg4 = createMobileSegment(createVerticalWire(2, 0, -5, 0), createHorizontalWire(10, 0, -6, 0), createCube(-6, -6, 0), createCircle(6, -6, 0),  "fourth")
+    const seg5 = createMobileSegment(createVerticalWire(2, 0, -7, 0), createHorizontalWire(10, 0, -8, 0), createCube(-6, -8, 0), createCube(6, -8, 0),  "fifth")
 
     // Object Nesting
     mobile.add(seg1)
@@ -148,10 +149,10 @@ function createMobile(x, y, z) {
 }
 
 // updates the position of the orthogonal camera
-function updateCameraPosition(x, y, z) {
-    camera.position.x = x
-    camera.position.y = y
-    camera.position.z = z
+function updateCameraPosition() {
+    camera.position.x = cameraProperties.x
+    camera.position.y = cameraProperties.y
+    camera.position.z = cameraProperties.z
     camera.lookAt(scene.position)
 }
 
@@ -159,7 +160,7 @@ function updateCameraPosition(x, y, z) {
 function createCamera() {
     camera = new THREE.OrthographicCamera(cameraProperties.cameraLeft, cameraProperties.cameraRight, cameraProperties.cameraTop, cameraProperties.cameraBottom, 1, 1000)
 
-    updateCameraPosition(initCameraPosition.cameraX, initCameraPosition.cameraY, initCameraPosition.cameraZ)
+    updateCameraPosition()
 }
 
 // creates the scene object
@@ -185,62 +186,73 @@ function onResize() {
     }
 }
 
-//roda um determinado V consoante a tecla que foi premida
+// roda um determinado V consoante a tecla que foi premida
 function rotateVs(e) {
-    //console.log('key pressed: ' + e)
+    let segment = null
     switch (e) {
         // controla v1
         case 'Q':
         case 'q':
-            mobile.children[0].rotation.y += speed
+            segment = mobile.getObjectByName('first')
+            segment.rotation.y += segment.userData.speed
             break;
 
         case 'W':
         case 'w':
-            mobile.children[0].rotation.y -= speed
+            segment = mobile.getObjectByName('first')
+            segment.rotation.y -= segment.userData.speed
             break;
 
         // controla v2
         case 'A':
         case 'a':
-            mobile.children[0].children[4].rotation.y += speed
+            segment = mobile.getObjectByName('second')
+            segment.rotation.y += segment.userData.speed
             break;
 
         case 'D':
         case 'd':
-            mobile.children[0].children[4].rotation.y -= speed
+            segment = mobile.getObjectByName('second')
+            segment.rotation.y -= segment.userData.speed
             break;
 
         // controla v3
         case 'Z':
         case 'z':
-            mobile.children[0].children[4].children[4].rotation.y += speed
+            segment = mobile.getObjectByName('fourth')
+            segment.rotation.y += segment.userData.speed
             break;
 
         case 'C':
         case 'c':
-            mobile.children[0].children[4].children[4].rotation.y -= speed
+            segment = mobile.getObjectByName('fourth')
+            segment.rotation.y -= segment.userData.speed
             break;
 
         default:
             break;
     }
-    console.log(e)
 }
 
 //muda posição da camera e material do mobile
 function switchCameraAndMaterial(event) {
     switch(event.key) {
         case '1':
-            updateCameraPosition(0, 0, 30)
+            cameraProperties.x = 0
+            cameraProperties.y = 0
+            cameraProperties.z = 30
             break;
             
         case '2':
-            updateCameraPosition(30, 0, 0)
+            cameraProperties.x = 30
+            cameraProperties.y = 0
+            cameraProperties.z = 0
             break;
                 
         case '3':
-            updateCameraPosition(0, 30, 0)
+            cameraProperties.x = 0
+            cameraProperties.y = 30
+            cameraProperties.z = 0
             break;
     
         case '4':
@@ -253,22 +265,23 @@ function switchCameraAndMaterial(event) {
     }
 }
 
+// moves the mobile based on the arrow key pressed
 function moveMobile(e) {
     switch (e) {
         case 'ArrowUp':
-            mobile.position.z -= speed
+            mobile.position.z -= mobile.userData.speed
             break;
 
         case 'ArrowDown':
-            mobile.position.z += speed
+            mobile.position.z += mobile.userData.speed
             break;
 
         case 'ArrowLeft':
-            mobile.position.x -= speed
+            mobile.position.x -= mobile.userData.speed
             break;
 
         case 'ArrowRight':
-            mobile.position.x += speed
+            mobile.position.x += mobile.userData.speed
             break;
             
         default:
@@ -309,7 +322,7 @@ const executeMoves = () => {
 
 // animates the scene
 function animate() {
-
+    updateCameraPosition()
     executeMoves()
 
     render()
@@ -339,12 +352,10 @@ function init() {
           controller[e.key].pressed = true
         }
       })
+
     window.addEventListener("keyup", (e) => {
         if(controller[e.key]){
           controller[e.key].pressed = false
         }
       })
 }
-
-
-
