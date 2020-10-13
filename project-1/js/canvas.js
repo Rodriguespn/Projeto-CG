@@ -125,10 +125,10 @@ function createMobile(x, y, z) {
 
     // Create Segments
     const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "first")
-    const seg2 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "second")
-    const seg3 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "third")
-    const seg4 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "fourth")
-    const seg5 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "fifth")
+    const seg2 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCircle(-6, 0, 0), createCube(6, 0, 0), "second")
+    const seg3 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCircle(-6, 0, 0), createEllipse(6, 0, 0), "third")
+    const seg4 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createCircle(6, 0, 0), "fourth")
+    const seg5 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createCube(6, 0, 0), "fifth")
     
     // Object Nesting
     mobile.add(seg1)
