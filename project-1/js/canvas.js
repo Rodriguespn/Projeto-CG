@@ -113,8 +113,7 @@ function createMobileSegment(vertWire, horWire, leftObj, rightObj, name) {
 
     segment.name = name
 
-    segment.position.set(3, 0, 0)
-    //console.log(segment.position)
+    segment.position.set(3, -4, 0)
     return segment
 }
 
@@ -126,11 +125,11 @@ function createMobile(x, y, z) {
 
     // Create Segments
     const seg1 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "first")
-    const seg2 = createMobileSegment(createVerticalWire(2, 0, -1, 0), createHorizontalWire(10, 0, -2, 0), createCube(6, -2, 0), createCircle(-6, -2, 0),  "second")
-    const seg3 = createMobileSegment(createVerticalWire(2, 0, -3, 0), createHorizontalWire(10, 0, -4, 0), createCircle(-6, -4, 0), createEllipse(6, -4, 0),  "third")
-    const seg4 = createMobileSegment(createVerticalWire(2, 0, -5, 0), createHorizontalWire(10, 0, -6, 0), createCube(-6, -6, 0), createCircle(6, -6, 0),  "fourth")
-    const seg5 = createMobileSegment(createVerticalWire(2, 0, -7, 0), createHorizontalWire(10, 0, -8, 0), createCube(-6, -8, 0), createCube(6, -8, 0),  "fifth")
-
+    const seg2 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "second")
+    const seg3 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "third")
+    const seg4 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "fourth")
+    const seg5 = createMobileSegment(createVerticalWire(4, 0, 2, 0), createHorizontalWire(10, 0, 0, 0), createCube(-6, 0, 0), createEllipse(6, 0, 0), "fifth")
+    
     // Object Nesting
     mobile.add(seg1)
     seg1.add(seg2)
@@ -141,7 +140,7 @@ function createMobile(x, y, z) {
     scene.add(mobile)
 
     mobile.position.x = x-3
-    mobile.position.y = y
+    mobile.position.y = y+4
     mobile.position.z = z
     mobile.name = "mobile"
 
@@ -291,10 +290,6 @@ function moveMobile(e) {
 
 //Guarda as teclas que foram premidas
 const controller = {
-    '1': {pressed: false, func: switchCameraAndMaterial},
-    '2': {pressed: false, func: switchCameraAndMaterial},
-    '3': {pressed: false, func: switchCameraAndMaterial},
-    '4': {pressed: false, func: switchCameraAndMaterial},
     'q': {pressed: false, func: rotateVs},
     'Q': {pressed: false, func: rotateVs},
     'w': {pressed: false, func: rotateVs},
