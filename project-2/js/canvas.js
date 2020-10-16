@@ -3,12 +3,13 @@ let windowHeight = window.innerHeight
 let scene, camera, renderer, geometry, material, mesh, table
 
 const background = '#d0e7e5'
+const numberOfBalls = 15
 
 const tableProperties = {
     color: '#0a6c03',
-    width: 100,
-    length: 40,
-    height: 2, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
+    width: 300,
+    length: 100,
+    height: 5, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
     initX: 0,
     initY: 0,
     initZ: 0
@@ -16,13 +17,15 @@ const tableProperties = {
 
 const frontWallProperties = {
     color: '#8b4513',
-    width: tableProperties.width, height: tableProperties.length * 0.1,
+    width: tableProperties.width, 
+    height: tableProperties.length * 0.1,
     length: tableProperties.height
 }
 
 const sideWallProperties = {
     color: frontWallProperties.color,
-    width: tableProperties.length, height: frontWallProperties.height, 
+    width: tableProperties.length, 
+    height: frontWallProperties.height, 
     length: frontWallProperties.length
 }
 
@@ -112,17 +115,23 @@ function createTable(x, y, z) {
     material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: true })
 
     addTableTop(table, 0, 0, 0)
-    addTableFrontWall(table, 0, tableProperties.height*1.5, tableProperties.length / 2 - frontWallProperties.length / 2)
-    addTableFrontWall(table, 0, tableProperties.height*1.5, -(tableProperties.length / 2 - frontWallProperties.length / 2))
-    addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, tableProperties.height*1.5, 0)
-    addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), tableProperties.height*1.5, 0)
+    addTableFrontWall(table, 0, frontWallProperties.height/2 + tableProperties.height / 2, tableProperties.length / 2 - frontWallProperties.length / 2)
+    addTableFrontWall(table, 0, frontWallProperties.height/2 + tableProperties.height / 2, -(tableProperties.length / 2 - frontWallProperties.length / 2))
+    addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, frontWallProperties.height/2 + tableProperties.height / 2, 0)
+    addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), frontWallProperties.height/2 + tableProperties.height / 2, 0)
 
-    createBall(table, 0, tableProperties.height / 2 + ballProperties.radius, 0)
+    // fixed initial balls
+    createBall(table, tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, tableProperties.length / 2 - frontWallProperties.length*2)
+    createBall(table, -tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, tableProperties.length / 2 - frontWallProperties.length*2)
+    createBall(table, tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length*2))
+    createBall(table, -tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length*2))
+    createBall(table, tableProperties.width / 2 - sideWallProperties.length*2, tableProperties.height / 2 + ballProperties.radius, 0)
+    createBall(table, -(tableProperties.width / 2 - sideWallProperties.length*2), tableProperties.height / 2 + ballProperties.radius, 0)
 
     scene.add(table)
 
     table.position.x = x
-    table.position.y = y
+    table.position.y = y - tableProperties.height
     table.position.z = z
 }
 
@@ -204,13 +213,13 @@ const executeMoves = () => {
 
 function checkScrollDirection(event) {
     if (checkScrollDirectionIsUp(event)) {
-        if (cameraProperties.x > 0) cameraProperties.x -= 1
-        if (cameraProperties.y > 0) cameraProperties.y -= 1
-        if (cameraProperties.z > 0) cameraProperties.z -= 1
+        if (cameraProperties.x > 0) cameraProperties.x -= 4
+        if (cameraProperties.y > 0) cameraProperties.y -= 4
+        if (cameraProperties.z > 0) cameraProperties.z -= 4
     } else {
-        if (cameraProperties.x > 0) cameraProperties.x += 1
-        if (cameraProperties.y > 0) cameraProperties.y += 1
-        if (cameraProperties.z > 0) cameraProperties.z += 1
+        if (cameraProperties.x > 0) cameraProperties.x += 4
+        if (cameraProperties.y > 0) cameraProperties.y += 4
+        if (cameraProperties.z > 0) cameraProperties.z += 4
     }
 }
 
