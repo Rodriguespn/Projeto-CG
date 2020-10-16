@@ -8,7 +8,7 @@ const numberOfBalls = 15
 const tableProperties = {
     color: '#0a6c03',
     width: 300,
-    length: 100,
+    length: 120,
     height: 5, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
     initX: 0,
     initY: 0,
@@ -27,6 +27,12 @@ const sideWallProperties = {
     width: tableProperties.length, 
     height: frontWallProperties.height, 
     length: frontWallProperties.length
+}
+
+const cueProperties = {
+    color: "#ffa54f",
+    height: 50,
+    radius: 2
 }
 
 const ballProperties = {
@@ -109,6 +115,23 @@ function addTableSideWall(obj, x, y, z) {
     obj.add(mesh)
 }
 
+// creates a circle at the (x,y,z) position
+function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
+    geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
+
+    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: true })
+    mesh = new THREE.Mesh(geometry, material)
+
+    mesh.position.set(x, y, z)
+    mesh.rotation.x += rotX
+    mesh.rotation.y += rotY
+    mesh.rotation.z += rotZ
+
+    obj.add(mesh)
+
+    return mesh
+}
+
 function createTable(x, y, z) {
     const table = new THREE.Object3D()
 
@@ -153,6 +176,20 @@ function createScene() {
     scene.add(new THREE.AxesHelper(10))
 
     createTable(tableProperties.initX, tableProperties.initY, tableProperties.initZ)
+
+    let rotation = {rotX: Math.PI / 2, rotY: 0, rotZ: 0}
+    createCue(scene, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
+    createCue(scene, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
+
+    rotation = {rotX: - Math.PI / 2, rotY: 0, rotZ: 0}
+    createCue(scene, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
+    createCue(scene, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
+
+    rotation = {rotX: 0, rotY: 0, rotZ: -Math.PI / 2}
+    createCue(scene, tableProperties.width / 2 + cueProperties.height / 2, tableProperties.height / 2 + ballProperties.radius, 0, rotation)
+    
+    rotation = {rotX: 0, rotY: 0, rotZ: Math.PI / 2}
+    createCue(scene, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation)
 }
 
 // adjusts the camera position when the window is resized
