@@ -112,10 +112,10 @@ function createTable(x, y, z) {
     material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: true })
 
     addTableTop(table, 0, 0, 0)
-    addTableFrontWall(table, 0, tableProperties.height, tableProperties.length / 2 - frontWallProperties.length / 2)
-    addTableFrontWall(table, 0, tableProperties.height, -(tableProperties.length / 2 - frontWallProperties.length / 2))
-    addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, tableProperties.height, 0)
-    addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), tableProperties.height, 0)
+    addTableFrontWall(table, 0, tableProperties.height*1.5, tableProperties.length / 2 - frontWallProperties.length / 2)
+    addTableFrontWall(table, 0, tableProperties.height*1.5, -(tableProperties.length / 2 - frontWallProperties.length / 2))
+    addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, tableProperties.height*1.5, 0)
+    addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), tableProperties.height*1.5, 0)
 
     createBall(table, 0, tableProperties.height / 2 + ballProperties.radius, 0)
 
@@ -202,6 +202,25 @@ const executeMoves = () => {
     })
 }
 
+function checkScrollDirection(event) {
+    if (checkScrollDirectionIsUp(event)) {
+        if (cameraProperties.x > 0) cameraProperties.x -= 1
+        if (cameraProperties.y > 0) cameraProperties.y -= 1
+        if (cameraProperties.z > 0) cameraProperties.z -= 1
+    } else {
+        if (cameraProperties.x > 0) cameraProperties.x += 1
+        if (cameraProperties.y > 0) cameraProperties.y += 1
+        if (cameraProperties.z > 0) cameraProperties.z += 1
+    }
+}
+
+function checkScrollDirectionIsUp(event) {
+    if (event.wheelDelta) {
+      return event.wheelDelta > 0;
+    }
+    return event.deltaY < 0;
+}
+
 // animates the scene
 function animate() {
     updateCameraPosition()
@@ -227,6 +246,7 @@ function init() {
 
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', switchCameraAndMaterial)
+    window.addEventListener('wheel', checkScrollDirection);
 
     //actualiza controller
     window.addEventListener("keydown", (e) => {
