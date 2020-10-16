@@ -2,7 +2,7 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, renderer, geometry, material, mesh, table
 
-const background = '#d0e7e5'
+const background = '#404040'
 const numberOfBalls = 15
 
 const tableProperties = {
