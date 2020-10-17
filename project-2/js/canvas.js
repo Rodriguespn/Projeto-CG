@@ -1,6 +1,6 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let scene, camera, renderer, geometry, material, mesh, table
+let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table
 
 const background = '#404040'
 const numberOfBalls = 15
@@ -46,9 +46,19 @@ const cameraProperties = {
     cameraRight: tableProperties.width,
     cameraTop: tableProperties.width,
     cameraBottom: -tableProperties.width,
-    x: tableProperties.width, 
-    y: tableProperties.width * 1.5, 
-    z: tableProperties.width
+    x: 0,
+    y: tableProperties.width*1.5,
+    z: 0
+}
+
+const perspectiveCameraProperties = {
+    cameraLeft: -tableProperties.width,
+    cameraRight: tableProperties.width,
+    cameraTop: tableProperties.width,
+    cameraBottom: -tableProperties.width,
+    x: 0,
+    y: tableProperties.width*1.5,
+    z: 0
 }
 
 
@@ -58,11 +68,11 @@ function render() {
 }
 
 // updates the position of the orthogonal camera
-function updateCameraPosition() {
-    camera.position.x = cameraProperties.x
-    camera.position.y = cameraProperties.y
-    camera.position.z = cameraProperties.z
-    camera.lookAt(scene.position)
+function updateCameraPosition(obj) {
+    obj.position.x = cameraProperties.x
+    obj.position.y = cameraProperties.y
+    obj.position.z = cameraProperties.z
+    obj.lookAt(scene.position)
 }
 
 function createBall(obj, x, y, z) {
@@ -158,14 +168,24 @@ function createTable(x, y, z) {
     table.position.z = z
 }
 
-// creates the camera object
-function createCamera() {
+// creates the orthographic camera object
+function createOrthographicCamera() {
     /* NAO APAGAR!!!!!! */ 
     //camera = new THREE.OrthographicCamera(cameraProperties.cameraLeft, cameraProperties.cameraRight, cameraProperties.cameraTop, cameraProperties.cameraBottom, 1, 1000)
 
-    camera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 1000)
+    orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
+         -tableProperties.length*1.5, 1, 1000)
 
-    updateCameraPosition()
+    updateCameraPosition(orthocamera)
+}
+
+function createPerspectiveCameras() {
+    perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 1000)
+    perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 1000)
+
+    updateCameraPosition(perspective1)
+    updateCameraPosition(perspective2)
+
 }
 
 // creates the scene object
@@ -209,24 +229,27 @@ function onResize() {
 function switchCameraAndMaterial(event) {
     switch(event.key) {
         case '1':
-            cameraProperties.x = tableProperties.width
+            camera = orthocamera
+            cameraProperties.x = 0
             cameraProperties.y = tableProperties.width * 1.5
-            cameraProperties.z = tableProperties.width
+            cameraProperties.z = 0
             break;
             
         case '2':
-            cameraProperties.x = tableProperties.width * 2
-            cameraProperties.y = tableProperties.width
-            cameraProperties.z = 0
+            camera = perspective1
+            cameraProperties.x = tableProperties.width * 0.8
+            cameraProperties.y = tableProperties.width * 1.3
+            cameraProperties.z = tableProperties.length *1.5
             break;
                 
         case '3':
+            camera = perspective2
             cameraProperties.x = 0
             cameraProperties.y = tableProperties.width
             cameraProperties.z = tableProperties.width * 2
             break;
 
-        case '4':
+        case '0':
             scene.traverse((node) => {
                 if (node instanceof THREE.Mesh) {
                     node.material.wireframe = !node.material.wireframe
@@ -269,7 +292,7 @@ function checkScrollDirectionIsUp(event) {
 
 // animates the scene
 function animate() {
-    updateCameraPosition()
+    updateCameraPosition(camera)
     executeMoves()
 
     render()
@@ -285,8 +308,14 @@ function init() {
 
     document.body.appendChild(renderer.domElement)
 
+    
+
     createScene()
-    createCamera()
+    createOrthographicCamera()
+    createPerspectiveCameras()
+
+    camera = orthocamera
+
 
     render()
 
