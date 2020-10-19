@@ -95,6 +95,21 @@ function createBall(obj, x, y, z) {
     obj.userData.balls.push(ball)
 }
 
+function generateRandomBalls(obj) {
+    const currentNumberOfBalls = obj.userData.balls.length
+    for (let i = currentNumberOfBalls; i < numberOfBalls; i++) {
+        generateRandomBall(obj);
+    }
+}
+
+function generateRandomBall(obj) {
+    const x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2), tableProperties.width / 2 - sideWallProperties.length*2)
+    const y = tableProperties.height / 2 + ballProperties.radius
+    const z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2), tableProperties.length / 2 - frontWallProperties.length*2)
+    
+    createBall(obj, x, y, z);
+}
+
 function addTableTop(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(tableProperties.width, tableProperties.height, tableProperties.length)
 
@@ -189,21 +204,6 @@ function createOrthographicCamera() {
          -tableProperties.length*1.5, 1, 1000)
 
     updateCameraPosition(orthocamera)
-}
-
-function generateRandomBalls(obj) {
-    const currentNumberOfBalls = obj.userData.balls.length
-    for (let i = currentNumberOfBalls; i < numberOfBalls; i++) {
-        generateRandomBall(obj);
-    }
-}
-
-function generateRandomBall(obj) {
-    const x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2), tableProperties.width / 2 - sideWallProperties.length*2)
-    const y = tableProperties.height / 2 + ballProperties.radius
-    const z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2), tableProperties.length / 2 - frontWallProperties.length*2)
-    
-    createBall(obj, x, y, z);
 }
 
 function createPerspectiveCameras() {
