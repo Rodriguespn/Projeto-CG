@@ -1,15 +1,23 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table
+let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0 
 
 const background = '#404040'
-const numberOfBalls = 15
+const numberOfBalls = 20
+const stopVelocity = 5
+const initFrictionCoefficient = 0.2 // ranges between [0,1]
+
+/*
+    Vicente: Rodar Tacos / Tacada / Camara q segue a bola
+    Pedro: Bola-Bola / Bola-Parede
+    João: Buraco 3D / Queda das bolas no infinito / gerar bolas com movimento inicial
+*/
 
 const tableProperties = {
     color: '#0a6c03',
     width: 300,
     length: 120,
-    height: 5, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
+    height: 10, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
     initX: 0,
     initY: 0,
     initZ: 0
@@ -18,8 +26,8 @@ const tableProperties = {
 const frontWallProperties = {
     color: '#8b4513',
     width: tableProperties.width, 
-    height: tableProperties.length * 0.1,
-    length: tableProperties.height
+    height: tableProperties.height,
+    length: tableProperties.length * 0.1
 }
 
 const sideWallProperties = {
@@ -31,13 +39,28 @@ const sideWallProperties = {
 
 const cueProperties = {
     color: "#ffa54f",
-    height: 50,
-    radius: 2
+    selectedColor: "#fc4903", 
+    height: 100,
+    radius: 2,
+    maxAngle: Math.PI / 3,
+    minAngle: -Math.PI / 3
 }
 
 const ballProperties = {
     color: '#ffffff',
     radius: frontWallProperties.height / 4
+}
+
+const initialVelocity = {
+    x: 50,
+    y: 0,
+    z: 50
+}
+
+const acceleration = {
+    x: initialVelocity.x * initFrictionCoefficient,
+    y: initialVelocity.y * initFrictionCoefficient,
+    z: initialVelocity.z * initFrictionCoefficient,   
 }
 
 // all the camera properties
@@ -75,39 +98,54 @@ function updateCameraPosition(obj) {
     obj.lookAt(scene.position)
 }
 
-function randomIntFromInterval(min, max) { // min and max included 
-    return Math.floor(Math.random() * (max - min + 1) + min);
+function randomFromInterval(min, max) { // min and max included 
+    return Math.random() * (max - min + 1) + min
 }
 
-function createBall(obj, x, y, z) {
-    ball = new THREE.Object3D()
-    ball.userData = {}
+function randomIntFromInterval(min, max) {
+    return Math.floor(randomFromInterval(min, max))
+}
 
-    material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: true })
+function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az) {
+    ball = new THREE.Object3D()
+
+    ball.userData = { speed: {x: vx, y: vy, z: vz }, acceleration: { x: ax, y: ay, z: az } }
+
+    material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: false })
 
     geometry = new THREE.SphereGeometry(ballProperties.radius, 10, 10)
     mesh = new THREE.Mesh(geometry, material)
 
     ball.add(mesh)
     ball.position.set(x, y, z)
+    ball.name = "ball"
 
     obj.add(ball)
     obj.userData.balls.push(ball)
+
+    return ball
 }
 
 function generateRandomBalls(obj) {
-    const currentNumberOfBalls = obj.userData.balls.length
-    for (let i = currentNumberOfBalls; i < numberOfBalls; i++) {
-        generateRandomBall(obj);
+    for (let i = 0; i < numberOfBalls; i++) {
+        ball = generateRandomBall(obj);
     }
 }
 
 function generateRandomBall(obj) {
-    const x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2), tableProperties.width / 2 - sideWallProperties.length*2)
+    const x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2), tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2)
     const y = tableProperties.height / 2 + ballProperties.radius
-    const z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2), tableProperties.length / 2 - frontWallProperties.length*2)
+    const z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2), tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2)
     
-    createBall(obj, x, y, z);
+    const vx = randomFromInterval(-initialVelocity.x, initialVelocity.x)
+    const vy = randomFromInterval(-initialVelocity.y, initialVelocity.y)
+    const vz = randomFromInterval(-initialVelocity.z, initialVelocity.z)
+
+    const ax = -1 * vx / Math.abs(vx) * acceleration.x
+    const ay = -1 * vy / Math.abs(vy) * acceleration.y
+    const az = -1 * vz / Math.abs(vz) * acceleration.z
+
+    return createBall(obj, x, y, z, vx, vy, vz, ax, ay, az)
 }
 
 function addTableTop(obj, x, y, z) {
@@ -123,7 +161,7 @@ function addTableTop(obj, x, y, z) {
 function addTableFrontWall(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(frontWallProperties.width, frontWallProperties.height, frontWallProperties.length)
     
-    material = new THREE.MeshBasicMaterial({ color: frontWallProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: frontWallProperties.color, wireframe: false })
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -135,7 +173,7 @@ function addTableFrontWall(obj, x, y, z) {
 function addTableSideWall(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(sideWallProperties.width - 2 * frontWallProperties.length, sideWallProperties.height, sideWallProperties.length)
     
-    material = new THREE.MeshBasicMaterial({ color: sideWallProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: sideWallProperties.color, wireframe: false })
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -149,7 +187,7 @@ function addTableSideWall(obj, x, y, z) {
 function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
     geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
 
-    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: false })
     mesh = new THREE.Mesh(geometry, material)
 
     mesh.position.set(x, y, z)
@@ -163,25 +201,41 @@ function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
 }
 
 function createTable(x, y, z) {
-    const table = new THREE.Object3D()
+    table = new THREE.Object3D()
 
-    material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: false })
 
-    table.userData = { balls: [] }
+    table.userData = { balls: [], cues: [] }
 
     addTableTop(table, 0, 0, 0)
-    addTableFrontWall(table, 0, frontWallProperties.height/2 + tableProperties.height / 2, tableProperties.length / 2 - frontWallProperties.length / 2)
-    addTableFrontWall(table, 0, frontWallProperties.height/2 + tableProperties.height / 2, -(tableProperties.length / 2 - frontWallProperties.length / 2))
+    addTableFrontWall(table, 0, frontWallProperties.height / 2 + tableProperties.height / 2, tableProperties.length / 2 - frontWallProperties.length / 2)
+    addTableFrontWall(table, 0, frontWallProperties.height / 2 + tableProperties.height / 2, -(tableProperties.length / 2 - frontWallProperties.length / 2))
     addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, frontWallProperties.height/2 + tableProperties.height / 2, 0)
     addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), frontWallProperties.height/2 + tableProperties.height / 2, 0)
 
     // fixed initial balls
+    /*
     createBall(table, tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, tableProperties.length / 2 - frontWallProperties.length*2)
     createBall(table, -tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, tableProperties.length / 2 - frontWallProperties.length*2)
     createBall(table, tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length*2))
     createBall(table, -tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length*2))
     createBall(table, tableProperties.width / 2 - sideWallProperties.length*2, tableProperties.height / 2 + ballProperties.radius, 0)
     createBall(table, -(tableProperties.width / 2 - sideWallProperties.length*2), tableProperties.height / 2 + ballProperties.radius, 0)
+    */
+
+    let rotation = {rotX: Math.PI / 2, rotY: 0, rotZ: 0}
+    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
+    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
+
+    rotation = {rotX: - Math.PI / 2, rotY: 0, rotZ: 0}
+    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
+    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
+
+    rotation = {rotX: 0, rotY: 0, rotZ: -Math.PI / 2}
+    createCue(table, tableProperties.width / 2 + cueProperties.height / 2, tableProperties.height / 2 + ballProperties.radius, 0, rotation)
+    
+    rotation = {rotX: 0, rotY: 0, rotZ: Math.PI / 2}
+    createCue(table, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation) 
 
     // randomly generated balls
     generateRandomBalls(table);
@@ -212,7 +266,6 @@ function createPerspectiveCameras() {
 
     updateCameraPosition(perspective1)
     updateCameraPosition(perspective2)
-
 }
 
 // creates the scene object
@@ -222,21 +275,7 @@ function createScene() {
 
     scene.add(new THREE.AxesHelper(10))
 
-    createTable(tableProperties.initX, tableProperties.initY, tableProperties.initZ)
-
-    let rotation = {rotX: Math.PI / 2, rotY: 0, rotZ: 0}
-    createCue(scene, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
-    createCue(scene, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
-
-    rotation = {rotX: - Math.PI / 2, rotY: 0, rotZ: 0}
-    createCue(scene, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
-    createCue(scene, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
-
-    rotation = {rotX: 0, rotY: 0, rotZ: -Math.PI / 2}
-    createCue(scene, tableProperties.width / 2 + cueProperties.height / 2, tableProperties.height / 2 + ballProperties.radius, 0, rotation)
-    
-    rotation = {rotX: 0, rotY: 0, rotZ: Math.PI / 2}
-    createCue(scene, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation)
+    createTable(tableProperties.initX, tableProperties.initY, tableProperties.initZ)   
 }
 
 // adjusts the camera position when the window is resized
@@ -286,41 +325,111 @@ function switchCameraAndMaterial(event) {
     }
 }
 
-//Guarda as teclas que foram premidas
-const controller = {
-
+function detectRightWallCollision(ball) {
+    const radius = ballProperties.radius
+    const border = tableProperties.width/2 - (radius+sideWallProperties.length)
+    if (ball.position.x > border) {
+        ball.position.x = border
+        ball.userData.speed.x = -ball.userData.speed.x
+        ball.userData.acceleration.x = -ball.userData.acceleration.x
+    }
 }
 
-//Verifica que keys estão pressionadas e activa o movimento correspondente
-const executeMoves = () => {
-    Object.keys(controller).forEach(key=> {
-      controller[key].pressed && controller[key].func(key)
+function detectLeftWallCollision(ball) {
+    const radius = ballProperties.radius
+    const border = -(tableProperties.width/2 - (radius+sideWallProperties.length))
+    if (ball.position.x < border) {
+        ball.position.x = border
+        ball.userData.speed.x = -ball.userData.speed.x
+        ball.userData.acceleration.x = -ball.userData.acceleration.x
+    }
+}
+
+function detectTopWallCollision(ball) {
+    const radius = ballProperties.radius
+    const border = tableProperties.length / 2 - (radius+frontWallProperties.length)
+    if (ball.position.z > border) {
+        ball.position.z = border
+        ball.userData.speed.z = -ball.userData.speed.z
+        ball.userData.acceleration.z = -ball.userData.acceleration.z
+    }
+}
+
+function detectBottomWallCollision(ball) {
+    const radius = ballProperties.radius
+    const border = -(tableProperties.length/2 - (radius+frontWallProperties.length))
+    if (ball.position.z < border) {
+        ball.position.z = border
+        ball.userData.speed.z = -ball.userData.speed.z
+        ball.userData.acceleration.z = -ball.userData.acceleration.z
+    }
+}
+
+function detectWallCollision() {
+    table.userData.balls.forEach((ball) => {
+        detectRightWallCollision(ball)
+        detectLeftWallCollision(ball)
+        detectTopWallCollision(ball)
+        detectBottomWallCollision(ball)
     })
 }
 
-function checkScrollDirection(event) {
-    if (checkScrollDirectionIsUp(event)) {
-        if (cameraProperties.x > 0) cameraProperties.x -= 4
-        if (cameraProperties.y > 0) cameraProperties.y -= 4
-        if (cameraProperties.z > 0) cameraProperties.z -= 4
-    } else {
-        if (cameraProperties.x > 0) cameraProperties.x += 4
-        if (cameraProperties.y > 0) cameraProperties.y += 4
-        if (cameraProperties.z > 0) cameraProperties.z += 4
-    }
+function stopBall() {
+    table.userData.balls.forEach((ball) => {
+        if (Math.abs(ball.userData.speed.x) <= stopVelocity) {
+            ball.userData.speed.x = 0
+        }
+
+        if (Math.abs(ball.userData.speed.z) <= stopVelocity) {
+            ball.userData.speed.z = 0
+        }
+    })
 }
 
-function checkScrollDirectionIsUp(event) {
-    if (event.wheelDelta) {
-      return event.wheelDelta > 0;
-    }
-    return event.deltaY < 0;
+function reduceSpeed() {
+    table.userData.balls.forEach((ball) => {
+        if (Math.abs(ball.userData.speed.x) > 0) {
+            ball.userData.speed.x = calculateVelocity(ball.userData.speed.x, ball.userData.acceleration.x, deltaFrameTime)
+        }
+
+        if (Math.abs(ball.userData.speed.z) > 0) {
+            ball.userData.speed.z = calculateVelocity(ball.userData.speed.z, ball.userData.acceleration.z, deltaFrameTime)
+        }
+    })
+}
+
+function updateBallsPositions() {
+    table.userData.balls.forEach((ball) => {
+        ball.position.x = calculateNextPosition(ball.position.x, ball.userData.speed.x, ball.userData.acceleration.x, deltaFrameTime)
+        ball.position.z = calculateNextPosition(ball.position.z, ball.userData.speed.z, ball.userData.acceleration.z, deltaFrameTime)
+    })
+}
+
+function calculateVelocity(v, a, deltaT) {
+    return v + a * deltaT
+}
+
+function calculateNextPosition(x, v, a, deltaT) {
+    return x + v * deltaT + 0.5 * a * (deltaT ** 2)
 }
 
 // animates the scene
 function animate() {
+    prevFrameTime = nextFrameTime
+    nextFrameTime = new Date()
+
+    if (prevFrameTime != 0) {
+        deltaFrameTime = (nextFrameTime - prevFrameTime) / 1000
+    }
+
+    
+    detectWallCollision()
+    
+    reduceSpeed()
+    stopBall()
+    
+    updateBallsPositions()
     updateCameraPosition(camera)
-    executeMoves()
 
     render()
 
@@ -335,22 +444,18 @@ function init() {
 
     document.body.appendChild(renderer.domElement)
 
-    
-
     createScene()
     createOrthographicCamera()
     createPerspectiveCameras()
 
     camera = orthocamera
 
-
     render()
 
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', switchCameraAndMaterial)
-    window.addEventListener('wheel', checkScrollDirection);
 
-    //actualiza controller
+    /*actualiza controller
     window.addEventListener("keydown", (e) => {
         if(controller[e.key]){
           controller[e.key].pressed = true
@@ -362,4 +467,5 @@ function init() {
           controller[e.key].pressed = false
         }
       })
+    */
 }
