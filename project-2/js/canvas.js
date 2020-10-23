@@ -113,7 +113,7 @@ function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az) {
 
     material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: false })
 
-    geometry = new THREE.SphereGeometry(ballProperties.radius, 10, 10)
+    geometry = new THREE.SphereGeometry(ballProperties.radius, ballProperties.radius*2, ballProperties.radius*2)
     mesh = new THREE.Mesh(geometry, material)
 
     ball.add(mesh)
