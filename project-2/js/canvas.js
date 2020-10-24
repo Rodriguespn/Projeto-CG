@@ -3,9 +3,8 @@ let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0 
 
 const background = '#404040'
-const numberOfBalls = 2
-const stopVelocity = 5
-const initFrictionCoefficient = 0.2 // ranges between [0,1]
+const numberOfBalls = 20
+const frictionCoefficient = 0.2 // ranges between [0,1]
 
 /*
     Vicente: Rodar Tacos / Tacada / Camara q segue a bola
@@ -17,7 +16,7 @@ const tableProperties = {
     color: '#0a6c03',
     width: 300,
     length: 120,
-    height: 10, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
+    height: 20, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
     initX: 0,
     initY: 0,
     initZ: 0
@@ -53,15 +52,15 @@ const ballProperties = {
 }
 
 const initialVelocity = {
-    x: 50,
+    x: ballProperties.radius*3,
     y: 0,
-    z: 50
+    z: ballProperties.radius*3
 }
 
 const acceleration = {
-    x: initialVelocity.x * initFrictionCoefficient,
-    y: initialVelocity.y * initFrictionCoefficient,
-    z: initialVelocity.z * initFrictionCoefficient,   
+    x: initialVelocity.x * frictionCoefficient,
+    y: initialVelocity.y * frictionCoefficient,
+    z: initialVelocity.z * frictionCoefficient,   
 }
 
 // all the camera properties
@@ -110,7 +109,7 @@ function randomIntFromInterval(min, max) {
 function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az) {
     ball = new THREE.Object3D()
 
-    ball.userData = { speed: {x: vx, y: vy, z: vz }, acceleration: { x: ax, y: ay, z: az } }
+    ball.userData = { radius: ballProperties.radius, mass: ballProperties.mass, velocity: {x: vx, y: vy, z: vz }, acceleration: { x: ax, y: ay, z: az } }
 
     material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: false })
 
@@ -134,9 +133,21 @@ function generateRandomBalls(obj) {
 }
 
 function generateRandomBall(obj) {
-    const x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2), tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2)
+    let x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2), tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2)
     const y = tableProperties.height / 2 + ballProperties.radius
-    const z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2), tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2)
+    let z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2), tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2)
+
+    const numbOfBalls = table.userData.balls.length
+    for (let i = 0; i < numbOfBalls; i++) {
+        let ball = table.userData.balls[i]
+        if (detectBallCollision(x, z, ball.position.x, ball.position.z, ballProperties.radius, ball.userData.radius)) {
+            x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2), tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2)
+
+            z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2), tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2)
+
+            i = -1 // starts the cycle all over again
+        }
+    }
     
     const vx = randomFromInterval(-initialVelocity.x, initialVelocity.x)
     const vy = randomFromInterval(-initialVelocity.y, initialVelocity.y)
@@ -331,7 +342,7 @@ function detectRightWallCollision(ball) {
     const border = tableProperties.width/2 - (radius+sideWallProperties.length)
     if (ball.position.x > border) {
         ball.position.x = border
-        ball.userData.speed.x = -ball.userData.speed.x
+        ball.userData.velocity.x = -ball.userData.velocity.x
         ball.userData.acceleration.x = -ball.userData.acceleration.x
     }
 }
@@ -341,7 +352,7 @@ function detectLeftWallCollision(ball) {
     const border = -(tableProperties.width/2 - (radius+sideWallProperties.length))
     if (ball.position.x < border) {
         ball.position.x = border
-        ball.userData.speed.x = -ball.userData.speed.x
+        ball.userData.velocity.x = -ball.userData.velocity.x
         ball.userData.acceleration.x = -ball.userData.acceleration.x
     }
 }
@@ -351,7 +362,7 @@ function detectTopWallCollision(ball) {
     const border = tableProperties.length / 2 - (radius+frontWallProperties.length)
     if (ball.position.z > border) {
         ball.position.z = border
-        ball.userData.speed.z = -ball.userData.speed.z
+        ball.userData.velocity.z = -ball.userData.velocity.z
         ball.userData.acceleration.z = -ball.userData.acceleration.z
     }
 }
@@ -361,7 +372,7 @@ function detectBottomWallCollision(ball) {
     const border = -(tableProperties.length/2 - (radius+frontWallProperties.length))
     if (ball.position.z < border) {
         ball.position.z = border
-        ball.userData.speed.z = -ball.userData.speed.z
+        ball.userData.velocity.z = -ball.userData.velocity.z
         ball.userData.acceleration.z = -ball.userData.acceleration.z
     }
 }
@@ -375,41 +386,44 @@ function detectWallCollision() {
     })
 }
 
+function sameDirection(x1, x2) {
+    const direction1 = x1 / Math.abs(x1)
+    const direction2 = x2 / Math.abs(x2)
+    return direction1 === direction2
+}
+
 function stopBall() {
     table.userData.balls.forEach((ball) => {
-        if (Math.abs(ball.userData.speed.x) <= stopVelocity) {
-            ball.userData.speed.x = 0
+        if (sameDirection(ball.userData.velocity.x, ball.userData.acceleration.x)) {
+            ball.userData.velocity.x = 0
         }
 
-        if (Math.abs(ball.userData.speed.z) <= stopVelocity) {
-            ball.userData.speed.z = 0
+        if (sameDirection(ball.userData.velocity.z, ball.userData.acceleration.z)) {
+            ball.userData.velocity.z = 0
         }
     })
 }
 
 function reduceSpeed() {
     table.userData.balls.forEach((ball) => {
-        if (Math.abs(ball.userData.speed.x) > 0) {
-            ball.userData.speed.x = calculateVelocity(ball.userData.speed.x, ball.userData.acceleration.x, deltaFrameTime)
+        if (Math.abs(ball.userData.velocity.x) > 0) {
+            ball.userData.velocity.x = calculateVelocity(ball.userData.velocity.x, ball.userData.acceleration.x, deltaFrameTime)
         }
 
-        if (Math.abs(ball.userData.speed.z) > 0) {
-            ball.userData.speed.z = calculateVelocity(ball.userData.speed.z, ball.userData.acceleration.z, deltaFrameTime)
+        if (Math.abs(ball.userData.velocity.z) > 0) {
+            ball.userData.velocity.z = calculateVelocity(ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
         }
     })
 }
 
 function updateBallsPositions() {
     table.userData.balls.forEach((ball) => {
-        ball.position.x = calculateNextPosition(ball.position.x, ball.userData.speed.x, ball.userData.acceleration.x, deltaFrameTime)
-        ball.position.z = calculateNextPosition(ball.position.z, ball.userData.speed.z, ball.userData.acceleration.z, deltaFrameTime)
+        ball.position.x = calculateNextPosition(ball.position.x, ball.userData.velocity.x, ball.userData.acceleration.x, deltaFrameTime)
+        ball.position.z = calculateNextPosition(ball.position.z, ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
 
-        
-        console.log(ball.position)
+        console.log(ball.userData.velocity)
+
     })
-    
-    console.log(getDistance(table.userData.balls[0].position.x, table.userData.balls[0].position.z, table.userData.balls[1].position.x,  table.userData.balls[1].position.z))
-
 }
 
 function calculateVelocity(v, a, deltaT) {
@@ -417,10 +431,85 @@ function calculateVelocity(v, a, deltaT) {
 }
 
 function calculateNextPosition(x, v, a, deltaT) {
-    if (v > 0) { 
+    if (Math.abs(v) > 0) { 
         return x + v * deltaT + 0.5 * a * (deltaT ** 2)
     } else {
         return x
+    }
+}
+
+function detectBallCollision(x1, y1, x2, y2, radius1, radius2) {
+    return getDistance(x1, y1, x2, y2) < radius1 + radius2
+}
+
+function rotate(velocity, angle) {
+    const rotatedVelocities = {
+        x: velocity.x * Math.cos(angle) - velocity.z * Math.sin(angle),
+        z: velocity.x * Math.sin(angle) + velocity.z * Math.cos(angle),
+    }
+
+    return rotatedVelocities
+}
+
+function resolveBallCollision(ball1, ball2) {
+    if (detectBallCollision(ball1.position.x, ball1.position.z, ball2.position.x, ball2.position.z, ball1.userData.radius, ball2.userData.radius)) {
+        const xVelocityDiff = ball1.userData.velocity.x - ball2.userData.velocity.x
+        const zVelocityDiff = ball1.userData.velocity.z - ball2.userData.velocity.z
+
+        const xBall1 = ball1.position.x, zBall1 = ball1.position.z
+        const xBall2 = ball2.position.x, zBall2 = ball2.position.z
+
+        const xDist = xBall2 - xBall1
+        const zDist = zBall2 - zBall1
+
+        // Prevents accidental overlap of balls
+        if(xVelocityDiff * xDist + zVelocityDiff * zDist >= 0) {
+
+            // Grab angle between the two colliding balls
+            const angle = -Math.atan2(zBall2 - zBall1, xBall2 - xBall1)
+
+            // Store mass in var for better readibility in collision equation
+            const m1 = ball1.userData.mass
+            const m2 = ball2.userData.mass
+
+            // Velocity before equation
+            const u1 = rotate(ball1.userData.velocity, angle)
+            const u2 = rotate(ball2.userData.velocity, angle)
+
+            // Final velocity after 1d collision equation
+            const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), z: u1.z }
+            const v2 = { x: u2.x * (m1 - m2) / (m1 + m2) + u1.x * 2 * m2 / (m1 + m2), z: u2.z }
+
+            // Final velocity after rotating axis, vack to original location
+            const vFinal1 = rotate(v1, -angle)
+            const vFinal2 = rotate(v2, -angle)
+
+            // swap balls velocities for realistic bounce effect
+            ball1.userData.velocity.x = vFinal1.x
+            ball1.userData.velocity.z = vFinal1.z
+
+            ball2.userData.velocity.x = vFinal2.x
+            ball2.userData.velocity.z = vFinal2.z
+
+            // adjusts the friction acceleration based on the new velocity value
+            ball1.userData.acceleration.x = -1 * vFinal1.x / Math.abs(vFinal1.x) * vFinal1.x * frictionCoefficient
+            ball1.userData.acceleration.z = -1 * vFinal1.z / Math.abs(vFinal1.z) * vFinal1.z * frictionCoefficient
+
+            ball2.userData.acceleration.x = -1 * vFinal2.x / Math.abs(vFinal2.x) * vFinal2.x * frictionCoefficient
+            ball2.userData.acceleration.z = -1 * vFinal2.x / Math.abs(vFinal2.z) * vFinal2.z * frictionCoefficient
+        }
+    }
+}
+
+function resolveAllBallsCollisions() {
+    const numbOfBalls = table.userData.balls.length
+    for (let i = 0; i < numbOfBalls; i++) {
+        let ball1 = table.userData.balls[i]
+        for (let j = 0; j < numbOfBalls; j++) {
+            if (i === j) continue // same ball
+            let ball2 = table.userData.balls[j]
+            resolveBallCollision(ball1, ball2)
+        }
     }
 }
 
@@ -448,8 +537,8 @@ function animate() {
         deltaFrameTime = (nextFrameTime - prevFrameTime) / 1000
     }
 
-    
     detectWallCollision()
+    resolveAllBallsCollisions()
     
     reduceSpeed()
     stopBall()
