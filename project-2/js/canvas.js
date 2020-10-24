@@ -3,7 +3,7 @@ let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0 
 
 const background = '#404040'
-const numberOfBalls = 20
+const numberOfBalls = 2
 const stopVelocity = 5
 const initFrictionCoefficient = 0.2 // ranges between [0,1]
 
@@ -48,7 +48,8 @@ const cueProperties = {
 
 const ballProperties = {
     color: '#ffffff',
-    radius: frontWallProperties.height / 4
+    radius: frontWallProperties.height / 4,
+    mass: 1
 }
 
 const initialVelocity = {
@@ -402,7 +403,13 @@ function updateBallsPositions() {
     table.userData.balls.forEach((ball) => {
         ball.position.x = calculateNextPosition(ball.position.x, ball.userData.speed.x, ball.userData.acceleration.x, deltaFrameTime)
         ball.position.z = calculateNextPosition(ball.position.z, ball.userData.speed.z, ball.userData.acceleration.z, deltaFrameTime)
+
+        
+        console.log(ball.position)
     })
+    
+    console.log(getDistance(table.userData.balls[0].position.x, table.userData.balls[0].position.z, table.userData.balls[1].position.x,  table.userData.balls[1].position.z))
+
 }
 
 function calculateVelocity(v, a, deltaT) {
@@ -410,7 +417,26 @@ function calculateVelocity(v, a, deltaT) {
 }
 
 function calculateNextPosition(x, v, a, deltaT) {
-    return x + v * deltaT + 0.5 * a * (deltaT ** 2)
+    if (v > 0) { 
+        return x + v * deltaT + 0.5 * a * (deltaT ** 2)
+    } else {
+        return x
+    }
+}
+
+/*function elasticCollisionX(m1, m2, v1, v2) { // gets v'2
+    return m1*
+}
+
+function elasticCollisionZ(m1, m2, v1, v2) { // gets v'1
+    return ()
+}*/
+
+function getDistance(x1, y1, x2, y2) {
+    const xDistance = x2 - x1
+    const yDistance = y2 - y1
+
+    return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
 }
 
 // animates the scene
