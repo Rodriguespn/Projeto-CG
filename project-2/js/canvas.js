@@ -3,8 +3,8 @@ let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0 
 
 const background = '#404040'
-const numberOfBalls = 20
-const frictionCoefficient = 0.3 // ranges between [0,1]
+const numberOfBalls = 50
+const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
 
 /*
@@ -16,7 +16,7 @@ const gravity = 9.8
 const tableProperties = {
     color: '#0a6c03',
     width: 300,
-    length: 120,
+    length: 150,
     height: 10,
     initX: 0,
     initY: 0,
@@ -54,8 +54,8 @@ const ballProperties = {
 
 const holeProperties = {
     color: '#000000',
-    radius: ballProperties.radius * 1.3,
-    height: tableProperties.height +0.0001
+    radius: ballProperties.radius * 3,
+    height: tableProperties.height + 0.001
 }
 
 const initialVelocity = {
@@ -77,7 +77,7 @@ const cameraProperties = {
     cameraTop: tableProperties.width,
     cameraBottom: -tableProperties.width,
     x: 0,
-    y: tableProperties.width*1.5,
+    y: tableProperties.width*1.2,
     z: 0
 }
 
@@ -87,7 +87,7 @@ const perspectiveCameraProperties = {
     cameraTop: tableProperties.width,
     cameraBottom: -tableProperties.width,
     x: 0,
-    y: tableProperties.width*1.5,
+    y: tableProperties.width*1.2,
     z: 0
 }
 
@@ -300,14 +300,14 @@ function createOrthographicCamera() {
     //camera = new THREE.OrthographicCamera(cameraProperties.cameraLeft, cameraProperties.cameraRight, cameraProperties.cameraTop, cameraProperties.cameraBottom, 1, 1000)
 
     orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
-         -tableProperties.length*1.5, 1, 1000)
+         -tableProperties.length*1.5, 1, tableProperties.width*3)
 
     updateCameraPosition(orthocamera)
 }
 
 function createPerspectiveCameras() {
-    perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 1000)
-    perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 1000)
+    perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
+    perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
 
     updateCameraPosition(perspective1)
     updateCameraPosition(perspective2)
@@ -372,7 +372,7 @@ function switchCameraAndMaterial(event) {
 
 function detectHoleCollision(ball) {
     table.userData.holes.forEach((hole) => {
-        if (detectBallCollision(ball.position.x, ball.position.z, hole.position.x, hole.position.z, ball.userData.radius, 0)) {
+        if (detectBallCollision(ball.position.x, ball.position.z, hole.position.x, hole.position.z, 0, holeProperties.radius)) {
             ball.userData.velocity.y = -100
             ball.userData.velocity.x = 0
             ball.userData.velocity.z = 0
@@ -537,11 +537,15 @@ function resolveBallCollision(ball1, ball2) {
             ball2.userData.velocity.z = vFinal2.z
 
             // adjusts the friction acceleration based on the new velocity value
-            ball1.userData.acceleration.x = -1 * vFinal1.x / Math.abs(vFinal1.x) * vFinal1.x * frictionCoefficient
-            ball1.userData.acceleration.z = -1 * vFinal1.z / Math.abs(vFinal1.z) * vFinal1.z * frictionCoefficient
+            if (vFinal1 > 0) {
+                ball1.userData.acceleration.x = -1 * vFinal1.x / Math.abs(vFinal1.x) * vFinal1.x * frictionCoefficient
+                ball1.userData.acceleration.z = -1 * vFinal1.z / Math.abs(vFinal1.z) * vFinal1.z * frictionCoefficient
+            }
 
-            ball2.userData.acceleration.x = -1 * vFinal2.x / Math.abs(vFinal2.x) * vFinal2.x * frictionCoefficient
-            ball2.userData.acceleration.z = -1 * vFinal2.x / Math.abs(vFinal2.z) * vFinal2.z * frictionCoefficient
+            if (vFinal2 > 0) {
+                ball2.userData.acceleration.x = -1 * vFinal2.x / Math.abs(vFinal2.x) * vFinal2.x * frictionCoefficient
+                ball2.userData.acceleration.z = -1 * vFinal2.z / Math.abs(vFinal2.z) * vFinal2.z * frictionCoefficient
+            }
         }
     }
 }
@@ -557,14 +561,6 @@ function resolveAllBallsCollisions() {
         }
     }
 }
-
-/*function elasticCollisionX(m1, m2, v1, v2) { // gets v'2
-    return m1*
-}
-
-function elasticCollisionZ(m1, m2, v1, v2) { // gets v'1
-    return ()
-}*/
 
 function getDistance(x1, y1, x2, y2) {
     const xDistance = x2 - x1
