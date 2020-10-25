@@ -5,11 +5,12 @@ let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, 
 const background = '#404040'
 const numberOfBalls = 20
 const frictionCoefficient = 0.3 // ranges between [0,1]
+const gravity = 9.8
 
 /*
     Vicente: Rodar Tacos / Tacada / Camara q segue a bola
     Pedro: Bola-Bola / Bola-Parede
-    João: Buraco 3D / Queda das bolas no infinito / gerar bolas com movimento inicial
+    João: Queda das bolas no infinito 
 */
 
 const tableProperties = {
@@ -51,6 +52,12 @@ const ballProperties = {
     mass: 1
 }
 
+const holeProperties = {
+    color: '#000000',
+    radius: ballProperties.radius * 1.3,
+    height: tableProperties.height +0.0001
+}
+
 const initialVelocity = {
     x: 100,
     y: 0,
@@ -59,7 +66,7 @@ const initialVelocity = {
 
 const acceleration = {
     x: initialVelocity.x * frictionCoefficient,
-    y: initialVelocity.y * frictionCoefficient,
+    y: 0,
     z: initialVelocity.z * frictionCoefficient,   
 }
 
@@ -195,6 +202,23 @@ function addTableSideWall(obj, x, y, z) {
     obj.add(mesh)
 }
 
+function createHole(obj, x, y, z) {
+    hole = new THREE.Object3D()
+
+    hole.userData = { radius: holeProperties.radius }
+    hole.name = "hole"
+
+    geometry = new THREE.CylinderGeometry(holeProperties.radius, holeProperties.radius, holeProperties.height)
+
+    material = new THREE.MeshBasicMaterial({ color: holeProperties.color, wireframe: false})
+    mesh = new THREE.Mesh(geometry, material)
+
+    hole.add(mesh) 
+    hole.position.set(x, y, z)   
+    obj.add(hole)
+    obj.userData.holes.push(hole)
+}
+
 // creates a circle at the (x,y,z) position
 function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
     geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
@@ -217,7 +241,7 @@ function createTable(x, y, z) {
 
     material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: false })
 
-    table.userData = { balls: [], cues: [] }
+    table.userData = { balls: [], cues: [], holes: [] }
 
     addTableTop(table, 0, 0, 0)
     addTableFrontWall(table, 0, frontWallProperties.height / 2 + tableProperties.height / 2, tableProperties.length / 2 - frontWallProperties.length / 2)
@@ -248,6 +272,15 @@ function createTable(x, y, z) {
     
     rotation = {rotX: 0, rotY: 0, rotZ: Math.PI / 2}
     createCue(table, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation) 
+
+    //create holes on the table
+    createHole(table, tableProperties.width/2 - frontWallProperties.length*1.5, 0, tableProperties.length/2 - frontWallProperties.length*1.5)
+    createHole(table, tableProperties.width/2 - frontWallProperties.length*1.5, 0, -1*(tableProperties.length/2 - frontWallProperties.length*1.5))
+    createHole(table, -1*(tableProperties.width/2 - frontWallProperties.length*1.5), 0, tableProperties.length/2 - frontWallProperties.length*1.5)
+    createHole(table, -1*(tableProperties.width/2 - frontWallProperties.length*1.5), 0, -1*(tableProperties.length/2 - frontWallProperties.length*1.5))
+    createHole(table, 0, 0, -1*(tableProperties.length/2 - frontWallProperties.length*1.5))
+    createHole(table, 0, 0, tableProperties.length/2 - frontWallProperties.length*1.5)
+
 
     // randomly generated balls
     generateRandomBalls(table);
@@ -337,6 +370,16 @@ function switchCameraAndMaterial(event) {
     }
 }
 
+function detectHoleCollision(ball) {
+    table.userData.holes.forEach((hole) => {
+        if (detectBallCollision(ball.position.x, ball.position.z, hole.position.x, hole.position.z, ball.userData.radius, 0)) {
+            ball.userData.velocity.y = -100
+            ball.userData.velocity.x = 0
+            ball.userData.velocity.z = 0
+            ball.userData.acceleration.y = -gravity        }
+    })
+}
+
 function detectRightWallCollision(ball) {
     const radius = ballProperties.radius
     const border = tableProperties.width/2 - (radius+sideWallProperties.length)
@@ -383,6 +426,7 @@ function detectWallCollision() {
         detectLeftWallCollision(ball)
         detectTopWallCollision(ball)
         detectBottomWallCollision(ball)
+        detectHoleCollision(ball)
     })
 }
 
@@ -412,6 +456,10 @@ function reduceSpeed() {
 
         if (Math.abs(ball.userData.velocity.z) > 0) {
             ball.userData.velocity.z = calculateVelocity(ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+        }
+
+        if (Math.abs(ball.userData.acceleration.y) > 0) {
+            ball.position.y = calculateNextPosition(ball.position.y, ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
         }
     })
 }
