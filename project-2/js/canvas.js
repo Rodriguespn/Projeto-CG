@@ -4,7 +4,7 @@ let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, 
 
 const background = '#404040'
 const numberOfBalls = 20
-const frictionCoefficient = 0.2 // ranges between [0,1]
+const frictionCoefficient = 0.3 // ranges between [0,1]
 
 /*
     Vicente: Rodar Tacos / Tacada / Camara q segue a bola
@@ -52,9 +52,9 @@ const ballProperties = {
 }
 
 const initialVelocity = {
-    x: ballProperties.radius*3,
+    x: 100,
     y: 0,
-    z: ballProperties.radius*3
+    z: 100
 }
 
 const acceleration = {
@@ -420,9 +420,6 @@ function updateBallsPositions() {
     table.userData.balls.forEach((ball) => {
         ball.position.x = calculateNextPosition(ball.position.x, ball.userData.velocity.x, ball.userData.acceleration.x, deltaFrameTime)
         ball.position.z = calculateNextPosition(ball.position.z, ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
-
-        console.log(ball.userData.velocity)
-
     })
 }
 
