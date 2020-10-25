@@ -16,7 +16,7 @@ const tableProperties = {
     color: '#0a6c03',
     width: 300,
     length: 120,
-    height: 20, // A altura H das paredes da mesa deve ser tal que não permita que as bolas caiam para fora da mesa
+    height: 10,
     initX: 0,
     initY: 0,
     initZ: 0
