@@ -3,7 +3,7 @@ let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0, selectedCue 
 
 const background = '#404040'
-const numberOfBalls = 0
+const numberOfBalls = 20
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
 const fallLimit = -200
