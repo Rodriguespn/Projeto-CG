@@ -1,9 +1,9 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0 
+let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0, selectedCue 
 
 const background = '#404040'
-const numberOfBalls = 50
+const numberOfBalls = 1
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
 
@@ -15,9 +15,9 @@ const gravity = 9.8
 
 const tableProperties = {
     color: '#0a6c03',
-    width: 300,
-    length: 150,
-    height: 10,
+    width: 200,
+    length: 120,
+    height: 5,
     initX: 0,
     initY: 0,
     initZ: 0
@@ -38,9 +38,9 @@ const sideWallProperties = {
 }
 
 const cueProperties = {
-    color: "#ffa54f",
-    selectedColor: "#fc4903", 
-    height: 100,
+    color: 0xffa54f,
+    selectedColor: 0xfc4903, 
+    height: tableProperties.width / 3,
     radius: 2,
     maxAngle: Math.PI / 3,
     minAngle: -Math.PI / 3
@@ -54,7 +54,7 @@ const ballProperties = {
 
 const holeProperties = {
     color: '#000000',
-    radius: ballProperties.radius * 3,
+    radius: ballProperties.radius * 2,
     height: tableProperties.height + 0.001
 }
 
@@ -98,11 +98,11 @@ function render() {
 }
 
 // updates the position of the orthogonal camera
-function updateCameraPosition(obj) {
-    obj.position.x = cameraProperties.x
-    obj.position.y = cameraProperties.y
-    obj.position.z = cameraProperties.z
-    obj.lookAt(scene.position)
+function updateCameraPosition(obj, x, y, z, lookAt) {
+    obj.position.x = x
+    obj.position.y = y
+    obj.position.z = z
+    obj.lookAt(lookAt)
 }
 
 function randomFromInterval(min, max) { // min and max included 
@@ -118,7 +118,7 @@ function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az) {
 
     ball.userData = { radius: ballProperties.radius, mass: ballProperties.mass, velocity: {x: vx, y: vy, z: vz }, acceleration: { x: ax, y: ay, z: az } }
 
-    material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: false })
+    material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: true })
 
     geometry = new THREE.SphereGeometry(ballProperties.radius, ballProperties.radius*10, ballProperties.radius*10)
     mesh = new THREE.Mesh(geometry, material)
@@ -147,7 +147,7 @@ function generateRandomBall(obj) {
     const numbOfBalls = table.userData.balls.length
     for (let i = 0; i < numbOfBalls; i++) {
         let ball = table.userData.balls[i]
-        if (detectBallCollision(x, z, ball.position.x, ball.position.z, ballProperties.radius, ball.userData.radius)) {
+        if (detectCollision(x, y, z, ball.position.x,ball.position.y, ball.position.z, ballProperties.radius, ball.userData.radius)) {
             x = randomIntFromInterval(-(tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2), tableProperties.width / 2 - sideWallProperties.length*2-ballProperties.radius*2)
 
             z = randomIntFromInterval(-(tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2), tableProperties.length / 2 - frontWallProperties.length*2-ballProperties.radius*2)
@@ -157,11 +157,11 @@ function generateRandomBall(obj) {
     }
     
     const vx = randomFromInterval(-initialVelocity.x, initialVelocity.x)
-    const vy = randomFromInterval(-initialVelocity.y, initialVelocity.y)
+    const vy = 0
     const vz = randomFromInterval(-initialVelocity.z, initialVelocity.z)
 
     const ax = -1 * vx / Math.abs(vx) * acceleration.x
-    const ay = -1 * vy / Math.abs(vy) * acceleration.y
+    const ay = 0
     const az = -1 * vz / Math.abs(vz) * acceleration.z
 
     return createBall(obj, x, y, z, vx, vy, vz, ax, ay, az)
@@ -180,7 +180,7 @@ function addTableTop(obj, x, y, z) {
 function addTableFrontWall(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(frontWallProperties.width, frontWallProperties.height, frontWallProperties.length)
     
-    material = new THREE.MeshBasicMaterial({ color: frontWallProperties.color, wireframe: false })
+    material = new THREE.MeshBasicMaterial({ color: frontWallProperties.color, wireframe: true })
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -192,7 +192,7 @@ function addTableFrontWall(obj, x, y, z) {
 function addTableSideWall(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(sideWallProperties.width - 2 * frontWallProperties.length, sideWallProperties.height, sideWallProperties.length)
     
-    material = new THREE.MeshBasicMaterial({ color: sideWallProperties.color, wireframe: false })
+    material = new THREE.MeshBasicMaterial({ color: sideWallProperties.color, wireframe: true })
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -210,7 +210,7 @@ function createHole(obj, x, y, z) {
 
     geometry = new THREE.CylinderGeometry(holeProperties.radius, holeProperties.radius, holeProperties.height)
 
-    material = new THREE.MeshBasicMaterial({ color: holeProperties.color, wireframe: false})
+    material = new THREE.MeshBasicMaterial({ color: holeProperties.color, wireframe: true})
     mesh = new THREE.Mesh(geometry, material)
 
     hole.add(mesh) 
@@ -223,7 +223,7 @@ function createHole(obj, x, y, z) {
 function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
     geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
 
-    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: false })
+    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: true })
     mesh = new THREE.Mesh(geometry, material)
 
     mesh.position.set(x, y, z)
@@ -233,13 +233,15 @@ function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
 
     obj.add(mesh)
 
+    obj.userData.cues.push(mesh)
+
     return mesh
 }
 
 function createTable(x, y, z) {
     table = new THREE.Object3D()
 
-    material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: false })
+    material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: true })
 
     table.userData = { balls: [], cues: [], holes: [] }
 
@@ -274,12 +276,12 @@ function createTable(x, y, z) {
     createCue(table, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation) 
 
     //create holes on the table
-    createHole(table, tableProperties.width/2 - frontWallProperties.length*1.5, 0, tableProperties.length/2 - frontWallProperties.length*1.5)
-    createHole(table, tableProperties.width/2 - frontWallProperties.length*1.5, 0, -1*(tableProperties.length/2 - frontWallProperties.length*1.5))
-    createHole(table, -1*(tableProperties.width/2 - frontWallProperties.length*1.5), 0, tableProperties.length/2 - frontWallProperties.length*1.5)
-    createHole(table, -1*(tableProperties.width/2 - frontWallProperties.length*1.5), 0, -1*(tableProperties.length/2 - frontWallProperties.length*1.5))
-    createHole(table, 0, 0, -1*(tableProperties.length/2 - frontWallProperties.length*1.5))
-    createHole(table, 0, 0, tableProperties.length/2 - frontWallProperties.length*1.5)
+    createHole(table, tableProperties.width/2 -(sideWallProperties.length + holeProperties.radius), 0, tableProperties.length/2 -(frontWallProperties.length + holeProperties.radius))
+    createHole(table, tableProperties.width/2 - (sideWallProperties.length + holeProperties.radius), 0, -(tableProperties.length/2 -(frontWallProperties.length + holeProperties.radius)))
+    createHole(table, -(tableProperties.width/2 - (sideWallProperties.length + holeProperties.radius)), 0, tableProperties.length/2 - (frontWallProperties.length + holeProperties.radius))
+    createHole(table, -(tableProperties.width/2 - (sideWallProperties.length + holeProperties.radius)), 0, -(tableProperties.length/2 - (frontWallProperties.length + holeProperties.radius)))
+    createHole(table, 0, 0, -(tableProperties.length/2 - (frontWallProperties.length + holeProperties.radius)))
+    createHole(table, 0, 0, tableProperties.length/2 - (frontWallProperties.length + holeProperties.radius))
 
 
     // randomly generated balls
@@ -296,21 +298,20 @@ function createTable(x, y, z) {
 
 // creates the orthographic camera object
 function createOrthographicCamera() {
-    /* NAO APAGAR!!!!!! */ 
-    //camera = new THREE.OrthographicCamera(cameraProperties.cameraLeft, cameraProperties.cameraRight, cameraProperties.cameraTop, cameraProperties.cameraBottom, 1, 1000)
-
     orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
          -tableProperties.length*1.5, 1, tableProperties.width*3)
 
-    updateCameraPosition(orthocamera)
+    updateCameraPosition(orthocamera, cameraProperties.x, cameraProperties.y, cameraProperties.z, scene.position)
 }
 
 function createPerspectiveCameras() {
     perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
     perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
 
-    updateCameraPosition(perspective1)
-    updateCameraPosition(perspective2)
+    perspective2.userData = { ball: 0 }
+
+    updateCameraPosition(perspective1, tableProperties.width * 0.8, tableProperties.width * 1.3, tableProperties.length *1.5, scene.position)
+    updateCameraPosition(perspective2, cameraProperties.x, tableProperties.height+ballProperties.radius, cameraProperties.z, scene.position)
 }
 
 // creates the scene object
@@ -355,9 +356,55 @@ function switchCameraAndMaterial(event) {
                 
         case '3':
             camera = perspective2
-            cameraProperties.x = 0
-            cameraProperties.y = tableProperties.width
-            cameraProperties.z = tableProperties.width * 2
+            camera.userData.ball = table.userData.balls[0]
+            break;
+
+        case '4':
+            if (selectedCue) {
+                selectedCue.material.color.setHex(cueProperties.color)
+            }
+            selectedCue = table.userData.cues[0]
+            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            break;
+
+        case '5':
+            if (selectedCue) {
+                selectedCue.material.color.setHex(cueProperties.color)
+            }
+            selectedCue = table.userData.cues[1]
+            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            break;
+
+        case '6':
+            if (selectedCue) {
+                selectedCue.material.color.setHex(cueProperties.color)
+            }
+            selectedCue = table.userData.cues[2]
+            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            break;
+
+        case '7':
+            if (selectedCue) {
+                selectedCue.material.color.setHex(cueProperties.color)
+            }
+            selectedCue = table.userData.cues[3]
+            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            break;
+
+        case '8':
+            if (selectedCue) {
+                selectedCue.material.color.setHex(cueProperties.color)
+            }
+            selectedCue = table.userData.cues[4]
+            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            break;
+
+        case '9':
+            if (selectedCue) {
+                selectedCue.material.color.setHex(cueProperties.color)
+            }
+            selectedCue = table.userData.cues[5]
+            selectedCue.material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '0':
@@ -367,16 +414,25 @@ function switchCameraAndMaterial(event) {
                 }
             })
             break;
+
+        case 'ArrowLeft':
+            
+            break;
+
+        case 'ArrowRight':
+            //if ()
+            break;
     }
 }
 
 function detectHoleCollision(ball) {
     table.userData.holes.forEach((hole) => {
-        if (detectBallCollision(ball.position.x, ball.position.z, hole.position.x, hole.position.z, 0, holeProperties.radius)) {
-            ball.userData.velocity.y = -100
-            ball.userData.velocity.x = 0
-            ball.userData.velocity.z = 0
-            ball.userData.acceleration.y = -gravity        }
+        if (detectCollision(ball.position.x, 0, ball.position.z, hole.position.x, 0, hole.position.z, 0, holeProperties.radius)) {
+            ball.userData.acceleration.y = -gravity
+            ball.userData.velocity.x *= 0.1
+            ball.userData.velocity.y = calculateVelocity(ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
+            ball.userData.velocity.z *= 0.1
+        }
     })
 }
 
@@ -457,16 +513,15 @@ function reduceSpeed() {
         if (Math.abs(ball.userData.velocity.z) > 0) {
             ball.userData.velocity.z = calculateVelocity(ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
         }
-
-        if (Math.abs(ball.userData.acceleration.y) > 0) {
-            ball.position.y = calculateNextPosition(ball.position.y, ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
-        }
     })
 }
 
 function updateBallsPositions() {
     table.userData.balls.forEach((ball) => {
         ball.position.x = calculateNextPosition(ball.position.x, ball.userData.velocity.x, ball.userData.acceleration.x, deltaFrameTime)
+
+        ball.position.y = calculateNextPosition(ball.position.y, ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
+
         ball.position.z = calculateNextPosition(ball.position.z, ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
     })
 }
@@ -483,8 +538,8 @@ function calculateNextPosition(x, v, a, deltaT) {
     }
 }
 
-function detectBallCollision(x1, y1, x2, y2, radius1, radius2) {
-    return getDistance(x1, y1, x2, y2) < radius1 + radius2
+function detectCollision(x1, y1, z1, x2, y2, z2, radius1, radius2) {
+    return getDistance(x1, y1, x2, y2) < radius1 + radius2 && getDistance(x1, z1, x2, z2) < radius1 + radius2
 }
 
 function rotate(velocity, angle) {
@@ -497,7 +552,8 @@ function rotate(velocity, angle) {
 }
 
 function resolveBallCollision(ball1, ball2) {
-    if (detectBallCollision(ball1.position.x, ball1.position.z, ball2.position.x, ball2.position.z, ball1.userData.radius, ball2.userData.radius)) {
+    if (detectCollision(ball1.position.x, ball1.position.y, ball1.position.z, ball2.position.x, ball2.position.y,  ball2.position.z, ball1.userData.radius, ball2.userData.radius)) {
+
         const xVelocityDiff = ball1.userData.velocity.x - ball2.userData.velocity.x
         const zVelocityDiff = ball1.userData.velocity.z - ball2.userData.velocity.z
 
@@ -585,7 +641,14 @@ function animate() {
     stopBall()
     
     updateBallsPositions()
-    updateCameraPosition(camera)
+
+    if (camera === perspective2) {
+        const x = calculateNextPosition(camera.position.x,camera.userData.ball.userData.velocity.x, camera.userData.ball.userData.acceleration.x, deltaFrameTime)
+        const y = camera.userData.ball.position.y
+        const z = calculateNextPosition(camera.position.z,camera.userData.ball.userData.velocity.z, camera.userData.ball.userData.acceleration.z, deltaFrameTime)
+
+        updateCameraPosition(perspective2, x, y, z, camera.userData.ball.position)
+    }
 
     render()
 
@@ -605,8 +668,9 @@ function init() {
     createPerspectiveCameras()
 
     camera = orthocamera
-
+    
     render()
+    
 
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', switchCameraAndMaterial)
