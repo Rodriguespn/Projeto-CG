@@ -42,6 +42,7 @@ const cueProperties = {
     selectedColor: 0xfc4903, 
     height: tableProperties.width / 3,
     radius: 2,
+    rotationAngle: Math.PI / 180,
     maxAngle: Math.PI / 3,
     minAngle: -Math.PI / 3
 }
@@ -54,7 +55,7 @@ const ballProperties = {
 
 const holeProperties = {
     color: '#000000',
-    radius: ballProperties.radius * 2,
+    radius: ballProperties.radius * 3,
     height: tableProperties.height + 0.001
 }
 
@@ -160,9 +161,9 @@ function generateRandomBall(obj) {
     const vy = 0
     const vz = randomFromInterval(-initialVelocity.z, initialVelocity.z)
 
-    const ax = -1 * vx / Math.abs(vx) * acceleration.x
+    const ax = -1 * getDirection(vx) * acceleration.x
     const ay = 0
-    const az = -1 * vz / Math.abs(vz) * acceleration.z
+    const az = -1 * getDirection(vz) * acceleration.z
 
     return createBall(obj, x, y, z, vx, vy, vz, ax, ay, az)
 }
@@ -220,22 +221,26 @@ function createHole(obj, x, y, z) {
 }
 
 // creates a circle at the (x,y,z) position
-function createCue(obj, x, y, z, { rotX, rotY, rotZ }) {
+function createCue(obj, x, y, z, { rotX, rotY, rotZ }, name) {
+
     geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
 
     material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: true })
-    mesh = new THREE.Mesh(geometry, material)
+    const cue = new THREE.Mesh(geometry, material)
 
-    mesh.position.set(x, y, z)
-    mesh.rotation.x += rotX
-    mesh.rotation.y += rotY
-    mesh.rotation.z += rotZ
+    cue.userData = { angle: 0 }
+    cue.name = name
 
-    obj.add(mesh)
+    cue.position.set(x, y, z)
+    cue.rotation.x += rotX
+    cue.rotation.y += rotY
+    cue.rotation.z += rotZ
 
-    obj.userData.cues.push(mesh)
+    obj.add(cue)
 
-    return mesh
+    obj.userData.cues.push(cue)
+
+    return cue
 }
 
 function createTable(x, y, z) {
@@ -262,18 +267,18 @@ function createTable(x, y, z) {
     */
 
     let rotation = {rotX: Math.PI / 2, rotY: 0, rotZ: 0}
-    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
-    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation)
+    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation, "frontCue")
+    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation, "frontCue")
 
     rotation = {rotX: - Math.PI / 2, rotY: 0, rotZ: 0}
-    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
-    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation)
+    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation, "frontCue")
+    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation, "frontCue")
 
     rotation = {rotX: 0, rotY: 0, rotZ: -Math.PI / 2}
-    createCue(table, tableProperties.width / 2 + cueProperties.height / 2, tableProperties.height / 2 + ballProperties.radius, 0, rotation)
+    createCue(table, tableProperties.width / 2 + cueProperties.height / 2, tableProperties.height / 2 + ballProperties.radius, 0, rotation, "sideCue")
     
     rotation = {rotX: 0, rotY: 0, rotZ: Math.PI / 2}
-    createCue(table, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation) 
+    createCue(table, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation, "sideCue") 
 
     //create holes on the table
     createHole(table, tableProperties.width/2 -(sideWallProperties.length + holeProperties.radius), 0, tableProperties.length/2 -(frontWallProperties.length + holeProperties.radius))
@@ -416,11 +421,56 @@ function switchCameraAndMaterial(event) {
             break;
 
         case 'ArrowLeft':
-            
+            console.log("Left pressed")
+            if (selectedCue && selectedCue.userData.angle >= cueProperties.minAngle) {
+                console.log(selectedCue.userData.angle)
+                console.log(cueProperties.minAngle)
+                if (selectedCue.name === 'frontCue') {
+                    selectedCue.rotation.z -= cueProperties.rotationAngle
+                } else if (selectedCue.name === 'sideCue') {
+                    selectedCue.rotation.y += cueProperties.rotationAngle
+                }
+                selectedCue.userData.angle -= cueProperties.rotationAngle
+            }
             break;
 
         case 'ArrowRight':
-            //if ()
+            console.log("Right pressed")
+            if (selectedCue && selectedCue.userData.angle <= cueProperties.maxAngle) {
+                console.log(selectedCue.userData.angle)
+                console.log(cueProperties.maxAngle)
+                if (selectedCue.name === 'frontCue') {
+                    selectedCue.rotation.z += cueProperties.rotationAngle
+                } else if (selectedCue.name === 'sideCue') {
+                    selectedCue.rotation.y -= cueProperties.rotationAngle
+                }
+                selectedCue.userData.angle += cueProperties.rotationAngle
+            }
+            break;
+
+        case 'Spacebar':
+        case ' ':
+            console.log("Space pressed")
+            if (selectedCue) {
+                const x = selectedCue.position.x
+                const y = selectedCue.position.y
+                const z = selectedCue.position.z
+
+                let v
+                
+                if (selectedCue.name === 'frontCue') {
+                    v = rotate({ x: 0, z: initialVelocity.z }, -selectedCue.userData.angle)
+
+                } else if (selectedCue.name === 'sideCue') {
+                    v = rotate({ x: initialVelocity.x, z: 0 }, -selectedCue.userData.angle)
+                }
+                
+                const ax = -1 * getDirection(v.x) * acceleration.x
+                const ay = 0
+                const az = -1 * getDirection(v.z) * acceleration.z
+
+                createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az)
+            }
             break;
     }
 }
@@ -486,9 +536,16 @@ function detectWallCollision() {
     })
 }
 
+function getDirection(x) {
+    if (Math.abs(x) > 0)
+        return x / Math.abs(x)
+    else
+        return 0
+}
+
 function sameDirection(x1, x2) {
-    const direction1 = x1 / Math.abs(x1)
-    const direction2 = x2 / Math.abs(x2)
+    const direction1 = getDirection(x1)
+    const direction2 = getDirection(x2)
     return direction1 === direction2
 }
 
@@ -593,15 +650,12 @@ function resolveBallCollision(ball1, ball2) {
             ball2.userData.velocity.z = vFinal2.z
 
             // adjusts the friction acceleration based on the new velocity value
-            if (vFinal1 > 0) {
-                ball1.userData.acceleration.x = -1 * vFinal1.x / Math.abs(vFinal1.x) * vFinal1.x * frictionCoefficient
-                ball1.userData.acceleration.z = -1 * vFinal1.z / Math.abs(vFinal1.z) * vFinal1.z * frictionCoefficient
-            }
+            ball1.userData.acceleration.x = -1 * getDirection(vFinal1.x) * vFinal1.x * frictionCoefficient
+            ball1.userData.acceleration.z = -1 * getDirection(vFinal1.z) * vFinal1.z * frictionCoefficient
+        
 
-            if (vFinal2 > 0) {
-                ball2.userData.acceleration.x = -1 * vFinal2.x / Math.abs(vFinal2.x) * vFinal2.x * frictionCoefficient
-                ball2.userData.acceleration.z = -1 * vFinal2.z / Math.abs(vFinal2.z) * vFinal2.z * frictionCoefficient
-            }
+            ball2.userData.acceleration.x = -1 * getDirection(vFinal2.x) * vFinal2.x * frictionCoefficient
+            ball2.userData.acceleration.z = -1 * getDirection(vFinal2.z) * vFinal2.z * frictionCoefficient
         }
     }
 }
