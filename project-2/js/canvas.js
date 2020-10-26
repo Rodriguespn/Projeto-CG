@@ -3,9 +3,10 @@ let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0, selectedCue 
 
 const background = '#404040'
-const numberOfBalls = 1
+const numberOfBalls = 0
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
+const fallLimit = -200
 
 /*
     Vicente: Rodar Tacos / Tacada / Camara q segue a bola
@@ -72,7 +73,7 @@ const acceleration = {
 }
 
 // all the camera properties
-const cameraProperties = {
+const orthogonalCameraProperties = {
     cameraLeft: -tableProperties.width,
     cameraRight: tableProperties.width,
     cameraTop: tableProperties.width,
@@ -306,17 +307,17 @@ function createOrthographicCamera() {
     orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
          -tableProperties.length*1.5, 1, tableProperties.width*3)
 
-    updateCameraPosition(orthocamera, cameraProperties.x, cameraProperties.y, cameraProperties.z, scene.position)
+    updateCameraPosition(orthocamera, orthogonalCameraProperties.x, orthogonalCameraProperties.y, orthogonalCameraProperties.z, scene.position)
 }
 
 function createPerspectiveCameras() {
     perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
     perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
 
-    perspective2.userData = { ball: 0 }
+    perspective2.userData = { ball: undefined }
 
     updateCameraPosition(perspective1, tableProperties.width * 0.8, tableProperties.width * 1.3, tableProperties.length *1.5, scene.position)
-    updateCameraPosition(perspective2, cameraProperties.x, tableProperties.height+ballProperties.radius, cameraProperties.z, scene.position)
+    updateCameraPosition(perspective2, perspectiveCameraProperties.x, tableProperties.height+ballProperties.radius, perspectiveCameraProperties.z, scene.position)
 }
 
 // creates the scene object
@@ -347,21 +348,20 @@ function switchCameraAndMaterial(event) {
     switch(event.key) {
         case '1':
             camera = orthocamera
-            cameraProperties.x = 0
-            cameraProperties.y = tableProperties.width * 1.5
-            cameraProperties.z = 0
+            orthogonalCameraProperties.x = 0
+            orthogonalCameraProperties.y = tableProperties.width * 1.5
+            orthogonalCameraProperties.z = 0
             break;
             
         case '2':
             camera = perspective1
-            cameraProperties.x = tableProperties.width * 0.8
-            cameraProperties.y = tableProperties.width * 1.3
-            cameraProperties.z = tableProperties.length *1.5
+            perspectiveCameraProperties.x = tableProperties.width * 0.8
+            perspectiveCameraProperties.y = tableProperties.width * 1.3
+            perspectiveCameraProperties.z = tableProperties.length *1.5
             break;
                 
         case '3':
             camera = perspective2
-            camera.userData.ball = table.userData.balls[0]
             break;
 
         case '4':
@@ -469,7 +469,10 @@ function switchCameraAndMaterial(event) {
                 const ay = 0
                 const az = -1 * getDirection(v.z) * acceleration.z
 
-                createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az)
+                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az)
+
+                perspective2.userData.ball = ball
+                updateCameraPosition(perspective2, perspectiveCameraProperties.x, tableProperties.height+ballProperties.radius, perspectiveCameraProperties.z, scene.position)
             }
             break;
     }
@@ -549,18 +552,6 @@ function sameDirection(x1, x2) {
     return direction1 === direction2
 }
 
-function stopBall() {
-    table.userData.balls.forEach((ball) => {
-        if (sameDirection(ball.userData.velocity.x, ball.userData.acceleration.x)) {
-            ball.userData.velocity.x = 0
-        }
-
-        if (sameDirection(ball.userData.velocity.z, ball.userData.acceleration.z)) {
-            ball.userData.velocity.z = 0
-        }
-    })
-}
-
 function reduceSpeed() {
     table.userData.balls.forEach((ball) => {
         if (Math.abs(ball.userData.velocity.x) > 0) {
@@ -569,6 +560,14 @@ function reduceSpeed() {
 
         if (Math.abs(ball.userData.velocity.z) > 0) {
             ball.userData.velocity.z = calculateVelocity(ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+        }
+
+        if (Math.round(Math.abs(ball.userData.velocity.x)) === 0) {
+            ball.userData.velocity.x = 0
+        }
+
+        if (Math.round(Math.abs(ball.userData.velocity.z)) === 0) {
+            ball.userData.velocity.z = 0
         }
     })
 }
@@ -580,6 +579,9 @@ function updateBallsPositions() {
         ball.position.y = calculateNextPosition(ball.position.y, ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
 
         ball.position.z = calculateNextPosition(ball.position.z, ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+
+        console.log(ball.userData.velocity)
+        console.log(ball.userData.acceleration)
     })
 }
 
@@ -650,12 +652,12 @@ function resolveBallCollision(ball1, ball2) {
             ball2.userData.velocity.z = vFinal2.z
 
             // adjusts the friction acceleration based on the new velocity value
-            ball1.userData.acceleration.x = -1 * getDirection(vFinal1.x) * vFinal1.x * frictionCoefficient
-            ball1.userData.acceleration.z = -1 * getDirection(vFinal1.z) * vFinal1.z * frictionCoefficient
+            ball1.userData.acceleration.x = -1 * getDirection(vFinal1.x) * Math.abs(vFinal1.x) * frictionCoefficient
+            ball1.userData.acceleration.z = -1 * getDirection(vFinal1.z) * Math.abs(vFinal1.z) * frictionCoefficient
         
 
-            ball2.userData.acceleration.x = -1 * getDirection(vFinal2.x) * vFinal2.x * frictionCoefficient
-            ball2.userData.acceleration.z = -1 * getDirection(vFinal2.z) * vFinal2.z * frictionCoefficient
+            ball2.userData.acceleration.x = -1 * getDirection(vFinal2.x) * Math.abs(vFinal2.x) * frictionCoefficient
+            ball2.userData.acceleration.z = -1 * getDirection(vFinal2.z) * Math.abs(vFinal2.z) * frictionCoefficient
         }
     }
 }
@@ -679,6 +681,18 @@ function getDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
 }
 
+function removeFallenBall() {
+    const removeIndex = Array()
+    for (let i = 0; i < table.userData.balls.length; i++) {
+        if (ball.position.y <= fallLimit) {
+            removeIndex.push(i)
+        }
+    }
+    for (let i = 0; i < removeIndex.length; i++) {
+        table.userData.balls.splice(removeIndex[i], 1);
+    }
+}
+
 // animates the scene
 function animate() {
     prevFrameTime = nextFrameTime
@@ -688,20 +702,24 @@ function animate() {
         deltaFrameTime = (nextFrameTime - prevFrameTime) / 1000
     }
 
+    reduceSpeed()
+
     detectWallCollision()
     resolveAllBallsCollisions()
+    removeFallenBall()
     
-    reduceSpeed()
-    stopBall()
     
     updateBallsPositions()
 
     if (camera === perspective2) {
-        const x = calculateNextPosition(camera.position.x,camera.userData.ball.userData.velocity.x, camera.userData.ball.userData.acceleration.x, deltaFrameTime)
-        const y = camera.userData.ball.position.y
-        const z = calculateNextPosition(camera.position.z,camera.userData.ball.userData.velocity.z, camera.userData.ball.userData.acceleration.z, deltaFrameTime)
+        const cameraBall = camera.userData.ball
+        if (cameraBall) {
+            const x = calculateNextPosition(camera.position.x, cameraBall.userData.velocity.x, cameraBall.userData.acceleration.x, deltaFrameTime)
+            const y = camera.userData.ball.position.y
+            const z = calculateNextPosition(camera.position.z, cameraBall.userData.velocity.z, cameraBall.userData.acceleration.z, deltaFrameTime)
 
-        updateCameraPosition(perspective2, x, y, z, camera.userData.ball.position)
+            updateCameraPosition(perspective2, x, y, z, cameraBall.position)
+        }
     }
 
     render()
