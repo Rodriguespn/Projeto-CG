@@ -3,7 +3,7 @@ let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0, selectedCue 
 
 const background = '#404040'
-const numberOfBalls = 20
+const numberOfBalls = 0
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
 const fallLimit = -200
@@ -256,16 +256,6 @@ function createTable(x, y, z) {
     addTableFrontWall(table, 0, frontWallProperties.height / 2 + tableProperties.height / 2, -(tableProperties.length / 2 - frontWallProperties.length / 2))
     addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, frontWallProperties.height/2 + tableProperties.height / 2, 0)
     addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), frontWallProperties.height/2 + tableProperties.height / 2, 0)
-
-    // fixed initial balls
-    /*
-    createBall(table, tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, tableProperties.length / 2 - frontWallProperties.length*2)
-    createBall(table, -tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, tableProperties.length / 2 - frontWallProperties.length*2)
-    createBall(table, tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length*2))
-    createBall(table, -tableProperties.width / 4, tableProperties.height / 2 + ballProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length*2))
-    createBall(table, tableProperties.width / 2 - sideWallProperties.length*2, tableProperties.height / 2 + ballProperties.radius, 0)
-    createBall(table, -(tableProperties.width / 2 - sideWallProperties.length*2), tableProperties.height / 2 + ballProperties.radius, 0)
-    */
 
     let rotation = {rotX: Math.PI / 2, rotY: 0, rotZ: 0}
     createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation, "frontCue")
