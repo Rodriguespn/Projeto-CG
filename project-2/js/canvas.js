@@ -681,17 +681,28 @@ function getDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
 }
 
-function removeFallenBall() {
-    const removeIndex = Array()
+/*function removeFallenBall() {
+    let removeIndexes = Array()
     for (let i = 0; i < table.userData.balls.length; i++) {
-        if (ball.position.y <= fallLimit) {
+        if (table.userData.balls[i].position.y <= fallLimit) {
             removeIndex.push(i)
         }
     }
-    for (let i = 0; i < removeIndex.length; i++) {
-        table.userData.balls.splice(removeIndex[i], 1);
+    for (let i = 0; i < removeIndexes.length; i++) {
+        table.userData.balls.splice(removeIndexes[i], 1);
     }
-}
+
+    removeIndexes = Array()
+    for (let i = 0; i < table.children.length; i++) {
+        if (table.children[i].position.y <= fallLimit) {
+            removeIndex.push(i)
+        }
+    }
+
+    for (let i = 0; i < removeIndexes.length; i++) {
+        table.children.splice(removeIndexes[i], 1);
+    }
+}*/
 
 // animates the scene
 function animate() {
@@ -706,7 +717,7 @@ function animate() {
 
     detectWallCollision()
     resolveAllBallsCollisions()
-    removeFallenBall()
+    //removeFallenBall()
     
     
     updateBallsPositions()
