@@ -2,8 +2,8 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0, selectedCue 
 
-const background = '#404040'
-const numberOfBalls = 20
+const background = '#000000'
+const numberOfBalls = 0
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
 const fallLimit = -200
@@ -16,9 +16,9 @@ const fallLimit = -200
 
 const tableProperties = {
     color: '#0a6c03',
-    width: 200,
-    length: 120,
-    height: 5,
+    width: 300,
+    length: 150,
+    height: 10,
     initX: 0,
     initY: 0,
     initZ: 0
@@ -27,7 +27,7 @@ const tableProperties = {
 const frontWallProperties = {
     color: '#8b4513',
     width: tableProperties.width, 
-    height: tableProperties.height,
+    height: tableProperties.height*2,
     length: tableProperties.length * 0.1
 }
 
@@ -42,28 +42,28 @@ const cueProperties = {
     color: 0xffa54f,
     selectedColor: 0xfc4903, 
     height: tableProperties.width / 3,
-    radius: 2,
+    radius: 3,
     rotationAngle: Math.PI / 180,
     maxAngle: Math.PI / 3,
     minAngle: -Math.PI / 3
 }
 
 const ballProperties = {
-    color: '#ffffff',
-    radius: frontWallProperties.height / 4,
+    color: ['#ffffff', '#ff6666', '#ffb266', '#ffff66', '#b2ff66', '#66ffff'],
+    radius: frontWallProperties.height / 6,
     mass: 1
 }
 
 const holeProperties = {
     color: '#000000',
-    radius: ballProperties.radius * 3,
-    height: tableProperties.height + 0.001
+    radius: ballProperties.radius * 2,
+    height: tableProperties.height + 1
 }
 
 const initialVelocity = {
-    x: 100,
+    x: 80,
     y: 0,
-    z: 100
+    z: 80
 }
 
 const acceleration = {
@@ -88,9 +88,9 @@ const perspectiveCameraProperties = {
     cameraRight: tableProperties.width,
     cameraTop: tableProperties.width,
     cameraBottom: -tableProperties.width,
-    x: 0,
+    x: tableProperties.width,
     y: tableProperties.width*1.2,
-    z: 0
+    z: tableProperties.width
 }
 
 
@@ -107,6 +107,25 @@ function updateCameraPosition(obj, x, y, z, lookAt) {
     obj.lookAt(lookAt)
 }
 
+// creates the orthographic camera object
+function createOrthographicCamera() {
+    orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
+         -tableProperties.length*1.5, 1, tableProperties.width*3)
+
+    updateCameraPosition(orthocamera, orthogonalCameraProperties.x, orthogonalCameraProperties.y, orthogonalCameraProperties.z, scene.position)
+}
+
+function createPerspectiveCameras() {
+    perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
+
+    perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
+
+    perspective2.userData = { ball: undefined }
+
+    updateCameraPosition(perspective1, tableProperties.width * 0.8, tableProperties.width * 1.3, tableProperties.length *1.5, scene.position)
+    updateCameraPosition(perspective2, perspectiveCameraProperties.x, tableProperties.height+ballProperties.radius, perspectiveCameraProperties.z, scene.position)
+}
+
 function randomFromInterval(min, max) { // min and max included 
     return Math.random() * (max - min + 1) + min
 }
@@ -115,12 +134,12 @@ function randomIntFromInterval(min, max) {
     return Math.floor(randomFromInterval(min, max))
 }
 
-function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az) {
+function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az, color) {
     ball = new THREE.Object3D()
 
     ball.userData = { radius: ballProperties.radius, mass: ballProperties.mass, velocity: {x: vx, y: vy, z: vz }, acceleration: { x: ax, y: ay, z: az } }
 
-    material = new THREE.MeshBasicMaterial({ color: ballProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: color, wireframe: false })
 
     geometry = new THREE.SphereGeometry(ballProperties.radius, ballProperties.radius*10, ballProperties.radius*10)
     mesh = new THREE.Mesh(geometry, material)
@@ -166,11 +185,14 @@ function generateRandomBall(obj) {
     const ay = 0
     const az = -1 * getDirection(vz) * acceleration.z
 
-    return createBall(obj, x, y, z, vx, vy, vz, ax, ay, az)
+    const ballColor = ballProperties.color[randomIntFromInterval(1, ballProperties.color.length)]
+    return createBall(obj, x, y, z, vx, vy, vz, ax, ay, az, ballColor)
 }
 
 function addTableTop(obj, x, y, z) {
-    geometry = new THREE.BoxGeometry(tableProperties.width, tableProperties.height, tableProperties.length)
+    geometry = new THREE.BoxGeometry(tableProperties.width-sideWallProperties.length, tableProperties.height, tableProperties.length-frontWallProperties.length)
+
+    material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: false})
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -182,7 +204,7 @@ function addTableTop(obj, x, y, z) {
 function addTableFrontWall(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(frontWallProperties.width, frontWallProperties.height, frontWallProperties.length)
     
-    material = new THREE.MeshBasicMaterial({ color: frontWallProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: frontWallProperties.color, wireframe: false })
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -194,7 +216,7 @@ function addTableFrontWall(obj, x, y, z) {
 function addTableSideWall(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(sideWallProperties.width - 2 * frontWallProperties.length, sideWallProperties.height, sideWallProperties.length)
     
-    material = new THREE.MeshBasicMaterial({ color: sideWallProperties.color, wireframe: true })
+    material = new THREE.MeshBasicMaterial({ color: sideWallProperties.color, wireframe: false })
 
     mesh = new THREE.Mesh(geometry, material)
 
@@ -212,7 +234,7 @@ function createHole(obj, x, y, z) {
 
     geometry = new THREE.CylinderGeometry(holeProperties.radius, holeProperties.radius, holeProperties.height)
 
-    material = new THREE.MeshBasicMaterial({ color: holeProperties.color, wireframe: true})
+    material = new THREE.MeshBasicMaterial({ color: holeProperties.color, wireframe: false})
     mesh = new THREE.Mesh(geometry, material)
 
     hole.add(mesh) 
@@ -223,19 +245,28 @@ function createHole(obj, x, y, z) {
 
 // creates a circle at the (x,y,z) position
 function createCue(obj, x, y, z, { rotX, rotY, rotZ }, name) {
+    const cue = new THREE.Object3D()
 
     geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
 
-    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: true })
-    const cue = new THREE.Mesh(geometry, material)
+    const loader = new THREE.TextureLoader()
+    
+    material = new THREE.MeshBasicMaterial({ map: loader.load('./textures/billiard-cue-wood.jpg'), color: cueProperties.color, wireframe: false })
+    
+    const cueCilinder = new THREE.Mesh(geometry, material)
 
+    
     cue.userData = { angle: 0 }
     cue.name = name
-
+    
     cue.position.set(x, y, z)
     cue.rotation.x += rotX
     cue.rotation.y += rotY
     cue.rotation.z += rotZ
+    
+    cue.add(cueCilinder)
+
+    cueCilinder.position.y += cueProperties.height / 2 + frontWallProperties.length
 
     obj.add(cue)
 
@@ -247,29 +278,28 @@ function createCue(obj, x, y, z, { rotX, rotY, rotZ }, name) {
 function createTable(x, y, z) {
     table = new THREE.Object3D()
 
-    material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: true })
-
     table.userData = { balls: [], cues: [], holes: [] }
 
     addTableTop(table, 0, 0, 0)
-    addTableFrontWall(table, 0, frontWallProperties.height / 2 + tableProperties.height / 2, tableProperties.length / 2 - frontWallProperties.length / 2)
-    addTableFrontWall(table, 0, frontWallProperties.height / 2 + tableProperties.height / 2, -(tableProperties.length / 2 - frontWallProperties.length / 2))
-    addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, frontWallProperties.height/2 + tableProperties.height / 2, 0)
-    addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), frontWallProperties.height/2 + tableProperties.height / 2, 0)
+    addTableFrontWall(table, 0, tableProperties.height/2, tableProperties.length / 2 - frontWallProperties.length / 2)
+    addTableFrontWall(table, 0, tableProperties.height/2, -(tableProperties.length / 2 - frontWallProperties.length / 2))
+    addTableSideWall(table, tableProperties.width / 2 - frontWallProperties.length / 2, tableProperties.height/2, 0)
+    addTableSideWall(table, -(tableProperties.width / 2 - frontWallProperties.length / 2), tableProperties.height/2, 0)
 
     let rotation = {rotX: Math.PI / 2, rotY: 0, rotZ: 0}
-    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation, "frontCue")
-    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation, "frontCue")
+    //createCue(table, tableProperties.width / 4, tableProperties.height + cueProperties.radius, tableProperties.length / 2 + cueProperties.height/2, rotation, "frontCue")
+    createCue(table, tableProperties.width / 4, tableProperties.height + cueProperties.radius, tableProperties.length / 2 - frontWallProperties.length, rotation, "frontCue")
+    createCue(table, -tableProperties.width / 4, tableProperties.height + cueProperties.radius, tableProperties.length / 2 - frontWallProperties.length, rotation, "frontCue")
 
     rotation = {rotX: - Math.PI / 2, rotY: 0, rotZ: 0}
-    createCue(table, -tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation, "frontCue")
-    createCue(table, tableProperties.width / 4, tableProperties.height / 2 + cueProperties.radius, -(tableProperties.length / 2 + cueProperties.height/2), rotation, "frontCue")
+    createCue(table, -tableProperties.width / 4, tableProperties.height + cueProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length), rotation, "frontCue")
+    createCue(table, tableProperties.width / 4, tableProperties.height + cueProperties.radius, -(tableProperties.length / 2 - frontWallProperties.length), rotation, "frontCue")
 
     rotation = {rotX: 0, rotY: 0, rotZ: -Math.PI / 2}
-    createCue(table, tableProperties.width / 2 + cueProperties.height / 2, tableProperties.height / 2 + ballProperties.radius, 0, rotation, "sideCue")
+    createCue(table, tableProperties.width / 2 - sideWallProperties.length, tableProperties.height + ballProperties.radius, 0, rotation, "sideCue")
     
     rotation = {rotX: 0, rotY: 0, rotZ: Math.PI / 2}
-    createCue(table, -(tableProperties.width / 2 + cueProperties.height / 2), tableProperties.height / 2 + ballProperties.radius, 0, rotation, "sideCue") 
+    createCue(table, -(tableProperties.width / 2 - sideWallProperties.length), tableProperties.height + ballProperties.radius, 0, rotation, "sideCue") 
 
     //create holes on the table
     createHole(table, tableProperties.width/2 -(sideWallProperties.length + holeProperties.radius), 0, tableProperties.length/2 -(frontWallProperties.length + holeProperties.radius))
@@ -290,25 +320,6 @@ function createTable(x, y, z) {
     table.position.z = z
 
     console.log(table)
-}
-
-// creates the orthographic camera object
-function createOrthographicCamera() {
-    orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
-         -tableProperties.length*1.5, 1, tableProperties.width*3)
-
-    updateCameraPosition(orthocamera, orthogonalCameraProperties.x, orthogonalCameraProperties.y, orthogonalCameraProperties.z, scene.position)
-}
-
-function createPerspectiveCameras() {
-    perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
-
-    perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
-
-    perspective2.userData = { ball: undefined }
-
-    updateCameraPosition(perspective1, tableProperties.width * 0.8, tableProperties.width * 1.3, tableProperties.length *1.5, scene.position)
-    updateCameraPosition(perspective2, perspectiveCameraProperties.x, tableProperties.height+ballProperties.radius, perspectiveCameraProperties.z, scene.position)
 }
 
 // creates the scene object
@@ -339,16 +350,13 @@ function switchCameraAndMaterial(event) {
     switch(event.key) {
         case '1':
             camera = orthocamera
-            orthogonalCameraProperties.x = 0
-            orthogonalCameraProperties.y = tableProperties.width * 1.5
-            orthogonalCameraProperties.z = 0
+            updateCameraPosition(camera, orthogonalCameraProperties.x, orthogonalCameraProperties.y, orthogonalCameraProperties.z, scene.position)
+            console.log(camera) 
             break;
             
         case '2':
             camera = perspective1
-            perspectiveCameraProperties.x = tableProperties.width * 0.8
-            perspectiveCameraProperties.y = tableProperties.width * 1.3
-            perspectiveCameraProperties.z = tableProperties.length *1.5
+            updateCameraPosition(camera, perspectiveCameraProperties.x, perspectiveCameraProperties.y, perspectiveCameraProperties.z, scene.position)
             break;
                 
         case '3':
@@ -359,50 +367,50 @@ function switchCameraAndMaterial(event) {
 
         case '4':
             if (selectedCue) {
-                selectedCue.material.color.setHex(cueProperties.color)
+                selectedCue.children[0].material.color.setHex(cueProperties.color)
             }
             selectedCue = table.userData.cues[0]
-            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            selectedCue.children[0].material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '5':
             if (selectedCue) {
-                selectedCue.material.color.setHex(cueProperties.color)
+                selectedCue.children[0].material.color.setHex(cueProperties.color)
             }
             selectedCue = table.userData.cues[1]
-            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            selectedCue.children[0].material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '6':
             if (selectedCue) {
-                selectedCue.material.color.setHex(cueProperties.color)
+                selectedCue.children[0].material.color.setHex(cueProperties.color)
             }
             selectedCue = table.userData.cues[2]
-            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            selectedCue.children[0].material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '7':
             if (selectedCue) {
-                selectedCue.material.color.setHex(cueProperties.color)
+                selectedCue.children[0].material.color.setHex(cueProperties.color)
             }
             selectedCue = table.userData.cues[3]
-            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            selectedCue.children[0].material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '8':
             if (selectedCue) {
-                selectedCue.material.color.setHex(cueProperties.color)
+                selectedCue.children[0].material.color.setHex(cueProperties.color)
             }
             selectedCue = table.userData.cues[4]
-            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            selectedCue.children[0].material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '9':
             if (selectedCue) {
-                selectedCue.material.color.setHex(cueProperties.color)
+                selectedCue.children[0].material.color.setHex(cueProperties.color)
             }
             selectedCue = table.userData.cues[5]
-            selectedCue.material.color.setHex(cueProperties.selectedColor)
+            selectedCue.children[0].material.color.setHex(cueProperties.selectedColor)
             break;
 
         case '0':
@@ -415,23 +423,7 @@ function switchCameraAndMaterial(event) {
 
         case 'ArrowLeft':
             console.log("Left pressed")
-            if (selectedCue && selectedCue.userData.angle >= cueProperties.minAngle) {
-                console.log(selectedCue.userData.angle)
-                console.log(cueProperties.minAngle)
-                if (selectedCue.name === 'frontCue') {
-                    selectedCue.rotation.z -= cueProperties.rotationAngle
-                } else if (selectedCue.name === 'sideCue') {
-                    selectedCue.rotation.y += cueProperties.rotationAngle
-                }
-                selectedCue.userData.angle -= cueProperties.rotationAngle
-            }
-            break;
-
-        case 'ArrowRight':
-            console.log("Right pressed")
             if (selectedCue && selectedCue.userData.angle <= cueProperties.maxAngle) {
-                console.log(selectedCue.userData.angle)
-                console.log(cueProperties.maxAngle)
                 if (selectedCue.name === 'frontCue') {
                     selectedCue.rotation.z += cueProperties.rotationAngle
                 } else if (selectedCue.name === 'sideCue') {
@@ -441,31 +433,46 @@ function switchCameraAndMaterial(event) {
             }
             break;
 
+        case 'ArrowRight':
+            console.log("Right pressed")
+            if (selectedCue && selectedCue.userData.angle >= cueProperties.minAngle) {
+                if (selectedCue.name === 'frontCue') {
+                    selectedCue.rotation.z -= cueProperties.rotationAngle
+                } else if (selectedCue.name === 'sideCue') {
+                    selectedCue.rotation.y += cueProperties.rotationAngle
+                }
+                selectedCue.userData.angle -= cueProperties.rotationAngle
+            }
+            break;
+
         case 'Spacebar':
         case ' ':
             console.log("Space pressed")
+            
             if (selectedCue) {
-                const x = selectedCue.position.x
-                const y = selectedCue.position.y
-                const z = selectedCue.position.z
-
-                let v
+                let x = selectedCue.position.x
+                const y = tableProperties.height / 2 + ballProperties.radius
+                let z = selectedCue.position.z
+                let v, cameraX = x, cameraY = y*10, cameraZ = z
                 
                 if (selectedCue.name === 'frontCue') {
                     v = rotate({ x: 0, z: initialVelocity.z }, -selectedCue.userData.angle)
-
+                    cameraZ = z+ (getDirection(v.z) * cueProperties.height)
+                    
                 } else if (selectedCue.name === 'sideCue') {
                     v = rotate({ x: initialVelocity.x, z: 0 }, -selectedCue.userData.angle)
+                    cameraX = x+ (getDirection(v.x) * cueProperties.height)
                 }
                 
                 const ax = -1 * getDirection(v.x) * acceleration.x
                 const ay = 0
                 const az = -1 * getDirection(v.z) * acceleration.z
-
-                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az)
-
+                
+                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az, "#ffffff")
+                
                 perspective2.userData.ball = ball
-                updateCameraPosition(perspective2, perspectiveCameraProperties.x, tableProperties.height+ballProperties.radius, perspectiveCameraProperties.z, scene.position)
+
+                updateCameraPosition(perspective2, cameraX, cameraY, cameraZ, ball.position)
             }
             break;
     }
@@ -572,9 +579,6 @@ function updateBallsPositions() {
         ball.position.y = calculateNextPosition(ball.position.y, ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
 
         ball.position.z = calculateNextPosition(ball.position.z, ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
-
-        console.log(ball.userData.velocity)
-        console.log(ball.userData.acceleration)
     })
 }
 
@@ -674,28 +678,17 @@ function getDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(xDistance, 2) + Math.pow(yDistance, 2))
 }
 
-/*function removeFallenBall() {
-    let removeIndexes = Array()
-    for (let i = 0; i < table.userData.balls.length; i++) {
-        if (table.userData.balls[i].position.y <= fallLimit) {
-            removeIndex.push(i)
-        }
-    }
-    for (let i = 0; i < removeIndexes.length; i++) {
-        table.userData.balls.splice(removeIndexes[i], 1);
-    }
+function updateMovingCamera(camera) {
+    const cameraBall = camera.userData.ball
+    
+    if (cameraBall) {
+        const x = calculateNextPosition(camera.position.x, cameraBall.userData.velocity.x, cameraBall.userData.acceleration.x, deltaFrameTime)
+        const y = calculateNextPosition(camera.position.y, cameraBall.userData.velocity.y, cameraBall.userData.acceleration.y, deltaFrameTime)
+        const z = calculateNextPosition(camera.position.z, cameraBall.userData.velocity.z, cameraBall.userData.acceleration.z, deltaFrameTime)
 
-    removeIndexes = Array()
-    for (let i = 0; i < table.children.length; i++) {
-        if (table.children[i].position.y <= fallLimit) {
-            removeIndex.push(i)
-        }
+        updateCameraPosition(camera, x, y, z, cameraBall.position)
     }
-
-    for (let i = 0; i < removeIndexes.length; i++) {
-        table.children.splice(removeIndexes[i], 1);
-    }
-}*/
+}
 
 // animates the scene
 function animate() {
@@ -715,16 +708,7 @@ function animate() {
     
     updateBallsPositions()
 
-    if (camera === perspective2) {
-        const cameraBall = camera.userData.ball
-        if (cameraBall) {
-            const x = calculateNextPosition(camera.position.x, cameraBall.userData.velocity.x, cameraBall.userData.acceleration.x, deltaFrameTime)
-            const y = camera.userData.ball.position.y * 3
-            const z = calculateNextPosition(camera.position.z, cameraBall.userData.velocity.z, cameraBall.userData.acceleration.z, deltaFrameTime)
-
-            updateCameraPosition(perspective2, x, y, z, cameraBall.position)
-        }
-    }
+    updateMovingCamera(perspective2)
 
     render()
 
