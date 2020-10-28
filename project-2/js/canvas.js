@@ -302,6 +302,7 @@ function createOrthographicCamera() {
 
 function createPerspectiveCameras() {
     perspective1 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
+
     perspective2 = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, tableProperties.width*3)
 
     perspective2.userData = { ball: undefined }
@@ -352,6 +353,8 @@ function switchCameraAndMaterial(event) {
                 
         case '3':
             camera = perspective2
+            if (!perspective2.userData.ball)
+                perspective2.userData.ball = table.userData.balls[0]
             break;
 
         case '4':
@@ -716,7 +719,7 @@ function animate() {
         const cameraBall = camera.userData.ball
         if (cameraBall) {
             const x = calculateNextPosition(camera.position.x, cameraBall.userData.velocity.x, cameraBall.userData.acceleration.x, deltaFrameTime)
-            const y = camera.userData.ball.position.y
+            const y = camera.userData.ball.position.y * 3
             const z = calculateNextPosition(camera.position.z, cameraBall.userData.velocity.z, cameraBall.userData.acceleration.z, deltaFrameTime)
 
             updateCameraPosition(perspective2, x, y, z, cameraBall.position)
