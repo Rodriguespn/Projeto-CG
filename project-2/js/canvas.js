@@ -458,6 +458,7 @@ function switchCameraAndMaterial(event) {
                     
                 } else if (selectedCue.name === 'sideCue') {
                     v = rotate({ x: initialVelocity.x, z: 0 }, -selectedCue.userData.angle)
+                    v.z *= getDirection(selectedCue.position.x)
                     cameraX += getDirection(selectedCue.position.x) * cueProperties.height
                 }
                 
@@ -473,6 +474,7 @@ function switchCameraAndMaterial(event) {
             }
             break;
     }
+    console.log(selectedCue.userData.angle)
 }
 
 function detectHoleCollision(ball) {
