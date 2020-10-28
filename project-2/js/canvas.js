@@ -457,11 +457,11 @@ function switchCameraAndMaterial(event) {
                 
                 if (selectedCue.name === 'frontCue') {
                     v = rotate({ x: 0, z: initialVelocity.z }, -selectedCue.userData.angle)
-                    cameraZ = z+ (getDirection(v.z) * cueProperties.height)
+                    cameraZ += getDirection(selectedCue.position.z) * cueProperties.height
                     
                 } else if (selectedCue.name === 'sideCue') {
                     v = rotate({ x: initialVelocity.x, z: 0 }, -selectedCue.userData.angle)
-                    cameraX = x+ (getDirection(v.x) * cueProperties.height)
+                    cameraX += getDirection(selectedCue.position.x) * cueProperties.height
                 }
                 
                 const ax = -1 * getDirection(v.x) * acceleration.x
