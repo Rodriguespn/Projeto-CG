@@ -109,8 +109,7 @@ function updateCameraPosition(obj, x, y, z, lookAt) {
 
 // creates the orthographic camera object
 function createOrthographicCamera() {
-    orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5,
-         -tableProperties.length*1.5, 1, tableProperties.width*3)
+    orthocamera = new THREE.OrthographicCamera(-tableProperties.width, tableProperties.width, tableProperties.length*1.5, -tableProperties.length*1.5, 1, tableProperties.width*3)
 
     updateCameraPosition(orthocamera, orthogonalCameraProperties.x, orthogonalCameraProperties.y, orthogonalCameraProperties.z, scene.position)
 }
@@ -248,10 +247,8 @@ function createCue(obj, x, y, z, { rotX, rotY, rotZ }, name) {
     const cue = new THREE.Object3D()
 
     geometry = new THREE.CylinderGeometry(cueProperties.radius, cueProperties.radius/4, cueProperties.height);
-
-    const loader = new THREE.TextureLoader()
     
-    material = new THREE.MeshBasicMaterial({ map: loader.load('./textures/billiard-cue-wood.jpg'), color: cueProperties.color, wireframe: false })
+    material = new THREE.MeshBasicMaterial({ color: cueProperties.color, wireframe: false })
     
     const cueCilinder = new THREE.Mesh(geometry, material)
 
