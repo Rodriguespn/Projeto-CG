@@ -135,9 +135,9 @@ function randomIntFromInterval(min, max) {
 function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az, color) {
     ball = new THREE.Object3D()
 
-    wx = calculateAngularVelocity(vx)
+    wx = calculateAngularVelocity(vz)
     wy = calculateAngularVelocity(vy)
-    wz = calculateAngularVelocity(vz)
+    wz = calculateAngularVelocity(vx)
 
     ball.userData = { radius: ballProperties.radius, mass: ballProperties.mass, linearVelocity: {x: vx, y: vy, z: vz }, angularVelocity: {x: wx, y: wy, z: wz}, acceleration: { x: ax, y: ay, z: az } }
 
@@ -485,11 +485,11 @@ function detectHoleCollision(ball) {
     table.userData.holes.forEach((hole) => {
         if (detectCollision(ball.position.x, 0, ball.position.z, hole.position.x, 0, hole.position.z, 0, holeProperties.radius)) {
             ball.userData.acceleration.y = -gravity
-            ball.userData.linearVelocity.x *= 0.1
+            ball.userData.linearVelocity.x = 0
             ball.userData.linearVelocity.y = calculateLinearVelocity(ball.userData.linearVelocity.y, ball.userData.acceleration.y, deltaFrameTime)
-            ball.userData.linearVelocity.z *= 0.1
-            ball.userData.angularVelocity.x *= 0.1
-            ball.userData.angularVelocity.z *= 0.1
+            ball.userData.linearVelocity.z = 0
+            ball.userData.angularVelocity.x = 0
+            ball.userData.angularVelocity.z = 0
         }
     })
 }
@@ -500,7 +500,7 @@ function detectRightWallCollision(ball) {
     if (ball.position.x > border) {
         ball.position.x = border
         ball.userData.linearVelocity.x = -ball.userData.linearVelocity.x
-        ball.userData.angularVelocity.x = -ball.userData.angularVelocity.x
+        ball.userData.angularVelocity.z = -ball.userData.angularVelocity.z
         ball.userData.acceleration.x = -ball.userData.acceleration.x
     }
 }
@@ -511,7 +511,7 @@ function detectLeftWallCollision(ball) {
     if (ball.position.x < border) {
         ball.position.x = border
         ball.userData.linearVelocity.x = -ball.userData.linearVelocity.x
-        ball.userData.angularVelocity.x = -ball.userData.angularVelocity.x
+        ball.userData.angularVelocity.z = -ball.userData.angularVelocity.z
         ball.userData.acceleration.x = -ball.userData.acceleration.x
     }
 }
@@ -522,7 +522,7 @@ function detectTopWallCollision(ball) {
     if (ball.position.z > border) {
         ball.position.z = border
         ball.userData.linearVelocity.z = -ball.userData.linearVelocity.z
-        ball.userData.angularVelocity.z = -ball.userData.angularVelocity.z
+        ball.userData.angularVelocity.x = -ball.userData.angularVelocity.x
         ball.userData.acceleration.z = -ball.userData.acceleration.z
     }
 }
@@ -533,7 +533,7 @@ function detectBottomWallCollision(ball) {
     if (ball.position.z < border) {
         ball.position.z = border
         ball.userData.linearVelocity.z = -ball.userData.linearVelocity.z
-        ball.userData.angularVelocity.z = -ball.userData.angularVelocity.z
+        ball.userData.angularVelocity.x = -ball.userData.angularVelocity.x
         ball.userData.acceleration.z = -ball.userData.acceleration.z
     }
 }
@@ -602,8 +602,8 @@ function calculateLinearVelocity(v, a, deltaT) {
     return v + a * deltaT
 }
 
-function calculateAngularVelocity(l_v) {
-    return l_v / (Math.PI * ballProperties.radius) * Math.PI
+function calculateAngularVelocity(linearVelocity) {
+    return linearVelocity / (Math.PI * ballProperties.radius) * Math.PI
 }
 
 function calculateNextPosition(x, v, a, deltaT) {
