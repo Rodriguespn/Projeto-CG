@@ -136,11 +136,15 @@ function randomIntFromInterval(min, max) {
 function createBall(obj, x, y, z, vx, vy, vz, ax, ay, az, color) {
     ball = new THREE.Object3D()
 
-    ball.userData = { radius: ballProperties.radius, mass: ballProperties.mass, velocity: {x: vx, y: vy, z: vz }, acceleration: { x: ax, y: ay, z: az } }
+    wx = calculateAngularVelocity(vx)
+    wy = calculateAngularVelocity(vy)
+    wz = calculateAngularVelocity(vz)
+
+    ball.userData = { radius: ballProperties.radius, mass: ballProperties.mass, linear_velocity: {x: vx, y: vy, z: vz }, angular_velocity: {x: wx, y: wy, z: wz}, acceleration: { x: ax, y: ay, z: az } }
 
     material = new THREE.MeshBasicMaterial({ color: color, wireframe: false })
 
-    geometry = new THREE.SphereGeometry(ballProperties.radius, ballProperties.radius*10, ballProperties.radius*10)
+    geometry = new THREE.SphereGeometry(ballProperties.radius, ballProperties.radius*3, ballProperties.radius*3)
     mesh = new THREE.Mesh(geometry, material)
 
     ball.add(mesh)
@@ -481,9 +485,11 @@ function detectHoleCollision(ball) {
     table.userData.holes.forEach((hole) => {
         if (detectCollision(ball.position.x, 0, ball.position.z, hole.position.x, 0, hole.position.z, 0, holeProperties.radius)) {
             ball.userData.acceleration.y = -gravity
-            ball.userData.velocity.x *= 0.1
-            ball.userData.velocity.y = calculateVelocity(ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
-            ball.userData.velocity.z *= 0.1
+            ball.userData.linear_velocity.x *= 0.1
+            ball.userData.linear_velocity.y = calculateLinearVelocity(ball.userData.linear_velocity.y, ball.userData.acceleration.y, deltaFrameTime)
+            ball.userData.linear_velocity.z *= 0.1
+            ball.userData.angular_velocity.x *= 0.1
+            ball.userData.angular_velocity.z *= 0.1
         }
     })
 }
@@ -493,7 +499,8 @@ function detectRightWallCollision(ball) {
     const border = tableProperties.width/2 - (radius+sideWallProperties.length)
     if (ball.position.x > border) {
         ball.position.x = border
-        ball.userData.velocity.x = -ball.userData.velocity.x
+        ball.userData.linear_velocity.x = -ball.userData.linear_velocity.x
+        ball.userData.angular_velocity.x = -ball.userData.angular_velocity.x
         ball.userData.acceleration.x = -ball.userData.acceleration.x
     }
 }
@@ -503,7 +510,8 @@ function detectLeftWallCollision(ball) {
     const border = -(tableProperties.width/2 - (radius+sideWallProperties.length))
     if (ball.position.x < border) {
         ball.position.x = border
-        ball.userData.velocity.x = -ball.userData.velocity.x
+        ball.userData.linear_velocity.x = -ball.userData.linear_velocity.x
+        ball.userData.angular_velocity.x = -ball.userData.angular_velocity.x
         ball.userData.acceleration.x = -ball.userData.acceleration.x
     }
 }
@@ -513,7 +521,8 @@ function detectTopWallCollision(ball) {
     const border = tableProperties.length / 2 - (radius+frontWallProperties.length)
     if (ball.position.z > border) {
         ball.position.z = border
-        ball.userData.velocity.z = -ball.userData.velocity.z
+        ball.userData.linear_velocity.z = -ball.userData.linear_velocity.z
+        ball.userData.angular_velocity.z = -ball.userData.angular_velocity.z
         ball.userData.acceleration.z = -ball.userData.acceleration.z
     }
 }
@@ -523,7 +532,8 @@ function detectBottomWallCollision(ball) {
     const border = -(tableProperties.length/2 - (radius+frontWallProperties.length))
     if (ball.position.z < border) {
         ball.position.z = border
-        ball.userData.velocity.z = -ball.userData.velocity.z
+        ball.userData.linear_velocity.z = -ball.userData.linear_velocity.z
+        ball.userData.angular_velocity.z = -ball.userData.angular_velocity.z
         ball.userData.acceleration.z = -ball.userData.acceleration.z
     }
 }
@@ -553,36 +563,47 @@ function sameDirection(x1, x2) {
 
 function reduceSpeed() {
     table.userData.balls.forEach((ball) => {
-        if (Math.abs(ball.userData.velocity.x) > 0) {
-            ball.userData.velocity.x = calculateVelocity(ball.userData.velocity.x, ball.userData.acceleration.x, deltaFrameTime)
+        if (Math.abs(ball.userData.linear_velocity.x) > 0) {
+            ball.userData.linear_velocity.x = calculateLinearVelocity(ball.userData.linear_velocity.x, ball.userData.acceleration.x, deltaFrameTime)
+            ball.userData.angular_velocity.z = calculateAngularVelocity(ball.userData.linear_velocity.x)
         }
 
-        if (Math.abs(ball.userData.velocity.z) > 0) {
-            ball.userData.velocity.z = calculateVelocity(ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+        if (Math.abs(ball.userData.linear_velocity.z) > 0) {
+            ball.userData.linear_velocity.z = calculateLinearVelocity(ball.userData.linear_velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+            ball.userData.angular_velocity.x = calculateAngularVelocity(ball.userData.linear_velocity.z)
         }
 
-        if (Math.round(Math.abs(ball.userData.velocity.x)) === 0) {
-            ball.userData.velocity.x = 0
+        if (Math.round(Math.abs(ball.userData.linear_velocity.x)) === 0) {
+            ball.userData.linear_velocity.x = 0
+            ball.userData.angular_velocity.z = 0
         }
 
-        if (Math.round(Math.abs(ball.userData.velocity.z)) === 0) {
-            ball.userData.velocity.z = 0
+        if (Math.round(Math.abs(ball.userData.linear_velocity.z)) === 0) {
+            ball.userData.linear_velocity.z = 0
+            ball.userData.angular_velocity.x = 0
         }
     })
 }
 
 function updateBallsPositions() {
     table.userData.balls.forEach((ball) => {
-        ball.position.x = calculateNextPosition(ball.position.x, ball.userData.velocity.x, ball.userData.acceleration.x, deltaFrameTime)
-
-        ball.position.y = calculateNextPosition(ball.position.y, ball.userData.velocity.y, ball.userData.acceleration.y, deltaFrameTime)
-
-        ball.position.z = calculateNextPosition(ball.position.z, ball.userData.velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+        ball.position.x = calculateNextPosition(ball.position.x, ball.userData.linear_velocity.x, ball.userData.acceleration.x, deltaFrameTime)
+        ball.rotation.x = ball.userData.angular_velocity.x
+        
+        ball.position.y = calculateNextPosition(ball.position.y, ball.userData.linear_velocity.y, ball.userData.acceleration.y, deltaFrameTime)
+        ball.rotation.y = ball.userData.angular_velocity.y
+        
+        ball.position.z = calculateNextPosition(ball.position.z, ball.userData.linear_velocity.z, ball.userData.acceleration.z, deltaFrameTime)
+        ball.rotation.z = ball.userData.angular_velocity.z
     })
 }
 
-function calculateVelocity(v, a, deltaT) {
+function calculateLinearVelocity(v, a, deltaT) {
     return v + a * deltaT
+}
+
+function calculateAngularVelocity(l_v) {
+    return l_v / (Math.PI * ballProperties.radius) * Math.PI
 }
 
 function calculateNextPosition(x, v, a, deltaT) {
@@ -609,8 +630,8 @@ function rotate(velocity, angle) {
 function resolveBallCollision(ball1, ball2) {
     if (detectCollision(ball1.position.x, ball1.position.y, ball1.position.z, ball2.position.x, ball2.position.y,  ball2.position.z, ball1.userData.radius, ball2.userData.radius)) {
 
-        const xVelocityDiff = ball1.userData.velocity.x - ball2.userData.velocity.x
-        const zVelocityDiff = ball1.userData.velocity.z - ball2.userData.velocity.z
+        const xVelocityDiff = ball1.userData.linear_velocity.x - ball2.userData.linear_velocity.x
+        const zVelocityDiff = ball1.userData.linear_velocity.z - ball2.userData.linear_velocity.z
 
         const xBall1 = ball1.position.x, zBall1 = ball1.position.z
         const xBall2 = ball2.position.x, zBall2 = ball2.position.z
@@ -629,8 +650,8 @@ function resolveBallCollision(ball1, ball2) {
             const m2 = ball2.userData.mass
 
             // Velocity before equation
-            const u1 = rotate(ball1.userData.velocity, angle)
-            const u2 = rotate(ball2.userData.velocity, angle)
+            const u1 = rotate(ball1.userData.linear_velocity, angle)
+            const u2 = rotate(ball2.userData.linear_velocity, angle)
 
             // Final velocity after 1d collision equation
             const v1 = { x: u1.x * (m1 - m2) / (m1 + m2) + u2.x * 2 * m2 / (m1 + m2), z: u1.z }
@@ -641,11 +662,15 @@ function resolveBallCollision(ball1, ball2) {
             const vFinal2 = rotate(v2, -angle)
 
             // swap balls velocities for realistic bounce effect
-            ball1.userData.velocity.x = vFinal1.x
-            ball1.userData.velocity.z = vFinal1.z
+            ball1.userData.linear_velocity.x = vFinal1.x
+            ball1.userData.angular_velocity.z = calculateAngularVelocity(vFinal1.x)
+            ball1.userData.linear_velocity.z = vFinal1.z
+            ball1.userData.angular_velocity.x = calculateAngularVelocity(vFinal1.z)
 
-            ball2.userData.velocity.x = vFinal2.x
-            ball2.userData.velocity.z = vFinal2.z
+            ball2.userData.linear_velocity.x = vFinal2.x
+            ball2.userData.angular_velocity.z = calculateAngularVelocity(vFinal2.x)
+            ball2.userData.linear_velocity.z = vFinal2.z
+            ball2.userData.angular_velocity.x = calculateAngularVelocity(vFinal2.z)
 
             // adjusts the friction acceleration based on the new velocity value
             ball1.userData.acceleration.x = -1 * getDirection(vFinal1.x) * Math.abs(vFinal1.x) * frictionCoefficient
@@ -681,9 +706,9 @@ function updateMovingCamera(camera) {
     const cameraBall = camera.userData.ball
     
     if (cameraBall) {
-        const x = calculateNextPosition(camera.position.x, cameraBall.userData.velocity.x, cameraBall.userData.acceleration.x, deltaFrameTime)
-        const y = calculateNextPosition(camera.position.y, cameraBall.userData.velocity.y, cameraBall.userData.acceleration.y, deltaFrameTime)
-        const z = calculateNextPosition(camera.position.z, cameraBall.userData.velocity.z, cameraBall.userData.acceleration.z, deltaFrameTime)
+        const x = calculateNextPosition(camera.position.x, cameraBall.userData.linear_velocity.x, cameraBall.userData.acceleration.x, deltaFrameTime)
+        const y = calculateNextPosition(camera.position.y, cameraBall.userData.linear_velocity.y, cameraBall.userData.acceleration.y, deltaFrameTime)
+        const z = calculateNextPosition(camera.position.z, cameraBall.userData.linear_velocity.z, cameraBall.userData.acceleration.z, deltaFrameTime)
 
         updateCameraPosition(camera, x, y, z, cameraBall.position)
     }
