@@ -1,3 +1,7 @@
+/*
+Grupo 46
+*/
+
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, material, mesh, table, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0, selectedCue 
@@ -6,12 +10,6 @@ const background = '#000000'
 const numberOfBalls = 20
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
-
-/*
-    Vicente: Rodar Tacos / Tacada / Camara q segue a bola
-    Pedro: Bola-Bola / Bola-Parede
-    João: Queda das bolas no infinito 
-*/
 
 const tableProperties = {
     color: '#0a6c03',
