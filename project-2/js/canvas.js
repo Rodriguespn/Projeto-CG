@@ -49,7 +49,7 @@ const cueProperties = {
 }
 
 const ballProperties = {
-    color: ['#ffffff', '#ff6666', '#ffb266', '#ffff66', '#b2ff66', '#66ffff'],
+    color: ['#ffffff', '#800000', '#1f75fe', '#CC2936', '#7BD1DA', '#08415C'],
     radius: frontWallProperties.height / 6,
     mass: 1
 }
@@ -189,7 +189,7 @@ function generateRandomBall(obj) {
 }
 
 function addTableTop(obj, x, y, z) {
-    geometry = new THREE.BoxGeometry(tableProperties.width-sideWallProperties.length, tableProperties.height, tableProperties.length-frontWallProperties.length)
+    geometry = new THREE.BoxGeometry(tableProperties.width-sideWallProperties.length * 2, tableProperties.height, tableProperties.length-frontWallProperties.length * 2)
 
     material = new THREE.MeshBasicMaterial({ color: tableProperties.color, wireframe: false})
 
@@ -466,7 +466,7 @@ function switchCameraAndMaterial(event) {
                 const ay = 0
                 const az = -1 * getDirection(v.z) * acceleration.z
                 
-                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az, "#ffffff")
+                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az, ballProperties.color[0])
                 
                 perspective2.userData.ball = ball
 
