@@ -345,6 +345,73 @@ function onResize() {
     }
 }
 
+//Verifica que keys estão pressionadas e activa o movimento correspondente
+const executeMoves = () => {
+    Object.keys(controller).forEach(key=> {
+      controller[key].pressed && controller[key].func(key)
+    })
+}
+
+function ArrowsAndSpacebar(e) {
+    switch (e) {
+        case 'ArrowLeft':
+            console.log("Left pressed")
+            if (selectedCue && selectedCue.userData.angle <= cueProperties.maxAngle) {
+                if (selectedCue.name === 'frontCue') {
+                    selectedCue.rotation.z += cueProperties.rotationAngle
+                } else if (selectedCue.name === 'sideCue') {
+                    selectedCue.rotation.y -= cueProperties.rotationAngle
+                }
+                selectedCue.userData.angle += cueProperties.rotationAngle
+            }
+            break;
+
+        case 'ArrowRight':
+            console.log("Right pressed")
+            if (selectedCue && selectedCue.userData.angle >= cueProperties.minAngle) {
+                if (selectedCue.name === 'frontCue') {
+                    selectedCue.rotation.z -= cueProperties.rotationAngle
+                } else if (selectedCue.name === 'sideCue') {
+                    selectedCue.rotation.y += cueProperties.rotationAngle
+                }
+                selectedCue.userData.angle -= cueProperties.rotationAngle
+            }
+            break;
+
+        case 'Spacebar':
+        case ' ':
+            console.log("Space pressed")
+            
+            if (selectedCue) {
+                let x = selectedCue.position.x
+                const y = tableProperties.height / 2 + ballProperties.radius
+                let z = selectedCue.position.z
+                let v, cameraX = x, cameraY = y*10, cameraZ = z
+                
+                if (selectedCue.name === 'frontCue') {
+                    v = rotate({ x: 0, z: initialVelocity.z }, -selectedCue.userData.angle)
+                    cameraZ += getDirection(selectedCue.position.z) * cueProperties.height
+                    
+                } else if (selectedCue.name === 'sideCue') {
+                    v = rotate({ x: initialVelocity.x, z: 0 }, -selectedCue.userData.angle)
+                    v.z *= getDirection(selectedCue.position.x)
+                    cameraX += getDirection(selectedCue.position.x) * cueProperties.height
+                }
+                
+                const ax = -1 * getDirection(v.x) * acceleration.x
+                const ay = 0
+                const az = -1 * getDirection(v.z) * acceleration.z
+                
+                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az, ballProperties.color[0])
+                
+                perspective2.userData.ball = ball
+
+                updateCameraPosition(perspective2, cameraX, cameraY, cameraZ, ball.position)
+            }
+            break;
+    }
+}
+
 //muda posição da camera e material do mobile
 function switchCameraAndMaterial(event) {
     switch(event.key) {
@@ -419,62 +486,6 @@ function switchCameraAndMaterial(event) {
                     node.material.wireframe = !node.material.wireframe
                 }
             })
-            break;
-
-        case 'ArrowLeft':
-            console.log("Left pressed")
-            if (selectedCue && selectedCue.userData.angle <= cueProperties.maxAngle) {
-                if (selectedCue.name === 'frontCue') {
-                    selectedCue.rotation.z += cueProperties.rotationAngle
-                } else if (selectedCue.name === 'sideCue') {
-                    selectedCue.rotation.y -= cueProperties.rotationAngle
-                }
-                selectedCue.userData.angle += cueProperties.rotationAngle
-            }
-            break;
-
-        case 'ArrowRight':
-            console.log("Right pressed")
-            if (selectedCue && selectedCue.userData.angle >= cueProperties.minAngle) {
-                if (selectedCue.name === 'frontCue') {
-                    selectedCue.rotation.z -= cueProperties.rotationAngle
-                } else if (selectedCue.name === 'sideCue') {
-                    selectedCue.rotation.y += cueProperties.rotationAngle
-                }
-                selectedCue.userData.angle -= cueProperties.rotationAngle
-            }
-            break;
-
-        case 'Spacebar':
-        case ' ':
-            console.log("Space pressed")
-            
-            if (selectedCue) {
-                let x = selectedCue.position.x
-                const y = tableProperties.height / 2 + ballProperties.radius
-                let z = selectedCue.position.z
-                let v, cameraX = x, cameraY = y*10, cameraZ = z
-                
-                if (selectedCue.name === 'frontCue') {
-                    v = rotate({ x: 0, z: initialVelocity.z }, -selectedCue.userData.angle)
-                    cameraZ += getDirection(selectedCue.position.z) * cueProperties.height
-                    
-                } else if (selectedCue.name === 'sideCue') {
-                    v = rotate({ x: initialVelocity.x, z: 0 }, -selectedCue.userData.angle)
-                    v.z *= getDirection(selectedCue.position.x)
-                    cameraX += getDirection(selectedCue.position.x) * cueProperties.height
-                }
-                
-                const ax = -1 * getDirection(v.x) * acceleration.x
-                const ay = 0
-                const az = -1 * getDirection(v.z) * acceleration.z
-                
-                const ball = createBall(table, x, y, z, v.x, 0, v.z, ax, ay, az, ballProperties.color[0])
-                
-                perspective2.userData.ball = ball
-
-                updateCameraPosition(perspective2, cameraX, cameraY, cameraZ, ball.position)
-            }
             break;
     }
 }
@@ -730,12 +741,21 @@ function animate() {
     
     updateBallsPositions()
 
+    executeMoves()
+
     updateMovingCamera(perspective2)
     
     render()
 
     requestAnimationFrame(animate)
 }
+
+//Guarda as teclas que foram premidas
+const controller = {
+    'ArrowLeft': {pressed: false, func: ArrowsAndSpacebar},
+    'ArrowRight': {pressed: false, func: ArrowsAndSpacebar},
+    ' ': {pressed: false, func: ArrowsAndSpacebar} //Spacebar
+  }
 
 // initial draw of the scene
 function init() {
@@ -756,4 +776,17 @@ function init() {
 
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', switchCameraAndMaterial)
+
+    //actualiza controller
+    window.addEventListener("keydown", (e) => {
+        if(controller[e.key]){
+            controller[e.key].pressed = true
+        }
+    })
+
+    window.addEventListener("keyup", (e) => {
+        if(controller[e.key]){
+            controller[e.key].pressed = false
+        }
+    })
 }
