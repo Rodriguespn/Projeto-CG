@@ -1,4 +1,4 @@
 # Projeto-CG
 
 ### Descrição
-![Alt Text](./readme.gif)
+![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
