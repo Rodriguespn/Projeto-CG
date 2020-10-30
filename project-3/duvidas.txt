@@ -1,0 +1,2 @@
+As texturas não carregam no chrome se abrirmos o index.html sem ser em localhost
+Qual é a menira correta de tratar eventos do teclado?

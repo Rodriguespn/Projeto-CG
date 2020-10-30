@@ -9,7 +9,7 @@ let scene, camera, orthocamera, perspective1, perspective2, renderer, geometry, 
 const background = '#000000'
 const numberOfBalls = 20
 const frictionCoefficient = 0.1 // ranges between [0,1]
-const gravity = 9.8
+const gravity = 98
 const ballTimeout = 500
 let ballFired = false
 
@@ -743,7 +743,6 @@ function animate() {
     detectWallCollision()
     resolveAllBallsCollisions()
     //removeFallenBall()
-    
     
     updateBallsPositions()
 
