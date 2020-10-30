@@ -10,8 +10,6 @@ const background = '#000000'
 const numberOfBalls = 20
 const frictionCoefficient = 0.1 // ranges between [0,1]
 const gravity = 9.8
-const ballTimeout = 500
-let ballFired = false
 
 const tableProperties = {
     color: '#0a6c03',
@@ -384,7 +382,7 @@ function ArrowsAndSpacebar(e) {
         case ' ':
             console.log("Space pressed")
             
-            if (selectedCue && !ballFired) {
+            if (selectedCue) {
                 let x = selectedCue.position.x
                 const y = tableProperties.height / 2 + ballProperties.radius
                 let z = selectedCue.position.z
@@ -409,10 +407,6 @@ function ArrowsAndSpacebar(e) {
                 perspective2.userData.ball = ball
 
                 updateCameraPosition(perspective2, cameraX, cameraY, cameraZ, ball.position)
-                setTimeout(() => {
-                    ballFired = false;
-                }, ballTimeout)
-                ballFired = true
             }
             break;
     }
