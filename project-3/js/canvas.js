@@ -10,7 +10,6 @@ const palanqueProperties = {
     color: '#bf6427'
 }
 
-
 function createPalanque(x, y, z) {
     palanque = new THREE.Object3D()
     geometry = new THREE.CylinderGeometry( palanqueProperties.radius, palanqueProperties.radius, palanqueProperties.height, 32);
@@ -71,6 +70,19 @@ function onResize() {
     }
 }
 
+// adjusts the camera position when the window is resized
+function onResize() {
+    windowWidth = window.innerWidth
+    windowHeight = window.innerHeight
+
+    renderer.setSize(windowWidth, windowHeight)
+
+    if (windowHeight > 0 && windowWidth > 0) {
+        camera.aspect = windowWidth / windowHeight
+        camera.updateProjectionMatrix()
+    }
+}
+
 // animates the scene
 function animate() {
     prevFrameTime = nextFrameTime
@@ -97,5 +109,8 @@ function init() {
     createScene()
     createPerspectiveCamera()
     render()
+
+    
+    window.addEventListener("resize", onResize)
 
 }
