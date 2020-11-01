@@ -1,4 +1,4 @@
 # Projeto-CG
 
 ### Descrição
-![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+![](http://pequenajornalista.com/wp-content/uploads/2020/08/nazareconfusamatematica.gif)
