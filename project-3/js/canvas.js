@@ -1,22 +1,78 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let scene, camera, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
+let light, scene, camera, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 
-const background = '#bababa'
+const rotationFactor = 100
+const background = '#000000'
 
 const palanqueProperties = {
-    radius: 35,
+    radius: 25,
     height: 1.2,
-    color: '#bf6427'
+    color: '#4c280f'
+}
+
+const directionalLightProperties = {
+    intensity: 2,
+    color: '#ffffff'
+}
+
+const floorProperties = {
+    width: palanqueProperties.radius * 3,
+    depth: palanqueProperties.radius * 3,
+    height: palanqueProperties.height * 0.8,
+    color: '#7b836a'
+}
+
+//TESTING CUBE
+const cubeProperties = {
+    width: palanqueProperties.radius * 0.6,
+    depth: palanqueProperties.radius * 0.6,
+    height: palanqueProperties.radius * 0.6,
+    color: '#024059'
+}
+
+function createCube(obj, x, y, z) {
+    cube = new THREE.Object3D()
+    geometry = new THREE.BoxGeometry(cubeProperties.width, cubeProperties.height, cubeProperties.depth);
+
+    material = new THREE.MeshPhongMaterial({ color: cubeProperties.color })
+
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+
+    mesh.rotation.x = Math.PI/4
+    mesh.rotation.y = Math.PI/4
+    mesh.position.set(x, y, z)
+
+    cube.add(mesh)
+
+    obj.add(cube)
+}
+
+function createFloor(x, y, z) {
+    floor = new THREE.Object3D()
+    geometry = new THREE.BoxGeometry(floorProperties.width, floorProperties.height, floorProperties.depth);
+
+    material = new THREE.MeshLambertMaterial({ color: floorProperties.color })
+
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.receiveShadow = true;
+
+    mesh.position.set(x, y, z)
+
+    floor.add(mesh)
+    scene.add(floor)
 }
 
 function createPalanque(x, y, z) {
     palanque = new THREE.Object3D()
     geometry = new THREE.CylinderGeometry( palanqueProperties.radius, palanqueProperties.radius, palanqueProperties.height, 32);
     
-    material = new THREE.MeshBasicMaterial({ color: palanqueProperties.color, wireframe: false })
+    material = new THREE.MeshLambertMaterial({ color: palanqueProperties.color})
 
     mesh = new THREE.Mesh(geometry, material)
+    mesh.receiveShadow = true;
 
     mesh.position.set(x, y, z)
 
@@ -24,7 +80,12 @@ function createPalanque(x, y, z) {
     scene.add(palanque)
 
     //Criar o CYBERTRUCK
+    createCube(palanque, 0, cubeProperties.height, 0)
 
+}
+
+function rotatePalanque(degrees) {
+    palanque.rotation.y += degrees
 }
 
 // updates the position of the orthogonal camera
@@ -36,9 +97,18 @@ function updateCameraPosition(obj, x, y, z, lookAt) {
 }
 
 function createPerspectiveCamera() {
-    camera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, palanqueProperties.height*100)
+    camera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, floorProperties.depth*4)
 
-    updateCameraPosition(camera, palanqueProperties.radius*2, palanqueProperties.radius, palanqueProperties.radius, scene.position)
+    updateCameraPosition(camera, palanqueProperties.radius*3, floorProperties.depth*0.6, palanqueProperties.radius*3, scene.position)
+}
+
+function createDirectionalLight(x, y, z) {
+    light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensity);
+    light.castShadow = true;
+    light.position.set(x, y, z);
+    //light.target.position.set(-4, 0, -4);
+    scene.add(light);
+    //scene.add(light.target);
 }
 
 // draws the object on the canvas
@@ -54,6 +124,7 @@ function createScene() {
     scene.add(new THREE.AxesHelper(1000))
 
     createPalanque(0, palanqueProperties.height/2, 0)
+    createFloor(0, -floorProperties.height/2, 0)
 
 }
 
@@ -102,15 +173,31 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true })
 
     renderer.setSize(windowWidth, windowHeight)
+    renderer.shadowMap.enabled = true;
+    //renderer.ShadowMap.type = THREE.BasicShadowMap
+
+    
 
     document.body.appendChild(renderer.domElement)
 
 
     createScene()
+    createDirectionalLight(palanqueProperties.radius,palanqueProperties.radius, palanqueProperties.radius)
     createPerspectiveCamera()
     render()
 
     
     window.addEventListener("resize", onResize)
+    window.addEventListener('keydown', keysPressed)
+}
 
+function keysPressed(event) {
+    switch(event.key) {
+        case 'ArrowRight':
+            rotatePalanque(Math.PI/rotationFactor)
+            break;
+        case 'ArrowLeft':
+            rotatePalanque(-Math.PI/rotationFactor)
+            break;
+    }
 }
