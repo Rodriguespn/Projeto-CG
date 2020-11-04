@@ -2,13 +2,13 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let light, scene, camera, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 
-const rotationFactor = 100
 const background = '#000000'
 
 const palanqueProperties = {
     radius: 25,
     height: 1.2,
-    color: '#4c280f'
+    color: '#4c280f',
+    rotationFactor: 100
 }
 
 const directionalLightProperties = {
@@ -194,10 +194,10 @@ function init() {
 function keysPressed(event) {
     switch(event.key) {
         case 'ArrowRight':
-            rotatePalanque(Math.PI/rotationFactor)
+            rotatePalanque(Math.PI/palanqueProperties.rotationFactor)
             break;
         case 'ArrowLeft':
-            rotatePalanque(-Math.PI/rotationFactor)
+            rotatePalanque(-Math.PI/palanqueProperties.rotationFactor)
             break;
     }
 }
