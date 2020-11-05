@@ -58,29 +58,24 @@ const cubeProperties = {
     color: '#024059'
 }
 
-function createHolofote(x, y, z) {
-    holofote = new THREE.Object3D()
+function createCone(x, y, z) {
+        cone= new THREE.Object3D()
+        geometry = new THREE.ConeBufferGeometry(holofoteProperties.coneRadius, holofoteProperties.coneHeight, 32, 2,
+            holofoteProperties.openEnded);
+        material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColor })
+    
+        geometry.applyMatrix4( new THREE.Matrix4().makeRotationFromEuler( new THREE.Euler( -Math.PI / 2, -Math.PI, 0 ) ) );
+        mesh = new THREE.Mesh(geometry, material)
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+    
+        mesh.position.set(x, y, z)
+        mesh.lookAt(0, 0, 0)
+        cone.add(mesh)
+        scene.add(cone)
+}
 
-    //Criar o cone
-    cone= new THREE.Object3D()
-    geometry = new THREE.ConeBufferGeometry(holofoteProperties.coneRadius, holofoteProperties.coneHeight, 32, 2,
-        holofoteProperties.openEnded);
-    material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColor })
-
-    geometry.applyMatrix4( new THREE.Matrix4().makeRotationFromEuler( new THREE.Euler( -Math.PI / 2, -Math.PI, 0 ) ) );
-    mesh = new THREE.Mesh(geometry, material)
-    mesh.castShadow = true
-    mesh.receiveShadow = true
-
-    mesh.position.set(x, y, z)
-    mesh.lookAt(0, 0, 0)
-    cone.add(mesh)
-    scene.add(cone)
-
-    //create SpotLight
-    createSpotLight(x, y, z)
-
-    //create Cylinder
+function createCylinder(x, y, z) {
     cylinder = new THREE.Object3D()
     geometry = new THREE.CylinderGeometry(holofoteProperties.cylinderRadius, holofoteProperties.cylinderRadius, 
         holofoteProperties.cylinderHeight, 20, 32)
@@ -92,6 +87,34 @@ function createHolofote(x, y, z) {
     mesh.position.set(x, y/2, z)
     cylinder.add(mesh)
     scene.add(cylinder)
+}
+
+function createSphere(x, y, z) {
+    sphere = new THREE.Object3D()
+    geometry = new THREE.SphereGeometry(holofoteProperties.coneRadius, 20, 32)
+    material = new THREE.MeshBasicMaterial({ color: holofoteProperties.cylinderColor })
+    mesh = new THREE.Mesh(geometry, material)
+
+    mesh.position.set(x-holofoteProperties.coneHeight, y-holofoteProperties.coneHeight/2,
+         z-holofoteProperties.coneHeight)
+    sphere.add(mesh)
+    scene.add(sphere)
+}
+
+function createHolofote(x, y, z) {
+    holofote = new THREE.Object3D()
+
+    //Criar o cone
+    createCone(x, y, z)
+
+    //create SpotLight
+    createSpotLight(x*0.95, y*0.95, z*0.95)
+
+    //create Cylinder
+    createCylinder(x, y, z)
+
+    //create Sphere
+    createSphere(x, y, z)
 
 }
 
