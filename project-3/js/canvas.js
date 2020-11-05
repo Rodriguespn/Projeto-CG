@@ -12,8 +12,35 @@ const palanqueProperties = {
 }
 
 const directionalLightProperties = {
-    intensity: 2,
+    intensity: 1,
     color: '#ffffff'
+}
+
+const pointLightProperties = {
+    color: "#FFFFFF",
+    intensity: 1
+}
+
+const spotLightProperties = {
+    color: "#FFFFFF",
+    intensity: 3,
+    penumbra: 0.2,
+    angle: Math.PI/5,
+    shadowMapSizeWidth: 1000,
+    shadowMapSizeHeight: 1000
+}
+
+const holofoteProperties = {
+    x: palanqueProperties.radius*1.1,
+    y: palanqueProperties.radius*1.1,
+    z: palanqueProperties.radius*1.1,
+    coneRadius: palanqueProperties.radius*0.1,
+    coneHeight: palanqueProperties.radius*0.2,
+    openEnded: true,
+    cylinderRadius: palanqueProperties.radius*0.02,
+    cylinderHeight: palanqueProperties.radius*1.1,
+    cylinderColor: "#5aaf9f",
+    coneColor: "#5aaf9f"
 }
 
 const floorProperties = {
@@ -31,6 +58,43 @@ const cubeProperties = {
     color: '#024059'
 }
 
+function createHolofote(x, y, z) {
+    holofote = new THREE.Object3D()
+
+    //Criar o cone
+    cone= new THREE.Object3D()
+    geometry = new THREE.ConeBufferGeometry(holofoteProperties.coneRadius, holofoteProperties.coneHeight, 32, 2,
+        holofoteProperties.openEnded);
+    material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColor })
+
+    geometry.applyMatrix4( new THREE.Matrix4().makeRotationFromEuler( new THREE.Euler( -Math.PI / 2, -Math.PI, 0 ) ) );
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    mesh.position.set(x, y, z)
+    mesh.lookAt(0, 0, 0)
+    cone.add(mesh)
+    scene.add(cone)
+
+    //create SpotLight
+    createSpotLight(x, y, z)
+
+    //create Cylinder
+    cylinder = new THREE.Object3D()
+    geometry = new THREE.CylinderGeometry(holofoteProperties.cylinderRadius, holofoteProperties.cylinderRadius, 
+        holofoteProperties.cylinderHeight, 20, 32)
+    material = new THREE.MeshPhongMaterial({ color: holofoteProperties.cylinderColor })
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    mesh.position.set(x, y/2, z)
+    cylinder.add(mesh)
+    scene.add(cylinder)
+
+}
+
 function createCube(obj, x, y, z) {
     cube = new THREE.Object3D()
     geometry = new THREE.BoxGeometry(cubeProperties.width, cubeProperties.height, cubeProperties.depth);
@@ -38,8 +102,8 @@ function createCube(obj, x, y, z) {
     material = new THREE.MeshPhongMaterial({ color: cubeProperties.color })
 
     mesh = new THREE.Mesh(geometry, material)
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
+    mesh.castShadow = true
+    mesh.receiveShadow = true
 
     mesh.rotation.x = Math.PI/4
     mesh.rotation.y = Math.PI/4
@@ -82,6 +146,9 @@ function createPalanque(x, y, z) {
     //Criar o CYBERTRUCK
     createCube(palanque, 0, cubeProperties.height, 0)
 
+    //criar holofotes
+    createHolofote(-holofoteProperties.x, holofoteProperties.y, holofoteProperties.z)
+
 }
 
 function rotatePalanque(degrees) {
@@ -106,9 +173,29 @@ function createDirectionalLight(x, y, z) {
     light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensity);
     light.castShadow = true;
     light.position.set(x, y, z);
-    //light.target.position.set(-4, 0, -4);
+    light.target.position.set(0, 0, 0);
     scene.add(light);
-    //scene.add(light.target);
+    scene.add(light.target);
+}
+
+function createPointLight(x, y, z) {
+    const light = new THREE.PointLight(pointLightProperties.color, pointLightProperties.intensity)
+    light.castShadow = true;
+    light.position.set(x, y, z)
+    scene.add(light)
+}
+
+function createSpotLight(x, y, z) {
+    const light = new THREE.SpotLight(spotLightProperties.color, spotLightProperties.intensity)
+    light.castShadow = true;
+    light.shadow.mapSize.width = spotLightProperties.shadowMapSizeWidth
+    light.shadow.mapSize.height = spotLightProperties.shadowMapSizeHeight
+    light.penumbra = spotLightProperties.penumbra
+    light.angle = spotLightProperties.angle
+    light.position.set(x, y, z);
+    light.target.position.set(0, 0, 0);
+    scene.add(light)
+    scene.add(light.target)
 }
 
 // draws the object on the canvas
@@ -176,10 +263,7 @@ function init() {
     renderer.shadowMap.enabled = true;
     //renderer.ShadowMap.type = THREE.BasicShadowMap
 
-    
-
     document.body.appendChild(renderer.domElement)
-
 
     createScene()
     createDirectionalLight(palanqueProperties.radius,palanqueProperties.radius, palanqueProperties.radius)
@@ -192,12 +276,17 @@ function init() {
 }
 
 function keysPressed(event) {
-    switch(event.key) {
+    switch(event.code) {
         case 'ArrowRight':
             rotatePalanque(Math.PI/palanqueProperties.rotationFactor)
             break;
         case 'ArrowLeft':
             rotatePalanque(-Math.PI/palanqueProperties.rotationFactor)
+            break;
+        case 'Numpad6':
+
+            break;
+        case 'Numpad4':
             break;
     }
 }
