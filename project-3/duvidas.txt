@@ -1,2 +1,5 @@
 As texturas não carregam no chrome se abrirmos o index.html sem ser em localhost
-Qual é a menira correta de tratar eventos do teclado?
+Qual é a maneira correta de tratar eventos do teclado?
+
+
+Para que vão servir as 3 Mesh diferentes? Como é que vão ser trocadas?
