@@ -1,6 +1,7 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let scene, camera, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
+let controls
 
 const background = '#bababa'
 
@@ -36,7 +37,7 @@ function updateCameraPosition(obj, x, y, z, lookAt) {
 }
 
 function createPerspectiveCamera() {
-    camera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, palanqueProperties.height*100)
+    camera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, palanqueProperties.height*1000)
 
     updateCameraPosition(camera, palanqueProperties.radius*2, palanqueProperties.radius, palanqueProperties.radius, scene.position)
 }
@@ -92,6 +93,7 @@ function animate() {
         deltaFrameTime = (nextFrameTime - prevFrameTime) / 1000
     }
     
+    controls.update()
     render()
 
     requestAnimationFrame(animate)
@@ -104,13 +106,13 @@ function init() {
     renderer.setSize(windowWidth, windowHeight)
 
     document.body.appendChild(renderer.domElement)
-
-
+    
     createScene()
     createPerspectiveCamera()
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement)
     render()
 
-    
     window.addEventListener("resize", onResize)
 
 }
