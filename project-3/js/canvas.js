@@ -1,6 +1,7 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let scene, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
+let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
+
 
 const background = '#000000'
 
@@ -27,8 +28,39 @@ const cubeProperties = {
 }
 
 const directionalLightProperties = {
-    intensity: 1,
+    intensityOff: 0,
+    intensityOn: 1,
     color: '#ffffff'
+}
+
+class DirLight extends THREE.Object3D {
+    constructor(x, y, z) {
+        super()
+        this.active = false
+        this.light = createDirectionalLight(x, y, z)
+    }
+
+    turnLightOnorOff() {
+        if (this.active){
+            //vai desligar a luz
+            this.light.intensity = directionalLightProperties.intensityOff
+            this.active = false
+        }
+        else {
+            this.light.intensity = directionalLightProperties.intensityOn
+            this.active = true
+        }
+    }
+}
+
+function createDirectionalLight(x, y, z) {
+    var light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOff);
+    light.castShadow = true;
+    light.position.set(x, y, z);
+    light.target.position.set(0, 0, 0);
+    scene.add(light);
+    scene.add(light.target);
+    return light
 }
 
 function createCube(obj, x, y, z) {
@@ -54,29 +86,50 @@ function createFloor(x, y, z) {
     floor = new THREE.Object3D()
     geometry = new THREE.BoxGeometry(floorProperties.width, floorProperties.height, floorProperties.depth);
 
-    material = new THREE.MeshPhongMaterial({ color: floorProperties.color })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: floorProperties.color })
+    basicMaterial = new THREE.MeshBasicMaterial({ color: floorProperties.color })
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: floorProperties.color })
 
-    mesh = new THREE.Mesh(geometry, material)
-    mesh.receiveShadow = true;
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    basicMesh = new THREE.Mesh(geometry, basicMaterial)
+    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    mesh.position.set(x, y, z)
+    phongMesh.receiveShadow = true;
+    lambertMesh.receiveShadow = true;
 
-    floor.add(mesh)
+    phongMesh.position.set(x, y, z)
+    basicMesh.position.set(x, y, z)
+    lambertMesh.position.set(x, y, z)
+
+    floor.add(phongMesh)
+    //floor.add(basicMesh)
+    //floor.add(lambertMesh)
     scene.add(floor)
 }
 
 function createPalanque(x, y, z) {
     palanque = new THREE.Object3D()
     geometry = new THREE.CylinderGeometry( palanqueProperties.radius, palanqueProperties.radius, palanqueProperties.height, 32);
-    
-    material = new THREE.MeshPhongMaterial({ color: palanqueProperties.color})
 
-    mesh = new THREE.Mesh(geometry, material)
-    mesh.receiveShadow = true;
 
-    mesh.position.set(x, y, z)
+    phongMaterial = new THREE.MeshPhongMaterial({ color: palanqueProperties.color})
+    basicMaterial = new THREE.MeshBasicMaterial({ color: palanqueProperties.color})
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: palanqueProperties.color})
 
-    palanque.add(mesh)
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    basicMesh = new THREE.Mesh(geometry, basicMaterial)
+    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
+
+    phongMesh.receiveShadow = true;
+    lambertMesh.receiveShadow = true;
+
+    phongMesh.position.set(x, y, z)
+    basicMesh.position.set(x, y, z)
+    lambertMesh.position.set(x, y, z)
+
+    palanque.add(phongMesh)
+    //palanque.add(basicMesh)
+    //palanque.add(lambertMesh)
     scene.add(palanque)
 
     //Criar o CYBERTRUCK
@@ -86,15 +139,6 @@ function createPalanque(x, y, z) {
 
 function rotatePalanque(degrees) {
     palanque.rotation.y += degrees
-}
-
-function createDirectionalLight(x, y, z) {
-    dirLight = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensity);
-    dirLight.castShadow = true;
-    dirLight.position.set(x, y, z);
-    dirLight.target.position.set(0, 0, 0);
-    scene.add(dirLight);
-    scene.add(dirLight.target);
 }
 
 // draws the object on the canvas
@@ -111,6 +155,9 @@ function createScene() {
 
     createPalanque(0, palanqueProperties.height/2, 0)
     createFloor(0, -floorProperties.height/2, 0)
+
+    //criar luz direcional
+    dirLight = new DirLight(palanqueProperties.radius,palanqueProperties.radius, palanqueProperties.radius)
 
     //criar holofotes
     holofote1 = new Holofote(-holofoteProperties.x, holofoteProperties.y, holofoteProperties.z)
@@ -173,20 +220,11 @@ function init() {
     createScene()
 
     //Cameras
-    createDirectionalLight(palanqueProperties.radius,palanqueProperties.radius, palanqueProperties.radius)
     createPerspectiveCamera()
     createOrthographicCamera(floorProperties.width, 0, 0)
     camera = perspectiveCamera
 
-
     console.log(holofote1)
-    
-    
-    //holofote1.children[1].intensity =0
-    //holofote2.children[1].intensity =0
-    //holofote3.children[1].intensity =0
-
-
 
     controls = new THREE.OrbitControls(camera, renderer.domElement)
     render()

@@ -1,4 +1,4 @@
-let dirLight, holofote1, holofote2, holofote3
+let holofote1, holofote2, holofote3
 
 const holofoteProperties = {
     x: palanqueProperties.radius*1.1,
@@ -28,38 +28,114 @@ class Holofote extends THREE.Object3D {
 
         //inicia desligada
         this.active = false
+        this.activeIllumination = true
+        this.lambertMode = false
 
-        this.cone = createCone(x, y, z)
-        this.bulb = createSphere(x, y, z)
+        this.coneBasic = createCone(x, y, z, "basic")
+        this.coneLambert = createCone(x, y, z, "lambert")
+        this.conePhong = createCone(x, y, z, "phong")
+
+        this.bulbBasic = createSphere(x, y, z, "basic")
+        this.bulbLambert = createSphere(x, y, z, "lambert")
+        this.bulbPhong = createSphere(x, y, z, "phong")
+
+        this.coneColor = holofoteProperties.coneColorOff
+        this.bulbColor = holofoteProperties.bulbColorOff
+        this.cone = this.conePhong
+        this.bulb = this.bulbBasic
+        scene.add(this.cone)
+        scene.add(this.bulb)
         this.light = createSpotLight(x-(holofoteProperties.coneHeight/2),
              y-(holofoteProperties.coneHeight/2), z-(holofoteProperties.coneHeight/2))
 
         scene.add(this)
     }
 
-    turnOnorOff() {
+    turnLightOnorOff() {
         if(this.active) {
             //apaga a luz
             this.light.intensity = 0
-            this.bulb.children[0].material.color.set(holofoteProperties.bulbColorOff)
-            this.cone.children[0].material.color.set(holofoteProperties.coneColorOff)
+            this.bulbBasic.children[0].material.color.set(holofoteProperties.bulbColorOff)
+            this.bulbPhong.children[0].material.color.set(holofoteProperties.bulbColorOff)
+            this.bulbLambert.children[0].material.color.set(holofoteProperties.bulbColorOff)
+
+            this.coneBasic.children[0].material.color.set(holofoteProperties.coneColorOff)
+            this.conePhong.children[0].material.color.set(holofoteProperties.coneColorOff)
+            this.coneLambert.children[0].material.color.set(holofoteProperties.coneColorOff)
+            
+            //this.coneColor = holofoteProperties.coneColorOff
+            //this.bulbColor = holofoteProperties.bulbColorOff
             this.active = false
         }
         else {
             //liga a luz
             this.light.intensity = 2
-            this.bulb.children[0].material.color.set(holofoteProperties.bulbColorOn)
-            this.cone.children[0].material.color.set(holofoteProperties.coneColorOn)
+            this.bulbBasic.children[0].material.color.set(holofoteProperties.bulbColorOn)
+            this.bulbPhong.children[0].material.color.set(holofoteProperties.bulbColorOn)
+            this.bulbLambert.children[0].material.color.set(holofoteProperties.bulbColorOn)
+
+            this.coneBasic.children[0].material.color.set(holofoteProperties.coneColorOn)
+            this.conePhong.children[0].material.color.set(holofoteProperties.coneColorOn)
+            this.coneLambert.children[0].material.color.set(holofoteProperties.coneColorOn)
+            
+            //this.coneColor = holofoteProperties.coneColorOn
+            //this.bulbColor = holofoteProperties.bulbColorOn
             this.active = true
+        }
+    }
+
+    illuminationCalculationOnorOff() {
+        if(this.activeIllumination) {
+            //desactiva iluminação
+            scene.remove(this.cone)
+            this.cone = this.coneBasic
+            scene.add(this.cone)
+            this.activeIllumination = false
+        }
+        else {
+            if(this.LambertMode) {
+                scene.remove(this.cone)
+                this.cone = this.coneLambert
+                scene.add(this.cone)
+            }
+            else {
+                scene.remove(this.cone)
+                this.cone = this.conePhong
+                scene.add(this.cone)
+            }
+            this.activeIllumination = true
+        }
+    }
+
+    shadingAlternation() {
+        if(this.lambertMode) {
+            scene.remove(this.cone)
+            this.cone = this.conePhong
+            scene.add(this.cone)
+            this.lambertMode = false
+        }
+        else {
+            scene.remove(this.cone)
+            this.cone = this.coneLambert
+            scene.add(this.cone)
+            this.lambertMode = true
         }
     }
 }
 
 
-function createCone(x, y, z) {
+function createCone(x, y, z, type) {
     cone= new THREE.Object3D()
     geometry = new THREE.ConeBufferGeometry(holofoteProperties.coneRadius, holofoteProperties.coneHeight, 32, 2);
-    material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColorOff })
+    if (type == "phong") {
+        material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColorOff })
+    }
+    else if (type == "basic") {
+        material = new THREE.MeshBasicMaterial({ color: holofoteProperties.coneColorOff })
+    }
+    if (type == "lambert") {
+        material = new THREE.MeshLambertMaterial({ color: holofoteProperties.coneColorOff })
+    }
 
     geometry.applyMatrix4( new THREE.Matrix4().makeRotationFromEuler( new THREE.Euler( -Math.PI / 2, -Math.PI, 0 ) ) );
     mesh = new THREE.Mesh(geometry, material)
@@ -69,19 +145,30 @@ function createCone(x, y, z) {
     mesh.position.set(x, y, z)
     mesh.lookAt(0, 0, 0)
     cone.add(mesh)
-    scene.add(cone)
+    //scene.add(cone)
     return cone
 }
 
-function createSphere(x, y, z) {
+function createSphere(x, y, z, type) {
     sphere = new THREE.Object3D()
     geometry = new THREE.SphereGeometry(holofoteProperties.coneRadius*0.4, 20, 32)
-    material = new THREE.MeshBasicMaterial({ color: holofoteProperties.bulbColorOff })
+    if (type == "phong") {
+        material = new THREE.MeshPhongMaterial({ color: holofoteProperties.bulbColorOff })
+    }
+    else if (type == "basic") {
+        material = new THREE.MeshBasicMaterial({ color: holofoteProperties.bulbColorOff })
+    }
+    if (type == "lambert") {
+        material = new THREE.MeshLambertMaterial({ color: holofoteProperties.bulbColorOff })
+    }
+
     mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
 
     mesh.position.set(x*0.95, y*0.95, z*0.95)
     sphere.add(mesh)
-    scene.add(sphere)
+    //scene.add(sphere)
     return sphere
 }
 

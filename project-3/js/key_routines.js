@@ -7,9 +7,7 @@ let qQPress = {
     state: false,
     //liga ou desliga a fonte de luz direccional
     action: function() {
-
-
-
+        dirLight.turnLightOnorOff()
         this.state = false
     }
 }
@@ -18,7 +16,9 @@ let wWPress = {
     state: false,
     //liga ou desliga o cálculo da iluminação
     action: function() {
-
+        holofote1.illuminationCalculationOnorOff()
+        holofote2.illuminationCalculationOnorOff()
+        holofote3.illuminationCalculationOnorOff()
 
         this.state = false
     }
@@ -28,8 +28,9 @@ let eEPress = {
     state: false,
     //alterna entre os tipos de sombreamento Phong ou Gouraud
     action: function() {
-
-
+        holofote1.shadingAlternation()
+        holofote2.shadingAlternation()
+        holofote3.shadingAlternation()
         this.state = false
     }
 }
@@ -38,7 +39,7 @@ let one1Press = {
     state: false,
     //liga ou desliga o holofote #1
     action: function() {
-        holofote1.turnOnorOff()
+        holofote1.turnLightOnorOff()
         this.state = false
     }
 }
@@ -47,7 +48,7 @@ let two2Press = {
     state: false,
     //liga ou desliga o holofote #2
     action: function() {
-        holofote2.turnOnorOff()
+        holofote2.turnLightOnorOff()
         this.state = false
     }
 }
@@ -56,7 +57,7 @@ let three3Press = {
     state: false,
     //liga ou desliga o holofote #3
     action: function() {
-        holofote3.turnOnorOff()
+        holofote3.turnLightOnorOff()
         this.state = false
     }
 }
