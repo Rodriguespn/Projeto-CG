@@ -6,26 +6,60 @@ const holofoteProperties = {
     z: palanqueProperties.radius*1.1,
     coneRadius: palanqueProperties.radius*0.1,
     coneHeight: palanqueProperties.radius*0.2,
-    coneColorOn: "#5aaf9f",
-    coneColorOff: "#5aaf9f",
+    coneColorOn: "#ffa500",
+    coneColorOff: "#696969",
     bulbColorOn: "#ffff00",
-    bulbColorOff: "#ffff00"
+    bulbColorOff: "#fffaf0"
 }
 
 const spotLightProperties = {
+    //starting properties of a spotlight 
     color: "#FFFFFF",
-    intensity: 2,
+    intensity: 0,
     penumbra: 0.2,
     angle: Math.PI/5,
     shadowMapSizeWidth: floorProperties.width*10,
-    shadowMapSizeHeight: 1000
+    shadowMapSizeHeight: floorProperties.width*10
+}
+
+class Holofote extends THREE.Object3D {
+    constructor(x , y, z) {
+        super()
+
+        //inicia desligada
+        this.active = false
+
+        this.cone = createCone(x, y, z)
+        this.bulb = createSphere(x, y, z)
+        this.light = createSpotLight(x-(holofoteProperties.coneHeight/2),
+             y-(holofoteProperties.coneHeight/2), z-(holofoteProperties.coneHeight/2))
+
+        scene.add(this)
+    }
+
+    turnOnorOff() {
+        if(this.active) {
+            //apaga a luz
+            this.light.intensity = 0
+            this.bulb.children[0].material.color.set(holofoteProperties.bulbColorOff)
+            this.cone.children[0].material.color.set(holofoteProperties.coneColorOff)
+            this.active = false
+        }
+        else {
+            //liga a luz
+            this.light.intensity = 2
+            this.bulb.children[0].material.color.set(holofoteProperties.bulbColorOn)
+            this.cone.children[0].material.color.set(holofoteProperties.coneColorOn)
+            this.active = true
+        }
+    }
 }
 
 
 function createCone(x, y, z) {
     cone= new THREE.Object3D()
     geometry = new THREE.ConeBufferGeometry(holofoteProperties.coneRadius, holofoteProperties.coneHeight, 32, 2);
-    material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColorOn })
+    material = new THREE.MeshPhongMaterial({ color: holofoteProperties.coneColorOff })
 
     geometry.applyMatrix4( new THREE.Matrix4().makeRotationFromEuler( new THREE.Euler( -Math.PI / 2, -Math.PI, 0 ) ) );
     mesh = new THREE.Mesh(geometry, material)
@@ -35,38 +69,20 @@ function createCone(x, y, z) {
     mesh.position.set(x, y, z)
     mesh.lookAt(0, 0, 0)
     cone.add(mesh)
+    scene.add(cone)
     return cone
 }
 
 function createSphere(x, y, z) {
     sphere = new THREE.Object3D()
     geometry = new THREE.SphereGeometry(holofoteProperties.coneRadius*0.4, 20, 32)
-    material = new THREE.MeshBasicMaterial({ color: holofoteProperties.bulbColorOn })
+    material = new THREE.MeshBasicMaterial({ color: holofoteProperties.bulbColorOff })
     mesh = new THREE.Mesh(geometry, material)
 
     mesh.position.set(x*0.95, y*0.95, z*0.95)
     sphere.add(mesh)
+    scene.add(sphere)
     return sphere
-}
-
-function createHolofote(x, y, z) {
-    holofote = new THREE.Object3D()
-
-    //Criar o cone
-    var cone = createCone(x, y, z)
-    holofote.add(cone)
-
-    //create SpotLight
-    var spotlight = createSpotLight(x-(holofoteProperties.coneHeight/2), y-(holofoteProperties.coneHeight/2), z-(holofoteProperties.coneHeight/2))
-    holofote.add(spotlight)
-
-    //create Sphere
-    var sphere = createSphere(x, y, z)
-    holofote.add(sphere)
-
-
-    scene.add(holofote)
-    return holofote
 }
 
 function createSpotLight(x, y, z) {

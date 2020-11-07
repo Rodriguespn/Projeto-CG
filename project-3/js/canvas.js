@@ -113,10 +113,9 @@ function createScene() {
     createFloor(0, -floorProperties.height/2, 0)
 
     //criar holofotes
-    holofote1 = createHolofote(-holofoteProperties.x, holofoteProperties.y, holofoteProperties.z)
-    holofote2 = createHolofote(holofoteProperties.x, holofoteProperties.y, 0)
-    holofote3 = createHolofote(holofoteProperties.x*0.3, holofoteProperties.y*1.3, -holofoteProperties.z)
-
+    holofote1 = new Holofote(-holofoteProperties.x, holofoteProperties.y, holofoteProperties.z)
+    holofote2 = new Holofote(holofoteProperties.x, holofoteProperties.y, 0)
+    holofote3 = new Holofote(holofoteProperties.x*0.3, holofoteProperties.y*1.3, -holofoteProperties.z)
 }
 
 // adjusts the camera position when the window is resized
@@ -178,6 +177,14 @@ function init() {
     createPerspectiveCamera()
     createOrthographicCamera(floorProperties.width, 0, 0)
     camera = perspectiveCamera
+
+
+    console.log(holofote1)
+    
+    
+    //holofote1.children[1].intensity =0
+    //holofote2.children[1].intensity =0
+    //holofote3.children[1].intensity =0
 
 
 

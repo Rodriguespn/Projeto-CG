@@ -5,7 +5,6 @@
 
 let qQPress = {
     state: false,
-
     //liga ou desliga a fonte de luz direccional
     action: function() {
 
@@ -17,7 +16,6 @@ let qQPress = {
 
 let wWPress = {
     state: false,
-
     //liga ou desliga o cálculo da iluminação
     action: function() {
 
@@ -28,7 +26,6 @@ let wWPress = {
 
 let eEPress = {
     state: false,
-
     //alterna entre os tipos de sombreamento Phong ou Gouraud
     action: function() {
 
@@ -39,40 +36,33 @@ let eEPress = {
 
 let one1Press = {
     state: false,
-
     //liga ou desliga o holofote #1
     action: function() {
-
-
+        holofote1.turnOnorOff()
         this.state = false
     }
 }
 
 let two2Press = {
     state: false,
-
     //liga ou desliga o holofote #2
     action: function() {
-
-
+        holofote2.turnOnorOff()
         this.state = false
     }
 }
 
 let three3Press = {
     state: false,
-
     //liga ou desliga o holofote #3
     action: function() {
-
-
+        holofote3.turnOnorOff()
         this.state = false
     }
 }
 
 let four4Press = {
     state: false,
-
     //activa a camera fixa perspectiva - tecla 4
     action: function() {
         cameraController.perspectiveActive = true
@@ -84,7 +74,6 @@ let four4Press = {
 
 let five5Press = {
     state: false,
-
     //activa a camera fixa ortogonal - tecla 5
     action: function() {
         cameraController.orthoActive = true
@@ -97,7 +86,6 @@ let five5Press = {
 
 let arrowRightPress = {
     state: false,
-
     //roda o palanque para a direita
     action: function() {
         rotatePalanque(Math.PI/palanqueProperties.rotationFactor)
@@ -108,7 +96,6 @@ let arrowRightPress = {
 
 let arrowLeftPress = {
     state: false,
-
     //roda o palanque para a esquerda
     action: function() {
         rotatePalanque(-Math.PI/palanqueProperties.rotationFactor)
