@@ -42,7 +42,7 @@ class Holofote extends THREE.Object3D {
         this.coneColor = holofoteProperties.coneColorOff
         this.bulbColor = holofoteProperties.bulbColorOff
         this.cone = this.conePhong
-        this.bulb = this.bulbBasic
+        this.bulb = this.bulbPhong
         scene.add(this.cone)
         scene.add(this.bulb)
         this.light = createSpotLight(x-(holofoteProperties.coneHeight/2),
@@ -62,6 +62,18 @@ class Holofote extends THREE.Object3D {
             this.coneBasic.children[0].material.color.set(holofoteProperties.coneColorOff)
             this.conePhong.children[0].material.color.set(holofoteProperties.coneColorOff)
             this.coneLambert.children[0].material.color.set(holofoteProperties.coneColorOff)
+
+            if(this.lambertMode) {
+                scene.remove(this.bulb)
+                this.bulb = this.bulbLambert
+                scene.add(this.bulb)
+            }
+            else {
+                scene.remove(this.bulb)
+                this.bulb = this.bulbPhong
+                scene.add(this.bulb)
+            }
+
             this.active = false
         }
         else {
@@ -74,6 +86,10 @@ class Holofote extends THREE.Object3D {
             this.coneBasic.children[0].material.color.set(holofoteProperties.coneColorOn)
             this.conePhong.children[0].material.color.set(holofoteProperties.coneColorOn)
             this.coneLambert.children[0].material.color.set(holofoteProperties.coneColorOn)
+
+            scene.remove(this.bulb)
+            this.bulb = this.bulbBasic
+            scene.add(this.bulb)
             this.active = true
         }
     }
