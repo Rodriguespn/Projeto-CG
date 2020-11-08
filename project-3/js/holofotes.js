@@ -87,7 +87,7 @@ class Holofote extends THREE.Object3D {
             this.activeIllumination = false
         }
         else {
-            if(this.LambertMode) {
+            if(this.lambertMode) {
                 scene.remove(this.cone)
                 this.cone = this.coneLambert
                 scene.add(this.cone)
@@ -97,12 +97,12 @@ class Holofote extends THREE.Object3D {
                 this.cone = this.conePhong
                 scene.add(this.cone)
             }
-            this.activeIllumination = true
+            this.activeIllumination = true   
         }
     }
 
     shadingAlternation() {
-        if (this.cone == this.coneBasic) {
+        if (!this.activeIllumination) {
             return
         }
         if(this.lambertMode) {
