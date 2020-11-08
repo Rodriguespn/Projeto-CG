@@ -62,9 +62,6 @@ class Holofote extends THREE.Object3D {
             this.coneBasic.children[0].material.color.set(holofoteProperties.coneColorOff)
             this.conePhong.children[0].material.color.set(holofoteProperties.coneColorOff)
             this.coneLambert.children[0].material.color.set(holofoteProperties.coneColorOff)
-            
-            //this.coneColor = holofoteProperties.coneColorOff
-            //this.bulbColor = holofoteProperties.bulbColorOff
             this.active = false
         }
         else {
@@ -77,9 +74,6 @@ class Holofote extends THREE.Object3D {
             this.coneBasic.children[0].material.color.set(holofoteProperties.coneColorOn)
             this.conePhong.children[0].material.color.set(holofoteProperties.coneColorOn)
             this.coneLambert.children[0].material.color.set(holofoteProperties.coneColorOn)
-            
-            //this.coneColor = holofoteProperties.coneColorOn
-            //this.bulbColor = holofoteProperties.bulbColorOn
             this.active = true
         }
     }

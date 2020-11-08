@@ -27,10 +27,6 @@ function createOrthographicCamera(x, y, z) {
     orthoCamera.lookAt(0,0,0)
 }
 
-
-
-
-
 let cameraController = {
     orthoActive: false,
     perspectiveActive: true,
