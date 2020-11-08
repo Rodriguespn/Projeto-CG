@@ -108,6 +108,9 @@ class Holofote extends THREE.Object3D {
     }
 
     shadingAlternation() {
+        if (this.cone == this.coneBasic) {
+            return
+        }
         if(this.lambertMode) {
             scene.remove(this.cone)
             this.cone = this.conePhong
