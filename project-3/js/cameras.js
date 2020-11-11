@@ -1,6 +1,6 @@
 let camera, orthoCamera, perspectiveCamera
 
-const frustumSize = 75
+const frustumSize = floorProperties.depth / 2
 const aspect = windowWidth / windowHeight
 
 // updates the position of the orthogonal camera

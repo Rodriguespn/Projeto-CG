@@ -6,7 +6,7 @@ const background = '#000000'
 
 const palanqueProperties = {
     radius: 150,
-    height: 1.2,
+    height: 3,
     color: '#4c280f',
     rotationFactor: 100
 }
@@ -71,60 +71,101 @@ function createWheel(obj, x, y, z) {
 
     geometry = new THREE.CylinderGeometry(carProperties.wheelsProperties.radius, carProperties.wheelsProperties.radius, carProperties.wheelsProperties.height, 100);
 
-    material = new THREE.MeshPhongMaterial({ color: carProperties.wheelsProperties.color, side: THREE.DoubleSide })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.wheelsProperties.color })
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.wheelsProperties.color })
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.wheelsProperties.color })
 
-    mesh = new THREE.Mesh(geometry, material)
-    mesh.castShadow = true
-    mesh.receiveShadow = true
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    basicMesh = new THREE.Mesh(geometry, basicMaterial)
+    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    mesh.rotation.x = Math.PI/2
-    mesh.position.set(x, y, z)
+    phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
+    lambertMesh.receiveShadow = true
+    lambertMesh.castShadow = true
+    basicMesh.receiveShadow = true
+    basicMesh.castShadow = true
 
-    wheel.add(mesh)
+    phongMesh.position.set(x, y, z)
+    basicMesh.position.set(x, y, z)
+    lambertMesh.position.set(x, y, z)
+
+    phongMesh.rotation.set(Math.PI / 2, 0, 0)
+    lambertMesh.rotation.set(Math.PI / 2, 0, 0)
+    basicMesh.rotation.set(Math.PI / 2, 0, 0)
+    
+    wheel.add(phongMesh)
+
+    wheel.name = "wheel"
 
     obj.add(wheel)
 }
 
-function createWheelConnection(obj, x, y, z, { rotx, roty, rotz }) {
+function createWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
     const wheelConnection = new THREE.Object3D()
 
     geometry = new THREE.BoxGeometry(carProperties.wheelsProperties.radius / 2, carProperties.depth - carProperties.wheelsProperties.height, carProperties.wheelsProperties.radius / 2);
 
-    material = new THREE.MeshPhongMaterial({ color: "#3a363b", side: THREE.DoubleSide })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: "#3a363b" })
+    basicMaterial = new THREE.MeshBasicMaterial({ color: "#3a363b" })
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: "#3a363b" })
 
-    mesh = new THREE.Mesh(geometry, material)
-    mesh.castShadow = true
-    mesh.receiveShadow = true
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    basicMesh = new THREE.Mesh(geometry, basicMaterial)
+    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    mesh.rotation.x = rotx
-    mesh.rotation.y = roty
-    mesh.rotation.z = rotz
+    phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
+    lambertMesh.receiveShadow = true
+    lambertMesh.castShadow = true
+    basicMesh.receiveShadow = true
+    basicMesh.castShadow = true
 
-    mesh.position.set(x, y, z)
+    phongMesh.position.set(x, y, z)
+    basicMesh.position.set(x, y, z)
+    lambertMesh.position.set(x, y, z)
 
-    wheelConnection.add(mesh)
+    phongMesh.rotation.set(rotX, rotY, rotZ)
+    lambertMesh.rotation.set(rotX, rotY, rotZ)
+    basicMesh.rotation.set(rotX, rotY, rotZ)
+    
+    wheelConnection.add(phongMesh)
+    wheelConnection.name = "wheel connection"
 
     obj.add(wheelConnection)
 }
 
-function createMainWheelConnection(obj, x, y, z, { rotx, roty, rotz }) {
+function createMainWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
     const wheelConnection = new THREE.Object3D()
 
     geometry = new THREE.BoxGeometry(carProperties.wheelsProperties.radius / 2, carProperties.depth - carProperties.wheelsProperties.radius / 2, carProperties.wheelsProperties.radius / 2);
 
-    material = new THREE.MeshPhongMaterial({ color: "#3a363b", side: THREE.DoubleSide })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: "#3a363b" })
+    basicMaterial = new THREE.MeshBasicMaterial({ color: "#3a363b" })
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: "#3a363b" })
 
-    mesh = new THREE.Mesh(geometry, material)
-    mesh.castShadow = true
-    mesh.receiveShadow = true
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    basicMesh = new THREE.Mesh(geometry, basicMaterial)
+    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    mesh.rotation.x = rotx
-    mesh.rotation.y = roty
-    mesh.rotation.z = rotz
+    phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
+    lambertMesh.receiveShadow = true
+    lambertMesh.castShadow = true
+    basicMesh.receiveShadow = true
+    basicMesh.castShadow = true
 
-    mesh.position.set(x, y, z)
+    phongMesh.position.set(x, y, z)
+    basicMesh.position.set(x, y, z)
+    lambertMesh.position.set(x, y, z)
 
-    wheelConnection.add(mesh)
+    phongMesh.rotation.set(rotX, rotY, rotZ)
+    lambertMesh.rotation.set(rotX, rotY, rotZ)
+    basicMesh.rotation.set(rotX, rotY, rotZ)
+    
+    wheelConnection.add(phongMesh)
+
+    wheelConnection.name = "main wheel connection"
 
     obj.add(wheelConnection)
 }
@@ -139,13 +180,13 @@ function createChassis(obj, x, y, z) {
     createWheel(chassis, x - wheelsXOffset, wheelsY, z + wheelsZOffset)
     createWheel(chassis, x - wheelsXOffset, wheelsY, z - wheelsZOffset)
 
-    let rotation = { rotx: Math.PI / 2, roty: 0, rotz: 0 }
+    let rotation = { rotX: Math.PI / 2, rotY: 0, rotZ: 0 }
     createWheelConnection(chassis, x + wheelsXOffset, wheelsY, z, rotation)
 
-    rotation = { rotx: Math.PI / 2, roty: 0, rotz: 0 }
+    rotation = { rotX: Math.PI / 2, rotY: 0, rotZ: 0 }
     createWheelConnection(chassis, x - wheelsXOffset, wheelsY, z, rotation)
 
-    rotation = { rotx: 0, roty: 0, rotz: Math.PI / 2 }
+    rotation = { rotX: 0, rotY: 0, rotZ: Math.PI / 2 }
     createMainWheelConnection(chassis, x, wheelsY, z, rotation)
     
     obj.add(chassis)
@@ -157,6 +198,8 @@ function createCyberTruck(obj, x, y, z) {
     createChassis(car, x, y, z)
 
     obj.add(car)
+    console.log("car")
+    console.log(car)
 }
 
 function createFloor(x, y, z) {
