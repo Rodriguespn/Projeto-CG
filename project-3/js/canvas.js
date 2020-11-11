@@ -5,7 +5,7 @@ let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime
 const background = '#000000'
 
 const palanqueProperties = {
-    radius: 50,
+    radius: 150,
     height: 1.2,
     color: '#4c280f',
     rotationFactor: 100
@@ -18,11 +18,15 @@ const floorProperties = {
     color: '#7b836a'
 }
 
-//TESTING CUBE
-const cubeProperties = {
-    width: palanqueProperties.radius * 0.6,
-    depth: palanqueProperties.radius * 0.6,
-    height: palanqueProperties.radius * 0.6,
+const carProperties = {
+    width: palanqueProperties.radius,
+    depth: palanqueProperties.radius,
+    height: palanqueProperties.height * 20,
+    wheelsProperties: {
+        radius: palanqueProperties.radius * 0.15,
+        height: palanqueProperties.radius * 0.15,
+        color: '#0c0b0c'
+    },
     color: '#024059'
 }
 
@@ -62,26 +66,97 @@ function createDirectionalLight(x, y, z) {
     return light
 }
 
-function createCube(obj, x, y, z) {
-    cube = new THREE.Object3D()
+function createWheel(obj, x, y, z) {
+    const wheel = new THREE.Object3D()
 
-    geometry = new THREE.PlaneGeometry(20, 20);
+    geometry = new THREE.CylinderGeometry(carProperties.wheelsProperties.radius, carProperties.wheelsProperties.radius, carProperties.wheelsProperties.height, 100);
 
-    /*geometry = new THREE.BoxGeometry(cubeProperties.width, cubeProperties.height, cubeProperties.depth);
-*/
-    material = new THREE.MeshPhongMaterial({ color: cubeProperties.color, side: THREE.DoubleSide })
+    material = new THREE.MeshPhongMaterial({ color: carProperties.wheelsProperties.color, side: THREE.DoubleSide })
 
     mesh = new THREE.Mesh(geometry, material)
     mesh.castShadow = true
     mesh.receiveShadow = true
 
-   /* mesh.rotation.x = Math.PI/4
-    mesh.rotation.y = Math.PI/4*/
+    mesh.rotation.x = Math.PI/2
     mesh.position.set(x, y, z)
 
-    cube.add(mesh)
+    wheel.add(mesh)
 
-    obj.add(cube)
+    obj.add(wheel)
+}
+
+function createWheelConnection(obj, x, y, z, { rotx, roty, rotz }) {
+    const wheelConnection = new THREE.Object3D()
+
+    geometry = new THREE.BoxGeometry(carProperties.wheelsProperties.radius / 2, carProperties.depth - carProperties.wheelsProperties.height, carProperties.wheelsProperties.radius / 2);
+
+    material = new THREE.MeshPhongMaterial({ color: "#3a363b", side: THREE.DoubleSide })
+
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    mesh.rotation.x = rotx
+    mesh.rotation.y = roty
+    mesh.rotation.z = rotz
+
+    mesh.position.set(x, y, z)
+
+    wheelConnection.add(mesh)
+
+    obj.add(wheelConnection)
+}
+
+function createMainWheelConnection(obj, x, y, z, { rotx, roty, rotz }) {
+    const wheelConnection = new THREE.Object3D()
+
+    geometry = new THREE.BoxGeometry(carProperties.wheelsProperties.radius / 2, carProperties.depth - carProperties.wheelsProperties.radius / 2, carProperties.wheelsProperties.radius / 2);
+
+    material = new THREE.MeshPhongMaterial({ color: "#3a363b", side: THREE.DoubleSide })
+
+    mesh = new THREE.Mesh(geometry, material)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+
+    mesh.rotation.x = rotx
+    mesh.rotation.y = roty
+    mesh.rotation.z = rotz
+
+    mesh.position.set(x, y, z)
+
+    wheelConnection.add(mesh)
+
+    obj.add(wheelConnection)
+}
+
+function createChassis(obj, x, y, z) {
+    const chassis = new THREE.Object3D()
+    const wheelsY = y - carProperties.height / 2 + carProperties.wheelsProperties.radius
+    const wheelsXOffset = carProperties.width / 2
+    const wheelsZOffset = carProperties.depth / 2
+    createWheel(chassis, x + wheelsXOffset, wheelsY, z + wheelsZOffset)
+    createWheel(chassis, x + wheelsXOffset, wheelsY, z - wheelsZOffset)
+    createWheel(chassis, x - wheelsXOffset, wheelsY, z + wheelsZOffset)
+    createWheel(chassis, x - wheelsXOffset, wheelsY, z - wheelsZOffset)
+
+    let rotation = { rotx: Math.PI / 2, roty: 0, rotz: 0 }
+    createWheelConnection(chassis, x + wheelsXOffset, wheelsY, z, rotation)
+
+    rotation = { rotx: Math.PI / 2, roty: 0, rotz: 0 }
+    createWheelConnection(chassis, x - wheelsXOffset, wheelsY, z, rotation)
+
+    rotation = { rotx: 0, roty: 0, rotz: Math.PI / 2 }
+    createMainWheelConnection(chassis, x, wheelsY, z, rotation)
+    
+    obj.add(chassis)
+}
+
+function createCyberTruck(obj, x, y, z) {
+    const car = new THREE.Object3D()
+    
+    createChassis(car, x, y, z)
+
+    obj.add(car)
 }
 
 function createFloor(x, y, z) {
@@ -135,7 +210,9 @@ function createPalanque(x, y, z) {
     scene.add(palanque)
 
     //Criar o CYBERTRUCK
-    createCube(palanque, 0, cubeProperties.height / 2 + palanqueProperties.height, 0)
+    //createCube(palanque, 0, carProperties.height / 2 + palanqueProperties.height, 0)
+
+    createCyberTruck(palanque, 0, carProperties.height / 2 + palanqueProperties.height, 0)
 
 }
 
