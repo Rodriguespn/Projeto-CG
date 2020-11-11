@@ -1,9 +1,9 @@
 let holofote1, holofote2, holofote3
 
 const holofoteProperties = {
-    x: palanqueProperties.radius*1.1,
-    y: palanqueProperties.radius*1.1,
-    z: palanqueProperties.radius*1.1,
+    x: palanqueProperties.radius*1.4,
+    y: palanqueProperties.radius*1.4,
+    z: palanqueProperties.radius*1.4,
     coneRadius: palanqueProperties.radius*0.1,
     coneHeight: palanqueProperties.radius*0.2,
     coneColorOn: "#ffa500",

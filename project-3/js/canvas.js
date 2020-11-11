@@ -2,11 +2,10 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 
-
 const background = '#000000'
 
 const palanqueProperties = {
-    radius: 25,
+    radius: 50,
     height: 1.2,
     color: '#4c280f',
     rotationFactor: 100
@@ -36,7 +35,7 @@ const directionalLightProperties = {
 class DirLight extends THREE.Object3D {
     constructor(x, y, z) {
         super()
-        this.active = false
+        this.active = true
         this.light = createDirectionalLight(x, y, z)
     }
 
@@ -54,7 +53,7 @@ class DirLight extends THREE.Object3D {
 }
 
 function createDirectionalLight(x, y, z) {
-    var light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOff);
+    var light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOn);
     light.castShadow = true;
     light.position.set(x, y, z);
     light.target.position.set(0, 0, 0);
@@ -65,16 +64,19 @@ function createDirectionalLight(x, y, z) {
 
 function createCube(obj, x, y, z) {
     cube = new THREE.Object3D()
-    geometry = new THREE.BoxGeometry(cubeProperties.width, cubeProperties.height, cubeProperties.depth);
 
-    material = new THREE.MeshPhongMaterial({ color: cubeProperties.color })
+    geometry = new THREE.PlaneGeometry(20, 20);
+
+    /*geometry = new THREE.BoxGeometry(cubeProperties.width, cubeProperties.height, cubeProperties.depth);
+*/
+    material = new THREE.MeshPhongMaterial({ color: cubeProperties.color, side: THREE.DoubleSide })
 
     mesh = new THREE.Mesh(geometry, material)
     mesh.castShadow = true
     mesh.receiveShadow = true
 
-    mesh.rotation.x = Math.PI/4
-    mesh.rotation.y = Math.PI/4
+   /* mesh.rotation.x = Math.PI/4
+    mesh.rotation.y = Math.PI/4*/
     mesh.position.set(x, y, z)
 
     cube.add(mesh)
@@ -133,7 +135,7 @@ function createPalanque(x, y, z) {
     scene.add(palanque)
 
     //Criar o CYBERTRUCK
-    createCube(palanque, 0, cubeProperties.height, 0)
+    createCube(palanque, 0, cubeProperties.height / 2 + palanqueProperties.height, 0)
 
 }
 
