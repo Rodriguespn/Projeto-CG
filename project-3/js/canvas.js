@@ -275,7 +275,7 @@ function createCarSide(obj, x, y, z, side) {
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
     
     phongMesh.userData = { 
         "phong": phongMaterial, 
@@ -379,7 +379,7 @@ function createCarFront(obj, x, y, z) {
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
     
     phongMesh.userData = { 
         "phong": phongMaterial, 
@@ -525,7 +525,7 @@ function createCarBack(obj, x, y, z) {
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
     
     phongMesh.userData = { 
         "phong": phongMaterial, 
