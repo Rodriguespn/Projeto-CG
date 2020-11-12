@@ -292,7 +292,6 @@ function createCarSide(obj, x, y, z, side) {
         new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, (carProperties.depth*0.3+1) * side ), // 0
         new THREE.Vector3( carProperties.width - carProperties.sideWindowProperties.offset*7,  carProperties.height*0.6, vz + side), // 1
         new THREE.Vector3( -carProperties.width*0.65 + carProperties.sideWindowProperties.offset,  carProperties.height*0.6, vz + side ), // 17
-        new THREE.Vector3( carProperties.width - carProperties.sideWindowProperties.offset * 7,  carProperties.height*0.6 + carProperties.sideWindowProperties.offset, vz + side ), // 1'
     ]
 
     geometry = new THREE.Geometry();
@@ -302,8 +301,7 @@ function createCarSide(obj, x, y, z, side) {
     })
 
     geometry.faces.push( 
-        new THREE.Face3( 0, 2, 3), 
-        new THREE.Face3( 3, 2, 1),
+        new THREE.Face3( 0, 1, 2),
     );
 
     geometry.computeVertexNormals()
