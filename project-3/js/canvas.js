@@ -5,8 +5,8 @@ let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime
 const background = '#000000'
 
 const palanqueProperties = {
-    radius: 170,
-    height: 6,
+    radius: 100,
+    height: 4,
     color: '#4c280f',
     rotationFactor: 100
 }
@@ -45,7 +45,7 @@ const carProperties = {
     },
     sideWindowProperties: {
         color: "#0c0c0c",
-        offset: 10
+        offset: 5
     },
     color: '#505050'
 }
