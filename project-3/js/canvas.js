@@ -376,6 +376,33 @@ function createSideWall(obj, x, y, z, side) {
     obj.add(wall)
 }
 
+function createFrontWall(obj, x, y, z) {
+    const wall = new THREE.Object3D()
+    
+    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
+    let vz = carProperties.depth / 2
+    let offSet = carProperties.wheelsProperties.radius
+
+    vertices = [
+        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, -vz],
+        [-carProperties.depth, vy+offSet/2, vz],
+        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, -vz],
+        [-carProperties.depth, vy+offSet/2, -vz],
+        [-carProperties.depth, vy+offSet/2, vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    wall.name = "wall"
+    obj.add(wall)
+}
+
 function createCyberTruck(obj, x, y, z) {
     const car = new THREE.Object3D()
     
@@ -385,6 +412,7 @@ function createCyberTruck(obj, x, y, z) {
     */
     createSideWall(car, x, y, z, 1) 
     createSideWall(car, x, y, z, -1)
+    createFrontWall(car, x, y, z)
 
     obj.add(car)
     console.log("car")
