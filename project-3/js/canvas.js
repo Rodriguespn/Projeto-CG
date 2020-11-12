@@ -273,7 +273,7 @@ function createSideWall(obj, x, y, z, side) {
     vz = carProperties.depth / 2 * side
     
     vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 6 * side],
+        [0, carProperties.height / 2,  carProperties.depth / 4 * side],
         [-vx-offSet/2, vy+offSet/2,  vz],
         [vx+offSet/2, vy+offSet/2,  vz]
     ]
@@ -285,7 +285,7 @@ function createSideWall(obj, x, y, z, side) {
     vz = carProperties.depth / 2 * side
     
     vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 6 *side],
+        [0, carProperties.height / 2,  carProperties.depth / 4 *side],
         [-vx-offSet/2, vy+offSet/2,  vz],
         [-vx-offSet, vy+offSet,  vz]
     ]
@@ -293,7 +293,7 @@ function createSideWall(obj, x, y, z, side) {
     createFragment(wall, x, y, z, vertices)
     
     vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 6 *side],
+        [0, carProperties.height / 2,  carProperties.depth / 4 *side],
         [vx+offSet/2, vy+offSet/2,  vz],
         [vx+offSet*1.5, vy+offSet/2,  vz]
     ]
@@ -301,7 +301,7 @@ function createSideWall(obj, x, y, z, side) {
     createFragment(wall, x, y, z, vertices)
 
     vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 6 *side],
+        [0, carProperties.height / 2,  carProperties.depth / 4 *side],
         [vx+offSet*1.5, vy+offSet/2,  vz],
         [carProperties.width, vy+offSet,  vz]
     ]
