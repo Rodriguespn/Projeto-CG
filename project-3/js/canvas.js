@@ -5,7 +5,7 @@ let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime
 const background = '#000000'
 
 const palanqueProperties = {
-    radius: 150,
+    radius: 50,
     height: 3,
     color: '#4c280f',
     rotationFactor: 100
@@ -21,13 +21,13 @@ const floorProperties = {
 const carProperties = {
     width: palanqueProperties.radius,
     depth: palanqueProperties.radius,
-    height: palanqueProperties.height * 20,
+    height: palanqueProperties.height * 15,
     wheelsProperties: {
         radius: palanqueProperties.radius * 0.15,
         height: palanqueProperties.radius * 0.15,
         color: '#0c0b0c'
     },
-    color: '#024059'
+    color: '#C0C0C0'
 }
 
 const directionalLightProperties = {
@@ -192,10 +192,199 @@ function createChassis(obj, x, y, z) {
     obj.add(chassis)
 }
 
+function generateTriangle(vertices) {
+    
+    const positions = []
+
+    for (const vertex of vertices) {
+        positions.push(...vertex);
+    }
+
+    geometry = new THREE.BufferGeometry()
+    const positionNumComponents = 3
+    geometry.setAttribute(
+        'position',
+        new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
+        
+    material = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide });
+    mesh = new THREE.Mesh( geometry, material );
+    
+    mesh.receiveShadow = true
+    mesh.castShadow = true
+        
+    return mesh
+}
+
+function createFragment(obj, x, y, z, vertices) {
+    mesh = generateTriangle(vertices)
+    
+    mesh.position.set(x, y, z)
+    mesh.name = "fragment"
+
+    obj.add(mesh)
+}
+
+function createSideWall(obj, x, y, z, side) {
+    const wall = new THREE.Object3D()
+    
+    let vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
+    let vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius
+    let vz = carProperties.depth / 2 * side
+    let offSet = carProperties.wheelsProperties.radius
+
+    let vertices = [
+        [vx, vy,  vz],
+        [-vx, vy,  vz],
+        [-vx, vy+offSet,  vz]
+    ]
+
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [vx, vy,  vz],
+        [vx, vy+offSet,  vz],
+        [-vx, vy+offSet,  vz]
+    ]
+
+    createFragment(wall, x, y, z, vertices)
+
+    vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
+    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
+    vz = carProperties.depth / 2 * side
+
+    vertices = [
+        [-vx, vy,  vz],
+        [-vx-offSet/2, vy+offSet/2,  vz],
+        [vx+offSet/2, vy+offSet/2,  vz]
+    ]
+
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [vx, vy,  vz],
+        [-vx, vy,  vz],
+        [vx+offSet/2, vy+offSet/2,  vz]
+    ]
+
+    createFragment(wall, x, y, z, vertices)
+
+    vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
+    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
+    vz = carProperties.depth / 2 * side
+    
+    vertices = [
+        [0, carProperties.height / 2,  carProperties.depth / 6 * side],
+        [-vx-offSet/2, vy+offSet/2,  vz],
+        [vx+offSet/2, vy+offSet/2,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+    
+    vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
+    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
+    vz = carProperties.depth / 2 * side
+    
+    vertices = [
+        [0, carProperties.height / 2,  carProperties.depth / 6 *side],
+        [-vx-offSet/2, vy+offSet/2,  vz],
+        [-vx-offSet, vy+offSet,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+    
+    vertices = [
+        [0, carProperties.height / 2,  carProperties.depth / 6 *side],
+        [vx+offSet/2, vy+offSet/2,  vz],
+        [vx+offSet*1.5, vy+offSet/2,  vz]
+    ]
+
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [0, carProperties.height / 2,  carProperties.depth / 6 *side],
+        [vx+offSet*1.5, vy+offSet/2,  vz],
+        [carProperties.width, vy+offSet,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+    
+    vertices = [
+        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 2,  vz],
+        [vx+offSet*1.5, vy+offSet/2,  vz],
+        [carProperties.width, vy+offSet,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+    
+    vertices = [
+        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 2,  vz],
+        [carProperties.width, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 1.5,  vz],
+        [carProperties.width, vy+offSet,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+    
+    vertices = [
+        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 2,  vz],
+        [carProperties.width, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 1.5,  vz],
+        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [-vx-offSet/2, vy+offSet/2,  vz],
+        [-vx-offSet, vy+offSet,  vz],
+        [-vx-offSet*1.5, vy+offSet/2,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [-carProperties.depth, vy+offSet/2,  vz],
+        [-vx-offSet, vy+offSet,  vz],
+        [-vx-offSet*1.5, vy+offSet/2,  vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [-carProperties.depth, vy+offSet/2, vz],
+        [-vx-offSet*1.5, vy+offSet/2, vz],
+        [-vx-offSet*2.25, vy, vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    vertices = [
+        [-carProperties.depth, vy+offSet/2, vz],
+        [-vx-offSet*2.25, vy, vz],
+        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+    
+    vertices = [
+        [-vx-offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz],
+        [-vx-offSet*2.25, vy, vz],
+        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz]
+    ]
+    
+    createFragment(wall, x, y, z, vertices)
+
+    wall.name = "wall"
+    obj.add(wall)
+}
+
 function createCyberTruck(obj, x, y, z) {
     const car = new THREE.Object3D()
     
     createChassis(car, x, y, z)
+    /* left: 1
+       right: -1 
+    */
+    createSideWall(car, x, y, z, 1) 
+    createSideWall(car, x, y, z, -1)
 
     obj.add(car)
     console.log("car")
@@ -284,7 +473,7 @@ function createScene() {
     //criar holofotes
     holofote1 = new Holofote(-holofoteProperties.x, holofoteProperties.y, holofoteProperties.z)
     holofote2 = new Holofote(holofoteProperties.x, holofoteProperties.y, 0)
-    holofote3 = new Holofote(holofoteProperties.x*0.3, holofoteProperties.y*1.3, -holofoteProperties.z)
+    holofote3 = new Holofote(holofoteProperties.x * 0.3, holofoteProperties.y*1.3, -holofoteProperties.z)
 }
 
 // adjusts the camera position when the window is resized
