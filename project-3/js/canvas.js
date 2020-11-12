@@ -27,9 +27,26 @@ const carProperties = {
         height: palanqueProperties.height * 2,
         color: '#0c0b0c'
     },
-    windowsColor: "#282828",
-    frontLightColor: "#ade6d8",
-    backLightColor: "#8B0000",
+    frontLightProperties: {
+        color: "#ade6d8",
+        height: palanqueProperties.height
+    },
+    backLightProperties: {
+        color: "#8B0000",
+        height: palanqueProperties.height*2
+    },
+    frontWindowProperties: {
+        color: "#0c0c0c",
+        offset: 10
+    },
+    backWindowProperties: {
+        color: "#0c0c0c",
+        offset: 20
+    },
+    sideWindowProperties: {
+        color: "#0c0c0c",
+        offset: 10
+    },
     color: '#505050'
 }
 
@@ -195,7 +212,7 @@ function createCarSide(obj, x, y, z, side) {
     const vz = carProperties.depth/2 * side
     const wheelsY = y - carProperties.height + carProperties.wheelsProperties.radius
 
-    const vertices = [
+    let vertices = [
         new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, carProperties.depth*0.3 * side ), // 0
         new THREE.Vector3( carProperties.width,  carProperties.height*0.6, vz ), // 1
         new THREE.Vector3( carProperties.width,  wheelsY*0.4, vz ), // 2
@@ -216,7 +233,7 @@ function createCarSide(obj, x, y, z, side) {
         new THREE.Vector3( -carProperties.width*0.65,  carProperties.height*0.6, vz ), // 17
     ]
 
-    const geometry = new THREE.Geometry();
+    geometry = new THREE.Geometry();
 
     vertices.forEach(vertice => {
         geometry.vertices.push(
@@ -269,6 +286,50 @@ function createCarSide(obj, x, y, z, side) {
     phongMesh.position.set(x, y, z)
     
     wall.add(phongMesh)
+
+    // draw window
+    vertices = [
+        new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, (carProperties.depth*0.3+1) * side ), // 0
+        new THREE.Vector3( carProperties.width - carProperties.sideWindowProperties.offset*7,  carProperties.height*0.6, vz +1 ), // 1
+        new THREE.Vector3( -carProperties.width*0.65 + carProperties.sideWindowProperties.offset,  carProperties.height*0.6, vz + 1 ), // 17
+        new THREE.Vector3( carProperties.width - carProperties.sideWindowProperties.offset * 7,  carProperties.height*0.6 + carProperties.sideWindowProperties.offset, vz + 1 ), // 1'
+    ]
+
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(vertice)
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 2, 3), 
+        new THREE.Face3( 3, 2, 1),
+    );
+
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+
+    phongMesh.receiveShadow = true
+
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
+    phongMesh.position.set(x, y, z)
+
+    wall.add(phongMesh)
+
     obj.add(wall)
 }
 
@@ -332,8 +393,92 @@ function createCarFront(obj, x, y, z) {
     
     wall.add(phongMesh)
 
+    const offset = 10
     // draw light
+    vertices = [
+        new THREE.Vector3( -carProperties.width-1, carProperties.height*0.3, vz - offset ), // 16
+        new THREE.Vector3( -carProperties.width-1, carProperties.height*0.3, -vz + offset), // 19
+        new THREE.Vector3( -carProperties.width-1, carProperties.height*0.3 - carProperties.frontLightProperties.height, vz - offset ), // 16'
+        new THREE.Vector3( -carProperties.width-1, carProperties.height*0.3- carProperties.frontLightProperties.height, -vz + offset), // 19'
+    ]
+
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(vertice)
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 1, 2), 
+        new THREE.Face3( 3, 2, 1),
+    );
     
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.frontLightProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.frontLightProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.frontLightProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
+    phongMesh.position.set(x, y, z)
+    
+    wall.add(phongMesh)
+
+    // draw window
+    vertices = [
+        new THREE.Vector3( -carProperties.width*0.1 - 1,  carProperties.height, carProperties.depth*0.3  - carProperties.frontWindowProperties.offset), // 0
+        new THREE.Vector3( -carProperties.width*0.1 - 1,  carProperties.height, -carProperties.depth*0.3 + carProperties.frontWindowProperties.offset), // 21
+        new THREE.Vector3( -carProperties.width*0.65 - 1,  carProperties.height*0.6, vz - carProperties.frontWindowProperties.offset), // 17
+        new THREE.Vector3( -carProperties.width*0.65 - 1,  carProperties.height*0.6, -vz + carProperties.frontWindowProperties.offset), // 18
+    ]
+
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(vertice)
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 1, 2), 
+        new THREE.Face3( 3, 2, 1),
+    );
+    
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
+    phongMesh.position.set(x, y, z)
+    
+    wall.add(phongMesh)
 
     obj.add(wall)
 }
@@ -390,6 +535,92 @@ function createCarBack(obj, x, y, z) {
 
     phongMesh.position.set(x, y, z)
 
+    wall.add(phongMesh)
+
+    const offset = 10
+    vertices = [
+        new THREE.Vector3( carProperties.width+1,  carProperties.height*0.6 - offset, vz - offset ), // 1
+        new THREE.Vector3( carProperties.width+1,  carProperties.height*0.6 - offset, -vz + offset ), // 22
+        new THREE.Vector3( carProperties.width+1,  carProperties.height*0.6 - offset - carProperties.backLightProperties.height, vz - offset ), // 1'
+        new THREE.Vector3( carProperties.width+1,  carProperties.height*0.6 - offset - carProperties.backLightProperties.height, -vz + offset), // 22'
+    ]
+
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(vertice)
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 1, 2), 
+        new THREE.Face3( 3, 2, 1),
+    );
+    
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.backLightProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.backLightProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.backLightProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
+    phongMesh.position.set(x, y, z)
+    
+    wall.add(phongMesh)
+
+    // draw window
+    vertices = [
+        new THREE.Vector3( -carProperties.width*0.1 + 1,  carProperties.height, carProperties.depth*0.3 - carProperties.frontWindowProperties.offset), // 0
+        new THREE.Vector3( -carProperties.width*0.1 + 1,  carProperties.height, -carProperties.depth*0.3 + carProperties.frontWindowProperties.offset), // 21
+        new THREE.Vector3( carProperties.width + 1,  carProperties.height*0.6, vz - carProperties.frontWindowProperties.offset), // 1
+        new THREE.Vector3( carProperties.width +1,  carProperties.height*0.6, -vz + carProperties.frontWindowProperties.offset), // 22
+    ]
+
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(vertice)
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 1, 2), 
+        new THREE.Face3( 3, 2, 1),
+    );
+    
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.frontWindowProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
+    phongMesh.position.set(x, y, z)
+    
     wall.add(phongMesh)
     
     obj.add(wall)
