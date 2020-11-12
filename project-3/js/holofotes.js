@@ -78,7 +78,7 @@ class Holofote extends THREE.Object3D {
         }
         else {
             //liga a luz
-            this.light.intensity = 2
+            this.light.intensity = 1
             this.bulbBasic.children[0].material.color.set(holofoteProperties.bulbColorOn)
             this.bulbPhong.children[0].material.color.set(holofoteProperties.bulbColorOn)
             this.bulbLambert.children[0].material.color.set(holofoteProperties.bulbColorOn)

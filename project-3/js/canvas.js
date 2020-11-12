@@ -5,8 +5,8 @@ let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime
 const background = '#000000'
 
 const palanqueProperties = {
-    radius: 50,
-    height: 3,
+    radius: 150,
+    height: 6,
     color: '#4c280f',
     rotationFactor: 100
 }
@@ -24,9 +24,12 @@ const carProperties = {
     height: palanqueProperties.height * 15,
     wheelsProperties: {
         radius: palanqueProperties.radius * 0.15,
-        height: palanqueProperties.radius * 0.15,
+        height: palanqueProperties.height * 2,
         color: '#0c0b0c'
     },
+    windowsColor: "#282828",
+    frontLightColor: "#ade6d8",
+    backLightColor: "#000000",
     color: '#C0C0C0'
 }
 
@@ -79,9 +82,9 @@ function createWheel(obj, x, y, z) {
     basicMesh = new THREE.Mesh(geometry, basicMaterial)
     lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    phongMesh.receiveShadow = true
+    //phongMesh.receiveShadow = true
     phongMesh.castShadow = true
-    lambertMesh.receiveShadow = true
+    //lambertMesh.receiveShadow = true
     lambertMesh.castShadow = true
     basicMesh.receiveShadow = true
     basicMesh.castShadow = true
@@ -114,9 +117,9 @@ function createWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
     basicMesh = new THREE.Mesh(geometry, basicMaterial)
     lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    phongMesh.receiveShadow = true
+    //phongMesh.receiveShadow = true
     phongMesh.castShadow = true
-    lambertMesh.receiveShadow = true
+    //lambertMesh.receiveShadow = true
     lambertMesh.castShadow = true
     basicMesh.receiveShadow = true
     basicMesh.castShadow = true
@@ -148,9 +151,9 @@ function createMainWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
     basicMesh = new THREE.Mesh(geometry, basicMaterial)
     lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
-    phongMesh.receiveShadow = true
+    //phongMesh.receiveShadow = true
     phongMesh.castShadow = true
-    lambertMesh.receiveShadow = true
+    //lambertMesh.receiveShadow = true
     lambertMesh.castShadow = true
     basicMesh.receiveShadow = true
     basicMesh.castShadow = true
@@ -173,7 +176,7 @@ function createMainWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
 function createChassis(obj, x, y, z) {
     const chassis = new THREE.Object3D()
     const wheelsY = y - carProperties.height / 2 + carProperties.wheelsProperties.radius
-    const wheelsXOffset = carProperties.width / 2
+    const wheelsXOffset = carProperties.width * 0.55
     const wheelsZOffset = carProperties.depth / 2
     createWheel(chassis, x + wheelsXOffset, wheelsY, z + wheelsZOffset)
     createWheel(chassis, x + wheelsXOffset, wheelsY, z - wheelsZOffset)
@@ -192,214 +195,177 @@ function createChassis(obj, x, y, z) {
     obj.add(chassis)
 }
 
-function generateTriangle(vertices) {
-    
-    const positions = []
-
-    for (const vertex of vertices) {
-        positions.push(...vertex);
-    }
-
-    geometry = new THREE.BufferGeometry()
-    const positionNumComponents = 3
-    geometry.setAttribute(
-        'position',
-        new THREE.BufferAttribute(new Float32Array(positions), positionNumComponents));
-        
-    material = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide });
-    mesh = new THREE.Mesh( geometry, material );
-    
-    mesh.receiveShadow = true
-    mesh.castShadow = true
-        
-    return mesh
-}
-
-function createFragment(obj, x, y, z, vertices) {
-    mesh = generateTriangle(vertices)
-    
-    mesh.position.set(x, y, z)
-    mesh.name = "fragment"
-
-    obj.add(mesh)
-}
-
-function createSideWall(obj, x, y, z, side) {
+function createCarSide(obj, x, y, z, side) {
     const wall = new THREE.Object3D()
-    
-    let vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
-    let vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius
-    let vz = carProperties.depth / 2 * side
-    let offSet = carProperties.wheelsProperties.radius
 
-    let vertices = [
-        [vx, vy,  vz],
-        [-vx, vy,  vz],
-        [-vx, vy+offSet,  vz]
+    const vz = carProperties.depth/2 * side
+    const wheelsY = y - carProperties.height + carProperties.wheelsProperties.radius
+
+    const vertices = [
+        new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, carProperties.depth*0.3 * side ), // 0
+        new THREE.Vector3( carProperties.width,  carProperties.height*0.6, vz ), // 1
+        new THREE.Vector3( carProperties.width,  wheelsY*0.4, vz ), // 2
+        new THREE.Vector3( carProperties.width*0.7,  wheelsY, vz ), // 3
+        new THREE.Vector3( carProperties.width*0.7, wheelsY*0.4, vz ), // 4
+        new THREE.Vector3( carProperties.width*0.6,  wheelsY*0.1, vz ), // 5
+        new THREE.Vector3( carProperties.width*0.5,  wheelsY*0.1, vz ), // 6
+        new THREE.Vector3( carProperties.width*0.4,   wheelsY*0.4, vz ), // 7
+        new THREE.Vector3( carProperties.width*0.4,  wheelsY, vz ), // 8
+        new THREE.Vector3( -carProperties.width*0.4,  wheelsY, vz ), // 9
+        new THREE.Vector3( -carProperties.width*0.4,  wheelsY*0.4, vz ), // 10
+        new THREE.Vector3( -carProperties.width*0.5,  wheelsY*0.1, vz ), // 11
+        new THREE.Vector3( -carProperties.width*0.6,  wheelsY*0.1, vz ), // 12
+        new THREE.Vector3( -carProperties.width*0.7,  wheelsY*0.4, vz ), // 13
+        new THREE.Vector3( -carProperties.width*0.7,  wheelsY, vz ), // 14
+        new THREE.Vector3( -carProperties.width,  wheelsY, vz ), // 15
+        new THREE.Vector3( -carProperties.width, carProperties.height*0.3, vz ), // 16
+        new THREE.Vector3( -carProperties.width*0.65,  carProperties.height*0.6, vz ), // 17
     ]
 
-    createFragment(wall, x, y, z, vertices)
+    const geometry = new THREE.Geometry();
 
-    vertices = [
-        [vx, vy,  vz],
-        [vx, vy+offSet,  vz],
-        [-vx, vy+offSet,  vz]
-    ]
+    vertices.forEach(vertice => {
+        geometry.vertices.push(
+            vertice
+        )
+    })
 
-    createFragment(wall, x, y, z, vertices)
+    geometry.faces.push( 
+        new THREE.Face3( 0, 1, 17 ), 
+        new THREE.Face3( 2, 3, 4 ), 
+        new THREE.Face3( 1, 2, 4 ), 
+        new THREE.Face3( 1, 4, 5 ), 
+        new THREE.Face3( 1, 5, 6 ), 
+        new THREE.Face3( 1, 6, 17 ), 
+        new THREE.Face3( 6, 11, 17 ), 
+        new THREE.Face3( 7, 8, 9 ), 
+        new THREE.Face3( 6, 7, 10 ), 
+        new THREE.Face3( 7, 9, 10 ), 
+        new THREE.Face3( 6, 10, 11 ), 
+        new THREE.Face3( 11, 12, 17 ), 
+        new THREE.Face3( 12, 13, 17 ), 
+        new THREE.Face3( 13, 16, 17 ), 
+        new THREE.Face3( 13, 15, 16 ), 
+        new THREE.Face3( 13, 14, 15 ));
 
-    vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
-    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
-    vz = carProperties.depth / 2 * side
+    geometry.computeFaceNormals()
+    geometry.computeVertexNormals()
 
-    vertices = [
-        [-vx, vy,  vz],
-        [-vx-offSet/2, vy+offSet/2,  vz],
-        [vx+offSet/2, vy+offSet/2,  vz]
-    ]
+    geometry.faces.forEach(vertice => {
+        vertice.color = carProperties.color
+    })
 
-    createFragment(wall, x, y, z, vertices)
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide, wireframe: false, })
 
-    vertices = [
-        [vx, vy,  vz],
-        [-vx, vy,  vz],
-        [vx+offSet/2, vy+offSet/2,  vz]
-    ]
-
-    createFragment(wall, x, y, z, vertices)
-
-    vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
-    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
-    vz = carProperties.depth / 2 * side
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 4 * side],
-        [-vx-offSet/2, vy+offSet/2,  vz],
-        [vx+offSet/2, vy+offSet/2,  vz]
-    ]
+    //phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
     
-    createFragment(wall, x, y, z, vertices)
+    phongMesh.position.set(x, y, z)
     
-    vx = carProperties.width / 2 - carProperties.wheelsProperties.radius*1.1
-    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
-    vz = carProperties.depth / 2 * side
-    
-    vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 4 *side],
-        [-vx-offSet/2, vy+offSet/2,  vz],
-        [-vx-offSet, vy+offSet,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-    
-    vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 4 *side],
-        [vx+offSet/2, vy+offSet/2,  vz],
-        [vx+offSet*1.5, vy+offSet/2,  vz]
-    ]
-
-    createFragment(wall, x, y, z, vertices)
-
-    vertices = [
-        [0, carProperties.height / 2,  carProperties.depth / 4 *side],
-        [vx+offSet*1.5, vy+offSet/2,  vz],
-        [carProperties.width, vy+offSet,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-    
-    vertices = [
-        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 2,  vz],
-        [vx+offSet*1.5, vy+offSet/2,  vz],
-        [carProperties.width, vy+offSet,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-    
-    vertices = [
-        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 2,  vz],
-        [carProperties.width, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 1.5,  vz],
-        [carProperties.width, vy+offSet,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-    
-    vertices = [
-        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 2,  vz],
-        [carProperties.width, -carProperties.height / 2 + carProperties.wheelsProperties.radius * 1.5,  vz],
-        [vx+offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-
-    vertices = [
-        [-vx-offSet/2, vy+offSet/2,  vz],
-        [-vx-offSet, vy+offSet,  vz],
-        [-vx-offSet*1.5, vy+offSet/2,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-
-    vertices = [
-        [-carProperties.depth, vy+offSet/2,  vz],
-        [-vx-offSet, vy+offSet,  vz],
-        [-vx-offSet*1.5, vy+offSet/2,  vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-
-    vertices = [
-        [-carProperties.depth, vy+offSet/2, vz],
-        [-vx-offSet*1.5, vy+offSet/2, vz],
-        [-vx-offSet*2.25, vy, vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-
-    vertices = [
-        [-carProperties.depth, vy+offSet/2, vz],
-        [-vx-offSet*2.25, vy, vz],
-        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-    
-    vertices = [
-        [-vx-offSet*2.25, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz],
-        [-vx-offSet*2.25, vy, vz],
-        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz]
-    ]
-    
-    createFragment(wall, x, y, z, vertices)
-
-    wall.name = "wall"
+    wall.add(phongMesh)
     obj.add(wall)
 }
 
-function createFrontWall(obj, x, y, z) {
+function createCarFront(obj, x, y, z) {
     const wall = new THREE.Object3D()
-    
-    vy = -carProperties.height / 2 + carProperties.wheelsProperties.radius*2
-    let vz = carProperties.depth / 2
-    let offSet = carProperties.wheelsProperties.radius
 
-    vertices = [
-        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, -vz],
-        [-carProperties.depth, vy+offSet/2, vz],
-        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, vz]
+    const vz = carProperties.depth/2
+    const wheelsY = y - carProperties.height + carProperties.wheelsProperties.radius
+
+    let vertices = [
+        new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, carProperties.depth*0.3), // 0
+        new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, -carProperties.depth*0.3), // 21
+        new THREE.Vector3( -carProperties.width,  wheelsY, vz ), // 15
+        new THREE.Vector3( -carProperties.width,  wheelsY, -vz ), // 20
+        new THREE.Vector3( -carProperties.width, carProperties.height*0.3, vz ), // 16
+        new THREE.Vector3( -carProperties.width, carProperties.height*0.3, -vz ), // 19
+        new THREE.Vector3( -carProperties.width*0.65,  carProperties.height*0.6, vz ), // 17
+        new THREE.Vector3( -carProperties.width*0.65,  carProperties.height*0.6, -vz ), // 18
     ]
-    
-    createFragment(wall, x, y, z, vertices)
 
-    vertices = [
-        [-carProperties.depth, -carProperties.height / 2 + carProperties.wheelsProperties.radius, -vz],
-        [-carProperties.depth, vy+offSet/2, -vz],
-        [-carProperties.depth, vy+offSet/2, vz]
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(
+            vertice
+        )
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 6, 7), 
+        new THREE.Face3( 7, 1, 0), 
+        new THREE.Face3( 4, 5, 6), 
+        new THREE.Face3( 7, 6, 5), 
+        new THREE.Face3( 2, 3, 4),
+        new THREE.Face3( 5, 4, 3), 
+    );
+
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide, wireframe: false })
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    
+    //phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
+    
+    phongMesh.position.set(x, y, z)
+    
+    wall.add(phongMesh)
+
+    // draw light
+    
+
+    obj.add(wall)
+}
+
+function createCarBack(obj, x, y, z) {
+    const wall = new THREE.Object3D()
+
+    const vz = carProperties.depth/2
+    const wheelsY = y - carProperties.height + carProperties.wheelsProperties.radius
+
+    let vertices = [
+        new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, carProperties.depth*0.3), // 0
+        new THREE.Vector3( -carProperties.width*0.1,  carProperties.height, -carProperties.depth*0.3), // 21
+        new THREE.Vector3( carProperties.width,  carProperties.height*0.6, vz ), // 1
+        new THREE.Vector3( carProperties.width,  carProperties.height*0.6, -vz ), // 22
+        new THREE.Vector3( carProperties.width,  wheelsY*0.4, vz ), // 2
+        new THREE.Vector3( carProperties.width,  wheelsY*0.4, -vz ), // 23
     ]
-    
-    createFragment(wall, x, y, z, vertices)
 
-    wall.name = "wall"
+    geometry = new THREE.Geometry();
+
+    vertices.forEach(vertice => {
+        geometry.vertices.push(
+            vertice
+        )
+    })
+
+    geometry.faces.push( 
+        new THREE.Face3( 0, 1, 2), 
+        new THREE.Face3( 3, 2, 1), 
+        new THREE.Face3( 5, 4, 2), 
+        new THREE.Face3( 2, 3, 5),
+    );
+
+    geometry.computeVertexNormals()
+    geometry.computeFaceNormals()
+
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide, wireframe: false})
+
+    phongMesh = new THREE.Mesh(geometry, phongMaterial)
+    
+    //phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
+    
+    phongMesh.position.set(x, y, z)
+
+    wall.add(phongMesh)
+    
     obj.add(wall)
 }
 
@@ -410,9 +376,10 @@ function createCyberTruck(obj, x, y, z) {
     /* left: 1
        right: -1 
     */
-    createSideWall(car, x, y, z, 1) 
-    createSideWall(car, x, y, z, -1)
-    createFrontWall(car, x, y, z)
+    createCarSide(car, x, y, z, 1) 
+    createCarSide(car, x, y, z, -1)
+    createCarFront(car, x, y, z)
+    createCarBack(car, x, y, z)
 
     obj.add(car)
     console.log("car")
@@ -432,6 +399,7 @@ function createFloor(x, y, z) {
     lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
 
     phongMesh.receiveShadow = true;
+    phongMesh.castShadow = true
     lambertMesh.receiveShadow = true;
 
     phongMesh.position.set(x, y, z)
@@ -469,9 +437,7 @@ function createPalanque(x, y, z) {
     //palanque.add(lambertMesh)
     scene.add(palanque)
 
-    //Criar o CYBERTRUCK
-    //createCube(palanque, 0, carProperties.height / 2 + palanqueProperties.height, 0)
-
+    //Cria o CYBERTRUCK
     createCyberTruck(palanque, 0, carProperties.height / 2 + palanqueProperties.height, 0)
 
 }
@@ -560,7 +526,7 @@ function init() {
 
     //Cameras
     createPerspectiveCamera()
-    createOrthographicCamera(floorProperties.width, 0, 0)
+    createOrthographicCamera(0, floorProperties.height+palanqueProperties.height, floorProperties.depth)
     camera = perspectiveCamera
 
     console.log(holofote1)
