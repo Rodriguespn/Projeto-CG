@@ -5,7 +5,7 @@ let dirLight, scene, renderer, palanque, geometry, material, mesh, prevFrameTime
 const background = '#000000'
 
 const palanqueProperties = {
-    radius: 150,
+    radius: 170,
     height: 6,
     color: '#4c280f',
     rotationFactor: 100
@@ -29,8 +29,8 @@ const carProperties = {
     },
     windowsColor: "#282828",
     frontLightColor: "#ade6d8",
-    backLightColor: "#000000",
-    color: '#C0C0C0'
+    backLightColor: "#8B0000",
+    color: '#505050'
 }
 
 const directionalLightProperties = {
@@ -74,28 +74,26 @@ function createWheel(obj, x, y, z) {
 
     geometry = new THREE.CylinderGeometry(carProperties.wheelsProperties.radius, carProperties.wheelsProperties.radius, carProperties.wheelsProperties.height, 100);
 
-    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.wheelsProperties.color })
-    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.wheelsProperties.color })
-    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.wheelsProperties.color })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.wheelsProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.wheelsProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.wheelsProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
-    basicMesh = new THREE.Mesh(geometry, basicMaterial)
-    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
-
-    //phongMesh.receiveShadow = true
-    phongMesh.castShadow = true
-    //lambertMesh.receiveShadow = true
-    lambertMesh.castShadow = true
-    basicMesh.receiveShadow = true
-    basicMesh.castShadow = true
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
 
     phongMesh.position.set(x, y, z)
-    basicMesh.position.set(x, y, z)
-    lambertMesh.position.set(x, y, z)
 
     phongMesh.rotation.set(Math.PI / 2, 0, 0)
-    lambertMesh.rotation.set(Math.PI / 2, 0, 0)
-    basicMesh.rotation.set(Math.PI / 2, 0, 0)
     
     wheel.add(phongMesh)
 
@@ -109,28 +107,26 @@ function createWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
 
     geometry = new THREE.BoxGeometry(carProperties.wheelsProperties.radius / 2, carProperties.depth - carProperties.wheelsProperties.height, carProperties.wheelsProperties.radius / 2);
 
-    phongMaterial = new THREE.MeshPhongMaterial({ color: "#3a363b" })
-    basicMaterial = new THREE.MeshBasicMaterial({ color: "#3a363b" })
-    lambertMaterial = new THREE.MeshLambertMaterial({ color: "#3a363b" })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
-    basicMesh = new THREE.Mesh(geometry, basicMaterial)
-    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
-
-    //phongMesh.receiveShadow = true
-    phongMesh.castShadow = true
-    //lambertMesh.receiveShadow = true
-    lambertMesh.castShadow = true
-    basicMesh.receiveShadow = true
-    basicMesh.castShadow = true
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
 
     phongMesh.position.set(x, y, z)
-    basicMesh.position.set(x, y, z)
-    lambertMesh.position.set(x, y, z)
 
     phongMesh.rotation.set(rotX, rotY, rotZ)
-    lambertMesh.rotation.set(rotX, rotY, rotZ)
-    basicMesh.rotation.set(rotX, rotY, rotZ)
     
     wheelConnection.add(phongMesh)
     wheelConnection.name = "wheel connection"
@@ -143,28 +139,26 @@ function createMainWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
 
     geometry = new THREE.BoxGeometry(carProperties.wheelsProperties.radius / 2, carProperties.depth - carProperties.wheelsProperties.radius / 2, carProperties.wheelsProperties.radius / 2);
 
-    phongMaterial = new THREE.MeshPhongMaterial({ color: "#3a363b" })
-    basicMaterial = new THREE.MeshBasicMaterial({ color: "#3a363b" })
-    lambertMaterial = new THREE.MeshLambertMaterial({ color: "#3a363b" })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
-    basicMesh = new THREE.Mesh(geometry, basicMaterial)
-    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
-
-    //phongMesh.receiveShadow = true
-    phongMesh.castShadow = true
-    //lambertMesh.receiveShadow = true
-    lambertMesh.castShadow = true
-    basicMesh.receiveShadow = true
-    basicMesh.castShadow = true
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
 
     phongMesh.position.set(x, y, z)
-    basicMesh.position.set(x, y, z)
-    lambertMesh.position.set(x, y, z)
 
     phongMesh.rotation.set(rotX, rotY, rotZ)
-    lambertMesh.rotation.set(rotX, rotY, rotZ)
-    basicMesh.rotation.set(rotX, rotY, rotZ)
     
     wheelConnection.add(phongMesh)
 
@@ -255,13 +249,23 @@ function createCarSide(obj, x, y, z, side) {
         vertice.color = carProperties.color
     })
 
-    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide, wireframe: false, })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    //phongMesh.receiveShadow = true
-    phongMesh.castShadow = true
+    phongMesh.receiveShadow = true
     
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
     phongMesh.position.set(x, y, z)
     
     wall.add(phongMesh)
@@ -305,12 +309,24 @@ function createCarFront(obj, x, y, z) {
     geometry.computeVertexNormals()
     geometry.computeFaceNormals()
 
-    phongMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide, wireframe: false })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    //phongMesh.receiveShadow = true
-    phongMesh.castShadow = true
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
+    phongMesh.position.set(x, y, z)
     
     phongMesh.position.set(x, y, z)
     
@@ -355,13 +371,23 @@ function createCarBack(obj, x, y, z) {
     geometry.computeVertexNormals()
     geometry.computeFaceNormals()
 
-    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide, wireframe: false})
+    phongMaterial = new THREE.MeshPhongMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: carProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
-    //phongMesh.receiveShadow = true
-    phongMesh.castShadow = true
+    phongMesh.receiveShadow = true
     
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
+
     phongMesh.position.set(x, y, z)
 
     wall.add(phongMesh)
@@ -390,25 +416,26 @@ function createFloor(x, y, z) {
     floor = new THREE.Object3D()
     geometry = new THREE.BoxGeometry(floorProperties.width, floorProperties.height, floorProperties.depth);
 
-    phongMaterial = new THREE.MeshPhongMaterial({ color: floorProperties.color })
-    basicMaterial = new THREE.MeshBasicMaterial({ color: floorProperties.color })
-    lambertMaterial = new THREE.MeshLambertMaterial({ color: floorProperties.color })
+    phongMaterial = new THREE.MeshPhongMaterial({ color: floorProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: floorProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: floorProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
-    basicMesh = new THREE.Mesh(geometry, basicMaterial)
-    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
-
-    phongMesh.receiveShadow = true;
-    phongMesh.castShadow = true
-    lambertMesh.receiveShadow = true;
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
 
     phongMesh.position.set(x, y, z)
-    basicMesh.position.set(x, y, z)
-    lambertMesh.position.set(x, y, z)
 
     floor.add(phongMesh)
-    //floor.add(basicMesh)
-    //floor.add(lambertMesh)
     scene.add(floor)
 }
 
@@ -416,21 +443,24 @@ function createPalanque(x, y, z) {
     palanque = new THREE.Object3D()
     geometry = new THREE.CylinderGeometry( palanqueProperties.radius, palanqueProperties.radius, palanqueProperties.height, 32);
 
-
-    phongMaterial = new THREE.MeshPhongMaterial({ color: palanqueProperties.color})
-    basicMaterial = new THREE.MeshBasicMaterial({ color: palanqueProperties.color})
-    lambertMaterial = new THREE.MeshLambertMaterial({ color: palanqueProperties.color})
+    phongMaterial = new THREE.MeshPhongMaterial({ color: palanqueProperties.color, side: THREE.DoubleSide })
+    phongMaterial.name = "phong"
+    basicMaterial = new THREE.MeshBasicMaterial({ color: palanqueProperties.color, side: THREE.DoubleSide })
+    basicMaterial.name = "basic"
+    lambertMaterial = new THREE.MeshLambertMaterial({ color: palanqueProperties.color, side: THREE.DoubleSide })
+    lambertMaterial.name = "lambert"
 
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
-    basicMesh = new THREE.Mesh(geometry, basicMaterial)
-    lambertMesh = new THREE.Mesh(geometry, lambertMaterial)
-
-    phongMesh.receiveShadow = true;
-    lambertMesh.receiveShadow = true;
+    
+    phongMesh.receiveShadow = true
+    
+    phongMesh.userData = { 
+        "phong": phongMaterial, 
+        "lambert": lambertMaterial, 
+        "basic": basicMaterial
+    }
 
     phongMesh.position.set(x, y, z)
-    basicMesh.position.set(x, y, z)
-    lambertMesh.position.set(x, y, z)
 
     palanque.add(phongMesh)
     //palanque.add(basicMesh)

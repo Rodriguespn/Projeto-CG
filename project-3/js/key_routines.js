@@ -19,9 +19,41 @@ let wWPress = {
         holofote1.illuminationCalculationOnorOff()
         holofote2.illuminationCalculationOnorOff()
         holofote3.illuminationCalculationOnorOff()
-
+        toggleBasicPhong(scene)
         this.state = false
     }
+}
+
+function toggleBasicPhong(obj) {
+    if (obj == undefined) return
+
+    if (obj.material) {
+        if (obj.material.name == "phong" || obj.material.name == "lambert") {
+            obj.material = obj.userData["basic"]
+        } else if (obj.material.name == "basic") {
+            obj.material = obj.userData["phong"]
+        }
+    }
+    for (let i = 0; i < obj.children.length; i++) {
+        toggleBasicPhong(obj.children[i])
+    }
+    return 
+}
+
+function toggleLambertPhong(obj) {
+    if (obj == undefined) return
+
+    if (obj.material) {
+        if (obj.material.name == "phong") {
+            obj.material = obj.userData["lambert"]
+        } else if (obj.material.name == "lambert") {
+            obj.material = obj.userData["phong"]
+        }
+    }
+    for (let i = 0; i < obj.children.length; i++) {
+        toggleLambertPhong(obj.children[i])
+    }
+    return 
 }
 
 let eEPress = {
@@ -31,6 +63,7 @@ let eEPress = {
         holofote1.shadingAlternation()
         holofote2.shadingAlternation()
         holofote3.shadingAlternation()
+        toggleLambertPhong(scene)
         this.state = false
     }
 }
