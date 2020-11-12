@@ -29,9 +29,10 @@ function toggleBasicPhong(obj) {
 
     if (obj.material) {
         if (obj.material.name == "phong" || obj.material.name == "lambert") {
+            obj.userData.previousMaterial = obj.material.name
             obj.material = obj.userData["basic"]
         } else if (obj.material.name == "basic") {
-            obj.material = obj.userData["phong"]
+            obj.material = obj.userData[obj.userData.previousMaterial]
         }
     }
     for (let i = 0; i < obj.children.length; i++) {
@@ -46,8 +47,10 @@ function toggleLambertPhong(obj) {
     if (obj.material) {
         if (obj.material.name == "phong") {
             obj.material = obj.userData["lambert"]
+            obj.userData.previousMaterial = obj.material.name
         } else if (obj.material.name == "lambert") {
             obj.material = obj.userData["phong"]
+            obj.userData.previousMaterial = obj.material.name
         }
     }
     for (let i = 0; i < obj.children.length; i++) {

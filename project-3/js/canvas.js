@@ -105,7 +105,8 @@ function createWheel(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -138,7 +139,8 @@ function createWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -170,7 +172,8 @@ function createMainWheelConnection(obj, x, y, z, { rotX, rotY, rotZ }) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -280,7 +283,8 @@ function createCarSide(obj, x, y, z, side) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -321,7 +325,8 @@ function createCarSide(obj, x, y, z, side) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -382,7 +387,8 @@ function createCarFront(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -428,7 +434,8 @@ function createCarFront(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -471,7 +478,8 @@ function createCarFront(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -528,7 +536,8 @@ function createCarBack(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -571,7 +580,8 @@ function createCarBack(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -614,7 +624,8 @@ function createCarBack(obj, x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -659,7 +670,8 @@ function createFloor(x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
@@ -686,7 +698,8 @@ function createPalanque(x, y, z) {
     phongMesh.userData = { 
         "phong": phongMaterial, 
         "lambert": lambertMaterial, 
-        "basic": basicMaterial
+        "basic": basicMaterial,
+        previousMaterial: "phong"
     }
 
     phongMesh.position.set(x, y, z)
