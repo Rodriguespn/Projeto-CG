@@ -100,6 +100,11 @@ class Holofote extends THREE.Object3D {
             scene.remove(this.cone)
             this.cone = this.coneBasic
             scene.add(this.cone)
+
+            scene.remove(this.bulb)
+            this.bulb = this.bulbBasic
+            scene.add(this.bulb)
+
             this.activeIllumination = false
         }
         else {
@@ -107,11 +112,22 @@ class Holofote extends THREE.Object3D {
                 scene.remove(this.cone)
                 this.cone = this.coneLambert
                 scene.add(this.cone)
+                if(!this.active) {
+                    scene.remove(this.bulb)
+                    this.bulb = this.bulbLambert
+                    scene.add(this.bulb)
+                }
             }
             else {
                 scene.remove(this.cone)
                 this.cone = this.conePhong
                 scene.add(this.cone)
+                
+                if(!this.active) {
+                    scene.remove(this.bulb)
+                    this.bulb = this.bulbPhong
+                    scene.add(this.bulb)
+                }
             }
             this.activeIllumination = true   
         }
