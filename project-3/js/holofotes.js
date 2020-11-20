@@ -14,7 +14,7 @@ const holofoteProperties = {
 
 const spotLightProperties = {
     //starting properties of a spotlight 
-    color: "#FFFFFF",
+    color: "#0000ff",
     intensity: 0,
     penumbra: 0.2,
     angle: Math.PI/5,
