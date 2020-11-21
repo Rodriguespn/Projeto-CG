@@ -705,8 +705,6 @@ function createPalanque(x, y, z) {
     phongMesh.position.set(x, y, z)
 
     palanque.add(phongMesh)
-    //palanque.add(basicMesh)
-    //palanque.add(lambertMesh)
     scene.add(palanque)
 
     //Cria o CYBERTRUCK
