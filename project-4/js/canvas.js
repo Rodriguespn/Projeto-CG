@@ -83,9 +83,10 @@ function createBall(obj, x, y, z) {
         side: THREE.DoubleSide,
     })
 
-    const mesh = new THREE.Mesh(geometry, basicMaterial)
+    const mesh = new THREE.Mesh(geometry, phongMaterial)
     
     mesh.receiveShadow = true
+    mesh.castShadow = true
     
     mesh.userData = { 
         "phong": phongMaterial,
@@ -129,9 +130,9 @@ function createFlag(obj, x, y, z) {
         side: THREE.DoubleSide,
     })
 
-    let mesh = new THREE.Mesh(geometry, basicMaterial)
+    let mesh = new THREE.Mesh(geometry, phongMaterial)
     
-    mesh.receiveShadow = true
+    mesh.castShadow = true
     
     mesh.userData = { 
         "phong": phongMaterial,
@@ -165,9 +166,9 @@ function createFlag(obj, x, y, z) {
         side: THREE.DoubleSide,
     })
 
-    mesh = new THREE.Mesh(geometry, basicMaterial)
+    mesh = new THREE.Mesh(geometry, phongMaterial)
     
-    mesh.receiveShadow = true
+    mesh.castShadow = true
     
     mesh.userData = { 
         "phong": phongMaterial,
@@ -218,7 +219,7 @@ function createGround(obj, x, y, z) {
         side: THREE.DoubleSide,
     })
 
-    const mesh = new THREE.Mesh(geometry, basicMaterial)
+    const mesh = new THREE.Mesh(geometry, phongMaterial)
     
     mesh.receiveShadow = true
     
@@ -316,6 +317,10 @@ function init() {
     //Cameras
     controls = new THREE.OrbitControls(camera, renderer.domElement)
     render()
+    
+    // Teste
+    const light = new THREE.AmbientLight( 0x404040 ); // soft white light
+    scene.add( light );
 
     window.addEventListener("resize", onResize)
     /*window.addEventListener('keydown', keysPressed)
