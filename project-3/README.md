@@ -1,7 +1,7 @@
-# Project-1
+# Project-3
 
 Terceiro Trabalho
-Cena Simples e Interativa com Câmaras Fixas
+Cena Interactiva com Malhas, Materiais e Luzes
 
 ### ToDos
 - 

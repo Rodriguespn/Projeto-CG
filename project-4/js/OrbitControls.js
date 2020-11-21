@@ -568,7 +568,7 @@ THREE.OrbitControls = function ( object, domElement ) {
 				needsUpdate = true;
 				break;
 
-			case scope.keys.LEFT:
+			/*case scope.keys.LEFT:
 				pan( scope.keyPanSpeed, 0 );
 				needsUpdate = true;
 				break;
@@ -577,6 +577,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 				pan( - scope.keyPanSpeed, 0 );
 				needsUpdate = true;
 				break;
+			*/
+
 		}
 
 		if ( needsUpdate ) {

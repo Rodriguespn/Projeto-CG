@@ -1,4 +1,4 @@
-# Project-1
+# Project-2
 
 Segundo Trabalho
 Cena Simples Interativa com Câmara Móvel e Colisões
