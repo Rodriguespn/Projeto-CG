@@ -3,7 +3,7 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
-let controls
+let controls, angle = 0
 
 const background = '#000000'
 
@@ -85,8 +85,8 @@ function createBall(obj, x, y, z) {
 
     const mesh = new THREE.Mesh(geometry, phongMaterial)
     
-    mesh.receiveShadow = true
     mesh.castShadow = true
+    mesh.receiveShadow = true
     
     mesh.userData = { 
         "phong": phongMaterial,
@@ -95,6 +95,7 @@ function createBall(obj, x, y, z) {
 
     ball.add(mesh)
     ball.position.set(x, y, z)
+    ball.name = "ball"
     obj.add(ball)
 }
 
@@ -230,6 +231,7 @@ function createGround(obj, x, y, z) {
 
     ground.add(mesh)
     ground.position.set(x, y, z)
+    ground.name = "ground"
 
     createBall(ground, groundProperties.side/3, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
 
@@ -293,6 +295,19 @@ function animate() {
     // keysPressedChecker()
     
     controls.update()
+
+    // teste rotacao da bola
+    scene.children.forEach(element => {
+        if (element.name == "ground") {
+            element.children.forEach(element => {
+                if (element.name == "ball") {
+                    angle += Math.PI / 180
+                    const position = { x: groundProperties.side/3, y: groundProperties.height/2 + groundProperties.ballProperties.radius, z: groundProperties.side/3}
+                    element.position.set(position.x * Math.cos(angle), position.y, position.z * Math.sin(angle))
+                }
+            })
+        }
+    });
     render()
 
     requestAnimationFrame(animate)
@@ -321,8 +336,47 @@ function init() {
     // Teste
     const light = new THREE.AmbientLight( 0x404040 ); // soft white light
     scene.add( light );
+    //criar luz direcional
+    dirLight = new DirLight(40, 40, 60)
 
     window.addEventListener("resize", onResize)
     /*window.addEventListener('keydown', keysPressed)
     window.addEventListener('keyup', keysReleased)*/
+}
+
+// teste
+const directionalLightProperties = {
+    intensityOff: 0,
+    intensityOn: 1,
+    color: '#ffffff'
+}
+
+class DirLight extends THREE.Object3D {
+    constructor(x, y, z) {
+        super()
+        this.active = true
+        this.light = createDirectionalLight(x, y, z)
+    }
+
+    turnLightOnorOff() {
+        if (this.active){
+            //vai desligar a luz
+            this.light.intensity = directionalLightProperties.intensityOff
+            this.active = false
+        }
+        else {
+            this.light.intensity = directionalLightProperties.intensityOn
+            this.active = true
+        }
+    }
+}
+
+function createDirectionalLight(x, y, z) {
+    var light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOn);
+    light.castShadow = true;
+    light.position.set(x, y, z);
+    light.target.position.set(0, 0, 0);
+    scene.add(light);
+    scene.add(light.target);
+    return light
 }
