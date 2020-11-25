@@ -11,4 +11,6 @@ Cena Interativa com Luz Pontual, Mensagens e Texturas
 - (Todos) Menu de pausa e reset
 
 ### Dúvidas
-- 
+- Luz direccional está com umas sombras estranhas
+- Problema a trocar as meshes
+- Como é que se pára o movimento da bola? (método pedido pelos docentes)

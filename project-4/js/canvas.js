@@ -2,7 +2,7 @@
 
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
-let dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
+let pLight, dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 let controls, angle = 0
 
 const background = '#000000'
@@ -247,6 +247,10 @@ function createScene() {
 
     createGround(scene, 0, -groundProperties.height/2, 0)
     scene.add(new THREE.AxesHelper(10))
+
+
+    //teste
+    console.log(scene)
 }
 
 function loadTexture(url) {
@@ -292,7 +296,7 @@ function animate() {
         deltaFrameTime = (nextFrameTime - prevFrameTime) / 1000
     }
 
-    // keysPressedChecker()
+    keysPressedChecker()
     
     controls.update()
 
@@ -334,14 +338,17 @@ function init() {
     render()
     
     // Teste
-    const light = new THREE.AmbientLight( 0x404040 ); // soft white light
-    scene.add( light );
+    //const light = new THREE.AmbientLight( 0x404040 ); // soft white light
+    //scene.add( light );
+
     //criar luz direcional
-    dirLight = new DirLight(40, 40, 60)
+    dirLight = new DirLight(60, 40, 40)
+    //criar luz pontual
+    pLight = new PLight(-20, 30, 20)
 
     window.addEventListener("resize", onResize)
-    /*window.addEventListener('keydown', keysPressed)
-    window.addEventListener('keyup', keysReleased)*/
+    window.addEventListener('keydown', keysPressed)
+    window.addEventListener('keyup', keysReleased)
 }
 
 // teste
@@ -349,6 +356,32 @@ const directionalLightProperties = {
     intensityOff: 0,
     intensityOn: 1,
     color: '#ffffff'
+}
+
+const pointLightProperties = {
+    intensityOff: 0,
+    intensityOn: 1,
+    color: '#ffffff'
+}
+
+class PLight extends THREE.Object3D {
+    constructor(x, y, z) {
+        super()
+        this.active = true
+        this.light = createPointLight(x, y, z)
+    }
+    turnLightOnorOff() {
+        if (this.active){
+            //vai desligar a luz
+            this.light.intensity = pointLightProperties.intensityOff
+            this.active = false
+        }
+        else {
+            this.light.intensity = pointLightProperties.intensityOn
+            this.active = true
+        }
+    }
+
 }
 
 class DirLight extends THREE.Object3D {
@@ -371,6 +404,14 @@ class DirLight extends THREE.Object3D {
     }
 }
 
+function createPointLight(x, y, z) {
+    const light = new THREE.PointLight(pointLightProperties.color, pointLightProperties.intensityOn);
+    light.position.set(x, y, z);
+    light.castShadow = true;
+    scene.add(light);
+    return light
+}
+
 function createDirectionalLight(x, y, z) {
     var light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOn);
     light.castShadow = true;
@@ -379,4 +420,44 @@ function createDirectionalLight(x, y, z) {
     scene.add(light);
     scene.add(light.target);
     return light
+}
+
+function switchWireframes(obj) {
+    if (obj == undefined) return
+
+    if (obj.material) {
+        if (obj.material.name == "phong" || obj.material.name == "basic") {
+            if (obj.material.wireframe) {
+                obj.material.wireframe = false
+            }
+            else {
+                obj.material.wireframe = true
+            }
+        }
+    }
+    for (let i = 0; i < obj.children.length; i++) {
+        switchWireframes(obj.children[i])
+    }
+    return 
+}
+
+function illuminationCalculation(obj) {
+    if (obj == undefined) return
+
+    if (obj.material) {
+        if (obj.material.name == "phong") {
+            obj.material = obj.material.userData["basic"]
+        }
+        else if (obj.material.name == "basic"){
+            obj.material = obj.material.userData["phong"]
+        }
+    }
+    for (let i = 0; i < obj.children.length; i++) {
+        illuminationCalculation(obj.children[i])
+    }
+    return 
+}
+
+function ballMovement() {
+
 }
