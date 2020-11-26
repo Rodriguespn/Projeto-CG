@@ -305,9 +305,12 @@ function animate() {
         if (element.name == "ground") {
             element.children.forEach(element => {
                 if (element.name == "ball") {
-                    angle += Math.PI / 180
-                    const position = { x: groundProperties.side/3, y: groundProperties.height/2 + groundProperties.ballProperties.radius, z: groundProperties.side/3}
-                    element.position.set(position.x * Math.cos(angle), position.y, position.z * Math.sin(angle))
+                    if (element.userData.rotating) {
+                        angle += Math.PI / 180
+                        const position = { x: groundProperties.side/3, y: groundProperties.height/2 + groundProperties.ballProperties.radius, z: groundProperties.side/3}
+                        element.position.set(position.x * Math.cos(angle), position.y, position.z * Math.sin(angle))
+                    }
+                    
                 }
             })
         }
@@ -444,12 +447,12 @@ function switchWireframes(obj) {
 function illuminationCalculation(obj) {
     if (obj == undefined) return
 
-    if (obj.material) {
+    if (obj.type == "Mesh") {
         if (obj.material.name == "phong") {
-            obj.material = obj.material.userData["basic"]
+            obj.material = obj.userData["basic"]
         }
-        else if (obj.material.name == "basic"){
-            obj.material = obj.material.userData["phong"]
+        else if (obj.material.name == "basic") {
+            obj.material = obj.userData["phong"]
         }
     }
     for (let i = 0; i < obj.children.length; i++) {
@@ -459,5 +462,18 @@ function illuminationCalculation(obj) {
 }
 
 function ballMovement() {
+    if (scene.children[0].children[1].userData.rotating) {
+        scene.children[0].children[1].userData.rotating = false
+    }
+    else {
+        scene.children[0].children[1].userData.rotating = true
+    }
+}
+
+function pauseScene() {
+    
+}
+
+function resetScene() {
 
 }

@@ -43,7 +43,7 @@ let bBPress = {
     state: false,
     //Controla a bola, inicia movimento ou pára movimento
     action: function() {
-        
+        ballMovement()
         this.state = false
     }
 }
@@ -61,6 +61,7 @@ let rRPress = {
     //reset o programa
     action: function() {
         
+        this.state = false
     }
 }
 

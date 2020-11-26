@@ -12,5 +12,4 @@ Cena Interativa com Luz Pontual, Mensagens e Texturas
 
 ### Dúvidas
 - Luz direccional está com umas sombras estranhas
-- Problema a trocar as meshes
-- Como é que se pára o movimento da bola? (método pedido pelos docentes)
+- Como é que se abranda o movimento da bola? (método pedido pelos docentes)
