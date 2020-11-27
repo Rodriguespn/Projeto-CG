@@ -287,6 +287,21 @@ function onResize() {
     }
 }
 
+function moveBall(element) {
+    angle += Math.PI / 180
+    const position = { 
+        x: groundProperties.side/3, 
+        y: groundProperties.height/2 + groundProperties.ballProperties.radius, 
+        z: groundProperties.side/3
+    }
+
+    element.position.set(
+        position.x * Math.cos(angle), 
+        position.y, 
+        position.z * Math.sin(angle)
+    )
+}
+
 // animates the scene
 function animate() {
     prevFrameTime = nextFrameTime
@@ -306,9 +321,7 @@ function animate() {
             element.children.forEach(element => {
                 if (element.name == "ball") {
                     if (element.userData.rotating) {
-                        angle += Math.PI / 180
-                        const position = { x: groundProperties.side/3, y: groundProperties.height/2 + groundProperties.ballProperties.radius, z: groundProperties.side/3}
-                        element.position.set(position.x * Math.cos(angle), position.y, position.z * Math.sin(angle))
+                        moveBall(element)
                     }
                     
                 }
@@ -345,9 +358,16 @@ function init() {
     //scene.add( light );
 
     //criar luz direcional
-    dirLight = new DirLight(60, 40, 40, scene)
+    dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, scene)
 
     scene.add(dirLight)
+
+    /*const helper = new THREE.DirectionalLightHelper( dirLight, 5 );
+    scene.add( helper );
+
+    var shadowHelper = new THREE.CameraHelper( dirLight.shadow.camera );
+    scene.add( shadowHelper );*/
+
     //criar luz pontual
     pLight = new PLight(-20, 30, 20, scene)
     scene.add(pLight)
@@ -358,79 +378,6 @@ function init() {
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', keysPressed)
     window.addEventListener('keyup', keysReleased)
-}
-
-// teste
-const directionalLightProperties = {
-    intensityOff: 0,
-    intensityOn: 0.3,
-    color: '#ffffff'
-}
-
-const pointLightProperties = {
-    intensityOff: 0,
-    intensityOn: 1,
-    color: '#ffffff'
-}
-
-class PLight extends THREE.PointLight {
-    constructor(x, y, z, lookAtObject) {
-        super(pointLightProperties.color, pointLightProperties.intensityOn)
-        this.active = true
-
-        this.position.set(x, y, z);
-        this.castShadow = true;
-        this.target = lookAtObject
-    }
-
-    turnLightOnorOff() {
-        if (this.active){
-            //vai desligar a luz
-            this.intensity = pointLightProperties.intensityOff
-            this.active = false
-        }
-        else {
-            this.intensity = pointLightProperties.intensityOn
-            this.active = true
-        }
-    }
-
-}
-
-class DirLight extends THREE.DirectionalLight {
-    constructor(x, y, z, lookAtObject) {
-        super(directionalLightProperties.color, directionalLightProperties.intensityOn)
-
-        this.active = true
-
-        this.castShadow = true
-        this.position.set(x, y, z);
-        
-        this.target = lookAtObject
-    }
-
-    turnLightOnorOff() {
-        if (this.active){
-            //vai desligar a luz
-            this.intensity = directionalLightProperties.intensityOff
-            this.active = false
-        }
-        else {
-            this.intensity = directionalLightProperties.intensityOn
-            this.active = true
-        }
-    }
-
-    createDirectionalLight(x, y, z) {
-        this.light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOn);
-        this.light.castShadow = true;
-        this.light.active = this.active
-        this.light.changeActiveState = false
-        this.light.position.set(x, y, z);
-        this.light.target.position.set(0, 0, 0);
-        //scene.add(this.light);
-        //scene.add(light.target);
-    }
 }
 
 function switchWireframes(obj) {
