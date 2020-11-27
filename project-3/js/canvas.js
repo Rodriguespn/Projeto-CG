@@ -694,6 +694,7 @@ function createPalanque(x, y, z) {
     phongMesh = new THREE.Mesh(geometry, phongMaterial)
     
     phongMesh.receiveShadow = true
+    phongMesh.castShadow = true
     
     phongMesh.userData = { 
         "phong": phongMaterial, 

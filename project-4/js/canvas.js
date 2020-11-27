@@ -4,6 +4,7 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 let controls, angle = 0
+let text
 
 const background = '#000000'
 
