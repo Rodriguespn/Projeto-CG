@@ -32,13 +32,13 @@ const groundProperties = {
         flagPoleProperties: {
             color: "#ffffff",
             textureUrl: 'assets/flagpole_texture.png',
-            bumpUrl: 'assets/grass_bump.jpg',
+            bumpUrl: '',
         },
         flagProperties: {
             width: 2,
             color: "#ffffff",
             textureUrl: 'assets/flag_texture.jpg',
-            bumpUrl: 'assets/grass_bump.jpg',
+            bumpUrl: '',
         },
 
     }
