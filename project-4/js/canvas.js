@@ -40,7 +40,6 @@ const groundProperties = {
             textureUrl: 'assets/flag_texture.jpg',
             bumpUrl: '',
         },
-
     }
 }
 
@@ -346,9 +345,15 @@ function init() {
     //scene.add( light );
 
     //criar luz direcional
-    dirLight = new DirLight(60, 40, 40)
+    dirLight = new DirLight(60, 40, 40, scene)
+
+    scene.add(dirLight)
     //criar luz pontual
-    pLight = new PLight(-20, 30, 20)
+    pLight = new PLight(-20, 30, 20, scene)
+    scene.add(pLight)
+
+    //const skybox = new CaixaCelestial(0, 0, 0)
+    //scene.add(skybox)
 
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', keysPressed)
@@ -358,7 +363,7 @@ function init() {
 // teste
 const directionalLightProperties = {
     intensityOff: 0,
-    intensityOn: 1,
+    intensityOn: 0.3,
     color: '#ffffff'
 }
 
@@ -368,62 +373,64 @@ const pointLightProperties = {
     color: '#ffffff'
 }
 
-class PLight extends THREE.Object3D {
-    constructor(x, y, z) {
-        super()
+class PLight extends THREE.PointLight {
+    constructor(x, y, z, lookAtObject) {
+        super(pointLightProperties.color, pointLightProperties.intensityOn)
         this.active = true
-        this.light = createPointLight(x, y, z)
+
+        this.position.set(x, y, z);
+        this.castShadow = true;
+        this.target = lookAtObject
     }
+
     turnLightOnorOff() {
         if (this.active){
             //vai desligar a luz
-            this.light.intensity = pointLightProperties.intensityOff
+            this.intensity = pointLightProperties.intensityOff
             this.active = false
         }
         else {
-            this.light.intensity = pointLightProperties.intensityOn
+            this.intensity = pointLightProperties.intensityOn
             this.active = true
         }
     }
 
 }
 
-class DirLight extends THREE.Object3D {
-    constructor(x, y, z) {
-        super()
+class DirLight extends THREE.DirectionalLight {
+    constructor(x, y, z, lookAtObject) {
+        super(directionalLightProperties.color, directionalLightProperties.intensityOn)
+
         this.active = true
-        this.light = createDirectionalLight(x, y, z)
+
+        this.castShadow = true
+        this.position.set(x, y, z);
+        
+        this.target = lookAtObject
     }
 
     turnLightOnorOff() {
         if (this.active){
             //vai desligar a luz
-            this.light.intensity = directionalLightProperties.intensityOff
+            this.intensity = directionalLightProperties.intensityOff
             this.active = false
         }
         else {
-            this.light.intensity = directionalLightProperties.intensityOn
+            this.intensity = directionalLightProperties.intensityOn
             this.active = true
         }
     }
-}
 
-function createPointLight(x, y, z) {
-    const light = new THREE.PointLight(pointLightProperties.color, pointLightProperties.intensityOn);
-    light.position.set(x, y, z);
-    light.castShadow = true;
-    scene.add(light);
-    return light
-}
-
-function createDirectionalLight(x, y, z) {
-    var light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOn);
-    light.castShadow = true;
-    light.position.set(x, y, z);
-    light.target.position.set(0, 0, 0);
-    scene.add(light);
-    scene.add(light.target);
-    return light
+    createDirectionalLight(x, y, z) {
+        this.light = new THREE.DirectionalLight(directionalLightProperties.color, directionalLightProperties.intensityOn);
+        this.light.castShadow = true;
+        this.light.active = this.active
+        this.light.changeActiveState = false
+        this.light.position.set(x, y, z);
+        this.light.target.position.set(0, 0, 0);
+        //scene.add(this.light);
+        //scene.add(light.target);
+    }
 }
 
 function switchWireframes(obj) {
