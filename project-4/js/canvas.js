@@ -25,7 +25,7 @@ const groundProperties = {
         bumpUrl: 'assets/golf_ball_texture.jpg',
         bumpScale: 0.1,
         wireframe: false,
-        specular: '#111111',
+        specular: '#ffffff',
         shininess: 100,
     },
     golfFlagProperties: {
@@ -382,18 +382,18 @@ function init() {
 
     scene.add(dirLight)
 
-    let helper = new THREE.DirectionalLightHelper( dirLight, 5 );
-    scene.add( helper )
+    let helper = new THREE.DirectionalLightHelper(dirLight, 5)
+    scene.add(helper)
 
-    let shadowHelper = new THREE.CameraHelper( dirLight.shadow.camera )
-    scene.add( shadowHelper )
+    let shadowHelper = new THREE.CameraHelper(dirLight.shadow.camera)
+    scene.add(shadowHelper)
 
     //criar luz pontual
     pLight = new PLight(-groundProperties.side / 4, groundProperties.ballProperties.radius, groundProperties.side / 4, ball)
     scene.add(pLight)
 
-    helper = new THREE.DirectionalLightHelper( pLight, 5 );
-    scene.add( helper )
+    helper = new THREE.DirectionalLightHelper(pLight, 5)
+    scene.add(helper)
 
     //const skybox = new CaixaCelestial(0, 0, 0)
     //scene.add(skybox)
