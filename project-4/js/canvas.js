@@ -186,6 +186,8 @@ function createFlag(obj, x, y, z) {
     golfFlag.add(flag)
     golfFlag.add(flagpole)
     golfFlag.position.set(x, y, z)
+
+    golfFlag.name = "golfFlag"
     obj.add(golfFlag)
 }
 
@@ -287,8 +289,7 @@ function onResize() {
     }
 }
 
-function moveBall(element) {
-    angle += Math.PI / 180
+function rotateObject(element, angle) {
     const position = { 
         x: groundProperties.side/3, 
         y: groundProperties.height/2 + groundProperties.ballProperties.radius, 
@@ -315,15 +316,21 @@ function animate() {
     
     controls.update()
 
+    angle += Math.PI / 180
+
     // teste rotacao da bola
     scene.children.forEach(element => {
         if (element.name == "ground") {
             element.children.forEach(element => {
                 if (element.name == "ball") {
                     if (element.userData.rotating) {
-                        moveBall(element)
+                        rotateObject(element, angle)
                     }
-                    
+                }
+                else if (element.name == "golfFlag") {
+                    /*if (element.userData.rotating) {
+                        rotateObject(element, -angle)
+                    }*/
                 }
             })
         }
