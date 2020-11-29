@@ -17,12 +17,12 @@ const groundProperties = {
     bumpUrl: 'assets/grass_bump.jpg',
     wireframe: false,
     ballProperties: {
-        radius: 1,
+        radius: 0.5,
         segments: 32,
         repeatSquares: 1,
         color: '#ffffff',
-        textureUrl: 'assets/golf_ball_texture.jpg',
-        bumpUrl: 'assets/golf_ball_texture.jpg',
+        textureUrl: 'assets/golfball.jpg',
+        bumpUrl: 'assets/golfball.jpg',
         bumpScale: 0.1,
         wireframe: false,
         specular: '#ffffff',
@@ -67,7 +67,7 @@ function createBall(obj, x, y, z) {
 
     const phongMaterial = new THREE.MeshPhongMaterial({
         name: "phong",
-        wireframe: groundProperties.wireframe,
+        wireframe: groundProperties.ballProperties.wireframe,
         map: texture,
         bumpMap: bump,
         bumpScale: groundProperties.ballProperties.bumpScale,
@@ -77,7 +77,7 @@ function createBall(obj, x, y, z) {
 
     const basicMaterial = new THREE.MeshBasicMaterial({
         name: "basic",
-        wireframe: groundProperties.wireframe,
+        wireframe: groundProperties.ballProperties.wireframe,
         map: texture,
     })
 
@@ -116,14 +116,14 @@ function createFlag(obj, x, y, z) {
 
     let phongMaterial = new THREE.MeshPhongMaterial({ 
         name: "phong",
-        wireframe: groundProperties.wireframe,
+        wireframe: groundProperties.golfFlagProperties.wireframe,
         map: texture,
         bumpMap: bump,
     })
 
     let basicMaterial = new THREE.MeshBasicMaterial({ 
         name: "basic",
-        wireframe: groundProperties.wireframe,
+        wireframe: groundProperties.golfFlagProperties.wireframe,
         map: texture,
     })
 
@@ -140,7 +140,7 @@ function createFlag(obj, x, y, z) {
 
     const flag = new THREE.Object3D()
 
-    geometry = new THREE.BoxGeometry(groundProperties.golfFlagProperties.flagProperties.width, groundProperties.golfFlagProperties.height*0.3, groundProperties.golfFlagProperties.radius);
+    geometry = new THREE.PlaneGeometry(groundProperties.golfFlagProperties.flagProperties.width, groundProperties.golfFlagProperties.height*0.3, 10, 10);
 
     texture = loadTexture(groundProperties.golfFlagProperties.flagProperties.textureUrl)
 
@@ -148,15 +148,17 @@ function createFlag(obj, x, y, z) {
 
     phongMaterial = new THREE.MeshPhongMaterial({            
         name: "phong",
-        wireframe: groundProperties.ballProperties.wireframe,
+        wireframe: groundProperties.golfFlagProperties.wireframe,
         map: texture,
         bumpMap: bump,
+        side: THREE.DoubleSide,
     })
 
     basicMaterial = new THREE.MeshBasicMaterial({
         name: "basic",
-        wireframe: groundProperties.ballProperties.wireframe,
+        wireframe: groundProperties.golfFlagProperties.wireframe,
         map: texture,
+        side: THREE.DoubleSide,
     })
 
     mesh = new THREE.Mesh(geometry, phongMaterial)
@@ -174,6 +176,9 @@ function createFlag(obj, x, y, z) {
         groundProperties.golfFlagProperties.height / 2 - groundProperties.golfFlagProperties.flagProperties.width / 2, 
         0
     )
+    
+    flag.name = "flag"
+    flagpole.name = "flagPole"
 
     golfFlag.add(flag)
     golfFlag.add(flagpole)
@@ -303,10 +308,13 @@ function moveBall(ball) {
     }
 
     const newX = Math.cos(angle) * maxPositions.x
-    /*ball.position.x = newX
-    ball.position.z = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 2)*/
+    
+    ball.position.x = newX
+    ball.position.z = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 4)
+    
 
-    ball.rotation.x += getDirection()
+    //ball.rotation.x += 0.05
+    ball.rotation.z += 0.1
 }
 
 function calculateParabolicMovement(x, k, b) {
@@ -378,7 +386,7 @@ function init() {
     render()
 
     //criar luz direcional
-    dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, ball)
+    dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, scene)
 
     scene.add(dirLight)
 
