@@ -3,7 +3,7 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let pLight, dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
-let controls, angle = 0
+let controls, angle = 0, speed = 0
 let ball
 
 const background = '#000000'
@@ -18,6 +18,7 @@ const groundProperties = {
     wireframe: false,
     ballProperties: {
         radius: 0.5,
+        velocity: 1,
         segments: 32,
         repeatSquares: 1,
         color: '#ffffff',
@@ -302,20 +303,28 @@ function moveGolfFlag(golfFlag) {
 }
 
 function moveBall(ball) {
-    angle += Math.PI / 180
+    speed += groundProperties.ballProperties.velocity * deltaFrameTime
     const maxPositions = {
         x: groundProperties.side / 4,
     }
 
-    const newX = Math.cos(angle) * maxPositions.x
+    const newX = Math.cos(speed) * maxPositions.x
+    const newZ = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 4)
+    const vx = (newX - ball.position.x) / deltaFrameTime
+    const vz = (newZ - ball.position.z) / deltaFrameTime
     
     ball.position.x = newX
-    ball.position.z = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 4)
-    
+    ball.position.z = newZ
 
-    //ball.rotation.x += 0.05
-    ball.rotation.z += 0.1
+    ball.rotation.x = vz
+    ball.rotation.z = vx
 }
+
+function calculateAngularVelocity(linearVelocity) {
+    return linearVelocity / (Math.PI * ballProperties.radius) * Math.PI
+}
+
+// y(x) = kx**2 + b
 
 function calculateParabolicMovement(x, k, b) {
     return Math.pow(x, 2) * k + b
@@ -341,8 +350,6 @@ function animate() {
     
     controls.update()
 
-    angle += Math.PI / 180
-
     // teste rotacao da bola
     scene.children.forEach(element => {
         if (element.name == "ground") {
@@ -359,7 +366,9 @@ function animate() {
                 }
             })
         }
-    });
+    })
+
+
     render()
 
     requestAnimationFrame(animate)

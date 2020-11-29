@@ -40,7 +40,8 @@ class CaixaCelestial extends THREE.Object3D {
                     map: texture,
                     //bumpMap: bumpmap,
                     bumpScale: 0.7,
-                    wireframe: false}
+                    wireframe: false
+                }
             }
 
             materials.push(material)
