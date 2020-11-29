@@ -309,13 +309,17 @@ function moveBall(ball) {
     }
 
     const newX = Math.cos(speed) * maxPositions.x
+    
     const newZ = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 4)
+    
     const vx = (newX - ball.position.x) / deltaFrameTime
     const vz = (newZ - ball.position.z) / deltaFrameTime
     
-    ball.position.x = newX
-    ball.position.z = newZ
-
+    if (newZ <= groundProperties.side / 2) {
+        ball.position.x = newX
+        ball.position.z = newZ
+    }
+        
     ball.rotation.x = vz
     ball.rotation.z = vx
 }

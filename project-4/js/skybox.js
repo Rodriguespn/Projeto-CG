@@ -1,6 +1,6 @@
 const skyboxProperties = {
-    width:  groundProperties.side * 4,
-    lenght:  groundProperties.side * 4,
+    width:  groundProperties.side * 3,
+    lenght:  groundProperties.side * 3 ,
     height:  (groundProperties.height + groundProperties.golfFlagProperties.height) * 4,
     firstSideTextureURl:  'assets/px.png',
     secondSideTextureURl:  'assets/nx.png',
@@ -11,15 +11,30 @@ const skyboxProperties = {
 }
 
 function createSkybox(obj, x, y, z) {
-    const loader = new THREE.CubeTextureLoader()
+    const geometry = new THREE.CubeGeometry(skyboxProperties.width, skyboxProperties.height, skyboxProperties.lenght)
 
-    const texture = loader.load([
+    const textures = [
         skyboxProperties.firstSideTextureURl, 
         skyboxProperties.secondSideTextureURl, 
         skyboxProperties.thirdSideTextureURl, 
         skyboxProperties.fourthSideTextureURl, 
         skyboxProperties.fifthSideTextureURl, 
         skyboxProperties.sixthSideTextureURl
-    ])
-    obj.background = texture
+    ]
+
+    const materials = []
+
+    for (let i = 0; i < 6; i++) {
+        const material = new THREE.MeshBasicMaterial(
+            {
+                map: new THREE.TextureLoader().load(textures[i]),
+                side: THREE.DoubleSide,
+            }
+        )
+        materials.push(material)
+    }
+
+    const mesh = new THREE.Mesh(geometry, materials)
+    
+    obj.add(mesh)
 }
