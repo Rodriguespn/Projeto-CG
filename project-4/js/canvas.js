@@ -22,10 +22,11 @@ const groundProperties = {
         repeatSquares: 1,
         color: '#ffffff',
         textureUrl: 'assets/golf_ball_texture.jpg',
-        bumpUrl: 'assets/golfball.jpg',
+        bumpUrl: 'assets/golf_ball_texture.jpg',
+        bumpScale: 0.1,
         wireframe: false,
         specular: '#111111',
-        shininess: 50,
+        shininess: 100,
     },
     golfFlagProperties: {
         radius: 0.1,
@@ -63,22 +64,20 @@ function createBall(obj, x, y, z) {
 
     let bump = loadTexture(groundProperties.ballProperties.bumpUrl)
 
-    const phongMaterial = new THREE.MeshPhongMaterial({           
-        color: groundProperties.color, 
+    const phongMaterial = new THREE.MeshPhongMaterial({
         name: "phong",
         wireframe: groundProperties.wireframe,
         map: texture,
         bumpMap: bump,
+        bumpScale: groundProperties.ballProperties.bumpScale,
         specular: groundProperties.ballProperties.specular,
         shininess: groundProperties.ballProperties.shininess,
     })
 
     const basicMaterial = new THREE.MeshBasicMaterial({
-        color: groundProperties.color, 
         name: "basic",
         wireframe: groundProperties.wireframe,
         map: texture,
-        side: THREE.DoubleSide,
     })
 
     const mesh = new THREE.Mesh(geometry, phongMaterial)
@@ -112,21 +111,17 @@ function createFlag(obj, x, y, z) {
 
     let bump = loadTexture(groundProperties.golfFlagProperties.flagPoleProperties.bumpUrl)
 
-    let phongMaterial = new THREE.MeshPhongMaterial({           
-        color: groundProperties.color, 
+    let phongMaterial = new THREE.MeshPhongMaterial({ 
         name: "phong",
         wireframe: groundProperties.wireframe,
         map: texture,
         bumpMap: bump,
-        side: THREE.DoubleSide,
     })
 
-    let basicMaterial = new THREE.MeshBasicMaterial({
-        color: groundProperties.color, 
+    let basicMaterial = new THREE.MeshBasicMaterial({ 
         name: "basic",
         wireframe: groundProperties.wireframe,
         map: texture,
-        side: THREE.DoubleSide,
     })
 
     let mesh = new THREE.Mesh(geometry, phongMaterial)
@@ -148,21 +143,17 @@ function createFlag(obj, x, y, z) {
 
     bump = loadTexture(groundProperties.golfFlagProperties.flagProperties.bumpUrl)
 
-    phongMaterial = new THREE.MeshPhongMaterial({           
-        color: groundProperties.color, 
+    phongMaterial = new THREE.MeshPhongMaterial({            
         name: "phong",
         wireframe: groundProperties.ballProperties.wireframe,
         map: texture,
         bumpMap: bump,
-        side: THREE.DoubleSide,
     })
 
     basicMaterial = new THREE.MeshBasicMaterial({
-        color: groundProperties.color, 
         name: "basic",
         wireframe: groundProperties.ballProperties.wireframe,
         map: texture,
-        side: THREE.DoubleSide,
     })
 
     mesh = new THREE.Mesh(geometry, phongMaterial)
@@ -208,7 +199,6 @@ function createGround(obj, x, y, z) {
         wireframe: groundProperties.wireframe,
         map: texture,
         bumpMap: bump,
-        side: THREE.DoubleSide,
     })
 
     const basicMaterial = new THREE.MeshBasicMaterial({
@@ -216,7 +206,6 @@ function createGround(obj, x, y, z) {
         name: "basic",
         wireframe: groundProperties.wireframe,
         map: texture,
-        side: THREE.DoubleSide,
     })
 
     const mesh = new THREE.Mesh(geometry, phongMaterial)
