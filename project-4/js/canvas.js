@@ -395,8 +395,8 @@ function init() {
     helper = new THREE.DirectionalLightHelper(pLight, 5)
     scene.add(helper)
 
-    //const skybox = new CaixaCelestial(0, 0, 0)
-    //scene.add(skybox)
+    const skybox = new CaixaCelestial(0, 0, 0)
+    scene.add(skybox)
 
     window.addEventListener("resize", onResize)
     window.addEventListener('keydown', keysPressed)

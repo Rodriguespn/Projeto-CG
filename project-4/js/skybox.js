@@ -12,12 +12,12 @@ class CaixaCelestial extends THREE.Object3D {
     constructor(x, y, z) {
         super()
 
-        var imagesTextures = ['../assets/nx.png', 
-            '../assets/ny.png',
-            '../assets/nz.png',
-            '../assets/px.png',
-            '../assets/py.png',
-            '../assets/pz.png']
+        var imagesTextures = ['assets/nx.png', 
+            'assets/ny.png',
+            'assets/nz.png',
+            'assets/px.png',
+            'assets/py.png',
+            'assets/pz.png']
 
         //var imagesBumpMap = ['./assets/dice-face-1-bumpMap.png', 
         //'./assets/dice-face-2-bumpMap.png',
@@ -26,10 +26,10 @@ class CaixaCelestial extends THREE.Object3D {
         //'./assets/dice-face-5-bumpMap.png',
         //'./assets/dice-face-6-bumpMap.png']
         
-        var materials = []
+        const materials = []
 
-        for (var i = 0; i < 6; i++) {
-            texture = new THREE.TextureLoader().load(imagesTextures[i])
+        for (let i = 0; i < 6; i++) {
+            let texture = new THREE.TextureLoader().load(imagesTextures[i])
             //bumpmap = new THREE.TextureLoader().load(imagesBumpMap[i])
 
             material = {
@@ -49,8 +49,8 @@ class CaixaCelestial extends THREE.Object3D {
         this.moving = true
 
         geometry = new THREE.BoxGeometry(skyboxProperties.size, skyboxProperties.size, skyboxProperties.size)
-        mesh = new Mesh(geometry, materials)
-        mesh.position.set(0, 0, 0)
+        mesh = new THREE.Mesh(geometry, materials)
+        mesh.position.set(x, y, z)
         
         mesh.castShadow = true
         mesh.receiveShadow = true
