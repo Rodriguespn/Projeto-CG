@@ -1,7 +1,7 @@
 // teste
 const directionalLightProperties = {
     intensityOff: 0,
-    intensityOn: 1,
+    intensityOn: 0.5,
     color: '#ffffff'
 }
 

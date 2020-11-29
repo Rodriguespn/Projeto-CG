@@ -4,7 +4,7 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let pLight, dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 let controls, angle = 0
-let text
+let ball
 
 const background = '#000000'
 
@@ -94,6 +94,8 @@ function createBall(obj, x, y, z) {
     ball.position.set(x, y, z)
     ball.name = "ball"
     obj.add(ball)
+
+    return ball
 }
 
 function createFlag(obj, x, y, z) {
@@ -221,7 +223,7 @@ function createGround(obj, x, y, z) {
     ground.position.set(x, y, z)
     ground.name = "ground"
 
-    createBall(ground, x, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
+    ball = createBall(ground, x, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
 
     createFlag(ground, groundProperties.side / 6, y + groundProperties.height + groundProperties.golfFlagProperties.height/2, -groundProperties.side / 4)
 
@@ -355,19 +357,25 @@ function init() {
     //scene.add( light );
 
     //criar luz direcional
-    dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, scene)
+    dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, ball)
 
     scene.add(dirLight)
 
-    /*const helper = new THREE.DirectionalLightHelper( dirLight, 5 );
-    scene.add( helper );
+    let helper = new THREE.DirectionalLightHelper( dirLight, 5 );
+    scene.add( helper )
 
-    var shadowHelper = new THREE.CameraHelper( dirLight.shadow.camera );
-    scene.add( shadowHelper );*/
+    let shadowHelper = new THREE.CameraHelper( dirLight.shadow.camera )
+    //scene.add( shadowHelper )
 
     //criar luz pontual
-    pLight = new PLight(-20, 30, 20, scene)
+    pLight = new PLight(-groundProperties.side / 4, groundProperties.ballProperties.radius, groundProperties.side / 4, ball)
     scene.add(pLight)
+
+    helper = new THREE.DirectionalLightHelper( pLight, 5 );
+    scene.add( helper )
+
+    shadowHelper = new THREE.CameraHelper( pLight.shadow.camera )
+    scene.add( shadowHelper )
 
     //const skybox = new CaixaCelestial(0, 0, 0)
     //scene.add(skybox)
