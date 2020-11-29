@@ -14,7 +14,7 @@ function updateCameraPosition(obj, x, y, z, lookAt) {
 function createPerspectiveCamera() {
     perspectiveCamera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 100)
 
-    updateCameraPosition(perspectiveCamera, 30, 30, 30, scene.position)
+    updateCameraPosition(perspectiveCamera, groundProperties.side, 15, groundProperties.side, scene.position)
 }
 
 function createOrthographicCamera(x, y, z) {

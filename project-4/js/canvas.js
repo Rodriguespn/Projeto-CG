@@ -397,7 +397,7 @@ function init() {
     scene.add(shadowHelper)
 
     //criar luz pontual
-    pLight = new PLight(-groundProperties.side / 4, groundProperties.ballProperties.radius, groundProperties.side / 4, ball)
+    pLight = new PLight(-groundProperties.side / 4, groundProperties.ballProperties.radius, groundProperties.side / 4, scene)
     scene.add(pLight)
 
     helper = new THREE.DirectionalLightHelper(pLight, 5)
