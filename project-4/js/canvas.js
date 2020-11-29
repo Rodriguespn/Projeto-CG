@@ -22,8 +22,10 @@ const groundProperties = {
         repeatSquares: 1,
         color: '#ffffff',
         textureUrl: 'assets/golf_ball_texture.jpg',
-        bumpUrl: 'assets/golf_ball_bump.jpg',
+        bumpUrl: 'assets/golfball.jpg',
         wireframe: false,
+        specular: '#111111',
+        shininess: 50,
     },
     golfFlagProperties: {
         radius: 0.1,
@@ -58,13 +60,8 @@ function createBall(obj, x, y, z) {
     geometry = new THREE.SphereGeometry(groundProperties.ballProperties.radius,groundProperties.ballProperties.segments,groundProperties.ballProperties.segments);
 
     let texture = loadTexture(groundProperties.ballProperties.textureUrl)
-    
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-    texture.repeat.set(groundProperties.ballProperties.repeatSquares, groundProperties.ballProperties.repeatSquares)
 
     let bump = loadTexture(groundProperties.ballProperties.bumpUrl)
-    bump.wrapS = bump.wrapT = THREE.MirroredRepeatWrapping
-    bump.repeat.set(groundProperties.repeatSquares, groundProperties.repeatSquares)
 
     const phongMaterial = new THREE.MeshPhongMaterial({           
         color: groundProperties.color, 
@@ -72,7 +69,8 @@ function createBall(obj, x, y, z) {
         wireframe: groundProperties.wireframe,
         map: texture,
         bumpMap: bump,
-        side: THREE.DoubleSide,
+        specular: groundProperties.ballProperties.specular,
+        shininess: groundProperties.ballProperties.shininess,
     })
 
     const basicMaterial = new THREE.MeshBasicMaterial({
@@ -153,7 +151,7 @@ function createFlag(obj, x, y, z) {
     phongMaterial = new THREE.MeshPhongMaterial({           
         color: groundProperties.color, 
         name: "phong",
-        wireframe: groundProperties.wireframe,
+        wireframe: groundProperties.ballProperties.wireframe,
         map: texture,
         bumpMap: bump,
         side: THREE.DoubleSide,
@@ -162,7 +160,7 @@ function createFlag(obj, x, y, z) {
     basicMaterial = new THREE.MeshBasicMaterial({
         color: groundProperties.color, 
         name: "basic",
-        wireframe: groundProperties.wireframe,
+        wireframe: groundProperties.ballProperties.wireframe,
         map: texture,
         side: THREE.DoubleSide,
     })
@@ -178,14 +176,15 @@ function createFlag(obj, x, y, z) {
 
     flag.add(mesh)
     flag.position.set(
-        x + groundProperties.golfFlagProperties.flagProperties.width / 2 + groundProperties.golfFlagProperties.radius, 
-        y - groundProperties.golfFlagProperties.height*0.3, 
-        z
+        groundProperties.golfFlagProperties.radius + groundProperties.golfFlagProperties.flagProperties.width/2, 
+        groundProperties.golfFlagProperties.height / 2 - groundProperties.golfFlagProperties.flagProperties.width / 2, 
+        0
     )
 
     golfFlag.add(flag)
     golfFlag.add(flagpole)
     golfFlag.position.set(x, y, z)
+    golfFlag.name = "golfFlag"
     obj.add(golfFlag)
 }
 
@@ -233,9 +232,9 @@ function createGround(obj, x, y, z) {
     ground.position.set(x, y, z)
     ground.name = "ground"
 
-    createBall(ground, groundProperties.side/3, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
+    createBall(ground, x, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
 
-    createFlag(ground, x, y + groundProperties.height + groundProperties.golfFlagProperties.height/2, z)
+    createFlag(ground, groundProperties.side / 6, y + groundProperties.height + groundProperties.golfFlagProperties.height/2, -groundProperties.side / 4)
 
     obj.add(ground)
 }
@@ -302,6 +301,10 @@ function moveBall(element) {
     )
 }
 
+function moveGolfFlag(element) {
+    element.rotation.y += 0.05
+}
+
 // animates the scene
 function animate() {
     prevFrameTime = nextFrameTime
@@ -321,9 +324,13 @@ function animate() {
             element.children.forEach(element => {
                 if (element.name == "ball") {
                     if (element.userData.rotating) {
-                        moveBall(element)
-                    }
-                    
+                        //moveBall(element)
+                    } 
+                }
+                if (element.name == "golfFlag") {
+                    if (element.userData.rotating) {
+                        moveGolfFlag(element)
+                    } 
                 }
             })
         }
