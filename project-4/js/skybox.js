@@ -1,5 +1,5 @@
 const skyboxProperties = {
-    size:  40,
+    size:  groundProperties.side*5,
     firstSideTextureURl:  '../assets/nx.png',
     secondSideTextureURl:  '../assets/ny.png',
     thirdSideTextureURl:  '../assets/nz.png',
