@@ -386,7 +386,7 @@ function init() {
     scene.add( helper )
 
     let shadowHelper = new THREE.CameraHelper( dirLight.shadow.camera )
-    //scene.add( shadowHelper )
+    scene.add( shadowHelper )
 
     //criar luz pontual
     pLight = new PLight(-groundProperties.side / 4, groundProperties.ballProperties.radius, groundProperties.side / 4, ball)
@@ -394,9 +394,6 @@ function init() {
 
     helper = new THREE.DirectionalLightHelper( pLight, 5 );
     scene.add( helper )
-
-    shadowHelper = new THREE.CameraHelper( pLight.shadow.camera )
-    scene.add( shadowHelper )
 
     //const skybox = new CaixaCelestial(0, 0, 0)
     //scene.add(skybox)
