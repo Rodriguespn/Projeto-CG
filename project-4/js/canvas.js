@@ -32,6 +32,7 @@ const groundProperties = {
         radius: 0.1,
         height: 7,
         wireframe: false,
+        rotationVelocity: 3, 
         flagPoleProperties: {
             color: "#ffffff",
             textureUrl: 'assets/flagpole_texture.png',
@@ -225,7 +226,7 @@ function createGround(obj, x, y, z) {
 
     ball = createBall(ground, x, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
 
-    createFlag(ground, groundProperties.side / 6, y + groundProperties.height + groundProperties.golfFlagProperties.height/2, -groundProperties.side / 4)
+    createFlag(ground, groundProperties.side / 3, y + groundProperties.height + groundProperties.golfFlagProperties.height/2, -groundProperties.side / 4)
 
     obj.add(ground)
 }
@@ -291,8 +292,32 @@ function rotateObject(element, angle) {
     )
 }
 
-function moveGolfFlag(element) {
-    element.rotation.y += 0.05
+function moveGolfFlag(golfFlag) {
+    golfFlag.rotation.y += groundProperties.golfFlagProperties.rotationVelocity * deltaFrameTime
+}
+
+function moveBall(ball) {
+    angle += Math.PI / 180
+    const maxPositions = {
+        x: groundProperties.side / 4,
+    }
+
+    const newX = Math.cos(angle) * maxPositions.x
+    /*ball.position.x = newX
+    ball.position.z = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 2)*/
+
+    ball.rotation.x += getDirection()
+}
+
+function calculateParabolicMovement(x, k, b) {
+    return Math.pow(x, 2) * k + b
+}
+
+function getDirection(x) {
+    if (Math.abs(x) > 0)
+        return x / Math.abs(x)
+    else
+        return 0
 }
 
 // animates the scene
@@ -316,7 +341,7 @@ function animate() {
             element.children.forEach(element => {
                 if (element.name == "ball") {
                     if (element.userData.rotating) {
-                        //moveBall(element)
+                        moveBall(element)
                     } 
                 }
                 if (element.name == "golfFlag") {
@@ -351,10 +376,6 @@ function init() {
     //Cameras
     controls = new THREE.OrbitControls(camera, renderer.domElement)
     render()
-    
-    // Teste
-    //const light = new THREE.AmbientLight( 0x404040 ); // soft white light
-    //scene.add( light );
 
     //criar luz direcional
     dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, ball)
