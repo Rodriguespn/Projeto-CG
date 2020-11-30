@@ -36,5 +36,6 @@ function createSkybox(obj, x, y, z) {
 
     const mesh = new THREE.Mesh(geometry, materials)
     
+    mesh.position.set(x, y, z)
     obj.add(mesh)
 }
