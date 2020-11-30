@@ -4,9 +4,21 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let pLight, dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 let controls, angle = 0, speed = 0
+let pauseScreenBox
 let ball
+let inPause = false
 
 const background = '#000000'
+
+const pauseScreenProperties = {
+    textureUrl: 'assets/pause_texture.jpg',
+    length: 10,
+    height: 10,
+    width: 10,
+    x: 0,
+    y: 50,
+    z: 0
+}
 
 const groundProperties = {
     side: 20,
@@ -48,9 +60,35 @@ const groundProperties = {
     }
 }
 
+const initialPositions = {
+    flagx: groundProperties.side / 3,
+    flagy: -groundProperties.height/2 + groundProperties.height + groundProperties.golfFlagProperties.height/2,
+    flagz: -groundProperties.side / 4,
+    ballx: 0,
+    bally: groundProperties.height/2 + groundProperties.ballProperties.radius,
+    ballz: 0
+
+}
+
 // draws the object on the canvas
 function render() {
     renderer.render(scene, camera)
+}
+
+function createPauseScreen(obj, x, y, z) {
+    const geometry = new THREE.CubeGeometry(pauseScreenProperties.width, pauseScreenProperties.height, pauseScreenProperties.lenght)
+
+    const material = new THREE.MeshBasicMaterial(
+        {
+            map: new THREE.TextureLoader().load(pauseScreenProperties.textureUrl),
+            side: THREE.DoubleSide,
+        }
+    )
+
+    const mesh = new THREE.Mesh(geometry, material)
+    
+    mesh.position.set(x, y, z)
+    obj.add(mesh)
 }
 
 function createBall(obj, x, y, z) {
@@ -230,9 +268,9 @@ function createGround(obj, x, y, z) {
     ground.position.set(x, y, z)
     ground.name = "ground"
 
-    ball = createBall(ground, x, groundProperties.height/2 + groundProperties.ballProperties.radius, z)
+    ball = createBall(ground, x, initialPositions.bally, z)
 
-    createFlag(ground, groundProperties.side / 3, y + groundProperties.height + groundProperties.golfFlagProperties.height/2, -groundProperties.side / 4)
+    createFlag(ground, initialPositions.flagx, initialPositions.flagy, initialPositions.flagz)
 
     obj.add(ground)
 }
@@ -242,7 +280,7 @@ function createScene() {
     scene = new THREE.Scene()
     scene.background = new THREE.Color(background)
 
-    createGround(scene, 0, -groundProperties.height/2, 0)
+    createGround(scene, initialPositions.ballx, -groundProperties.height/2, initialPositions.ballz)
     scene.add(new THREE.AxesHelper(10))
 
 
@@ -343,6 +381,7 @@ function getDirection(x) {
 
 // animates the scene
 function animate() {
+
     prevFrameTime = nextFrameTime
     nextFrameTime = new Date()
 
@@ -354,27 +393,25 @@ function animate() {
     
     controls.update()
 
-    // teste rotacao da bola
-    scene.children.forEach(element => {
-        if (element.name == "ground") {
-            element.children.forEach(element => {
-                if (element.name == "ball") {
-                    if (element.userData.rotating) {
-                        moveBall(element)
-                    } 
-                }
-                if (element.name == "golfFlag") {
-                    if (element.userData.rotating) {
-                        moveGolfFlag(element)
-                    } 
-                }
-            })
-        }
-    })
-
-
+    if (!inPause) {
+        scene.children.forEach(element => {
+            if (element.name == "ground") {
+                element.children.forEach(element => {
+                    if (element.name == "ball") {
+                        if (element.userData.rotating) {
+                            moveBall(element)
+                        } 
+                    }
+                    if (element.name == "golfFlag") {
+                        if (element.userData.rotating) {
+                            moveGolfFlag(element)
+                        } 
+                    }
+                })
+            }
+        })
+    }
     render()
-
     requestAnimationFrame(animate)
 }
 
@@ -389,14 +426,21 @@ function init() {
     document.body.appendChild(renderer.domElement)
     createScene()
 
+    //Criar PauseScreenBox
+    pauseScreenBox = new THREE.Object3D()
+    createPauseScreen(pauseScreenBox, pauseScreenProperties.x, pauseScreenProperties.y, pauseScreenProperties.z)
+
     //Cameras
     createPerspectiveCamera()
-    createOrthographicCamera(0, 50, 30)
+    createOrthographicCamera(pauseScreenProperties.x, pauseScreenProperties.y, pauseScreenProperties.z, pauseScreenProperties.x, pauseScreenProperties.y, pauseScreenProperties.z)
     camera = perspectiveCamera
 
     //Cameras
     controls = new THREE.OrbitControls(camera, renderer.domElement)
     render()
+
+    
+    
 
     //criar luz direcional
     dirLight = new DirLight(groundProperties.side, groundProperties.side, groundProperties.side, scene)
@@ -469,9 +513,53 @@ function ballMovement() {
 }
 
 function pauseScene() {
-    
+    if (inPause) {
+        controls.enabled = true;
+        scene.remove(pauseScreenBox)
+        camera = perspectiveCamera
+        inPause = false
+    }
+    else {
+        controls.enabled = false;
+        scene.add(pauseScreenBox)
+        camera = orthoCamera
+        inPause = true
+    }
+
 }
 
 function resetScene() {
+    if (inPause) {
+        controls.enabled = true;
+        scene.remove(pauseScreenBox)
+        camera = perspectiveCamera
+        prevFrameTime = 0
+        resetBallAndFlag()
+        updateCameraPosition(perspectiveCamera, groundProperties.side / 2, 15, groundProperties.side / 2, scene.position)
+        inPause = false
+    }
+    else {
+        
+    }
+}
 
+function resetBallAndFlag() {
+    scene.children.forEach(element => {
+        if (element.name == "ground") {
+            element.children.forEach(element => {
+                if (element.name == "ball") {
+                    console.log("ball")
+                    element.position.x = 0
+                    element.position.y = initialPositions.bally
+                    element.position.z = 0
+                }
+                if (element.name == "golfFlag") {
+                    console.log("flag")
+                    element.position.x = initialPositions.flagx
+                    element.position.y = initialPositions.flagy
+                    element.position.z = initialPositions.flagz
+                }
+            })
+        }
+    })
 }

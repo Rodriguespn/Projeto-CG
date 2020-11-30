@@ -52,7 +52,8 @@ let sSPress = {
     state: false,
     //Pausa
     action: function() {
-        
+        pauseScene()
+        this.state = false
     }
 }
 
@@ -60,7 +61,7 @@ let rRPress = {
     state: false,
     //reset o programa
     action: function() {
-        
+        resetScene()
         this.state = false
     }
 }
