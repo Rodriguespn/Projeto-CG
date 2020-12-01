@@ -276,8 +276,6 @@ function createScene() {
     scene.background = new THREE.Color(background)
 
     createGround(scene, initialPositions.ballx, -groundProperties.height/2, initialPositions.ballz)
-    scene.add(new THREE.AxesHelper(10))
-
 
     //teste
     console.log(scene)
@@ -442,18 +440,9 @@ function init() {
 
     scene.add(dirLight)
 
-    /*let helper = new THREE.DirectionalLightHelper(dirLight, 5)
-    scene.add(helper)
-
-    let shadowHelper = new THREE.CameraHelper(dirLight.shadow.camera)
-    scene.add(shadowHelper)*/
-
     //criar luz pontual
     pLight = new PLight(-groundProperties.side / 4, groundProperties.ballProperties.radius, groundProperties.side / 4, scene)
     scene.add(pLight)
-
-    /*helper = new THREE.DirectionalLightHelper(pLight, 5)
-    scene.add(helper)*/
 
     createSkybox(scene, 0, 0, 0)
 
