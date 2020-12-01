@@ -4,7 +4,7 @@ let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let pLight, dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
 let controls, speed = 0
-let pauseScreenBox, ball, inPause = false, wireframe = false
+let pauseScreenBox, ball, inPause = false, wireframe = false, initMaterialName = "phong"
 
 const background = '#000000'
 
@@ -27,6 +27,7 @@ const groundProperties = {
     bumpUrl: 'assets/grass_bump.jpg',
     ballProperties: {
         radius: 0.5,
+        rotating: false,
         velocity: 1,
         segments: 32,
         repeatSquares: 1,
@@ -44,13 +45,13 @@ const groundProperties = {
         flagPoleProperties: {
             color: "#ffffff",
             textureUrl: 'assets/flagpole_texture.png',
-            bumpUrl: '',
+            bumpUrl: 'assets/flagpole_texture.png',
         },
         flagProperties: {
             width: 2,
             color: "#ffffff",
             textureUrl: 'assets/flag_texture.jpg',
-            bumpUrl: '',
+            bumpUrl: 'assets/flag_texture.jpg',
         },
     }
 }
@@ -89,7 +90,7 @@ function createBall(obj, x, y, z) {
     const ball = new THREE.Object3D()
 
     ball.userData = {
-        rotating: false
+        rotating: groundProperties.ballProperties.rotating
     }
 
     geometry = new THREE.SphereGeometry(groundProperties.ballProperties.radius,groundProperties.ballProperties.segments,groundProperties.ballProperties.segments);
@@ -484,7 +485,7 @@ function resetWireframes(obj) {
         }
     }
     for (let i = 0; i < obj.children.length; i++) {
-        switchWireframes(obj.children[i])
+        resetWireframes(obj.children[i])
     }
     return 
 }
@@ -502,6 +503,26 @@ function illuminationCalculation(obj) {
     }
     for (let i = 0; i < obj.children.length; i++) {
         illuminationCalculation(obj.children[i])
+    }
+    return 
+}
+
+function resetIllumination(obj) {
+    if (obj == undefined) return
+
+    if (obj.type == "Mesh") {
+        if (obj.material.name == "basic") {
+            obj.material = obj.userData[initMaterialName]
+        }
+    }
+
+    if (obj.type == "DirectionalLight" || obj.type == "PointLight") {
+        if (!obj.active) {
+            obj.turnLightOnorOff()
+        }
+    }
+    for (let i = 0; i < obj.children.length; i++) {
+        resetIllumination(obj.children[i])
     }
     return 
 }
@@ -541,6 +562,7 @@ function resetScene() {
         updateCameraPosition(perspectiveCamera, groundProperties.side / 2, 15, groundProperties.side / 2, scene.position)
         inPause = false
         resetWireframes(scene)
+        resetIllumination(scene)
     }
 }
 
@@ -553,6 +575,7 @@ function resetBallAndFlag() {
                     element.position.x = initialPositions.ballx
                     element.position.y = initialPositions.bally
                     element.position.z = initialPositions.ballz
+                    element.userData.rotating = groundProperties.ballProperties.rotating
                 }
                 else if (element.name == "golfFlag") {
                     console.log("flag")

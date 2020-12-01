@@ -16,6 +16,7 @@ class PLight extends THREE.PointLight {
     constructor(x, y, z, lookAtObject) {
         super(pointLightProperties.color, pointLightProperties.intensityOn)
         this.active = true
+        this.name = "light"
 
         this.position.set(x, y, z);
         this.castShadow = true;
@@ -43,7 +44,7 @@ class DirLight extends THREE.DirectionalLight {
         this.active = true
 
         this.castShadow = true
-        this.position.set(x, y, z);
+        this.position.set(x, y, z)
         
         this.target = lookAtObject
 
