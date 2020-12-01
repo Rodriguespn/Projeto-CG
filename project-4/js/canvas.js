@@ -27,7 +27,7 @@ const groundProperties = {
     bumpUrl: 'assets/grass_bump.jpg',
     ballProperties: {
         radius: 0.5,
-        rotating: false,
+        rotating: true,
         velocity: 1,
         segments: 32,
         repeatSquares: 1,
