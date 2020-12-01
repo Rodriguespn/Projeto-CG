@@ -1,7 +1,7 @@
 const skyboxProperties = {
     width:  groundProperties.side * 3,
     lenght:  groundProperties.side * 3 ,
-    height:  (groundProperties.height + groundProperties.golfFlagProperties.height) * 4,
+    height:  (groundProperties.height + groundProperties.golfFlagProperties.height) * 5,
     firstSideTextureURl:  'assets/px.png',
     secondSideTextureURl:  'assets/nx.png',
     thirdSideTextureURl:  'assets/py.png',
