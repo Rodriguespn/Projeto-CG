@@ -3,10 +3,8 @@
 let windowWidth = window.innerWidth
 let windowHeight = window.innerHeight
 let pLight, dirLight, scene, renderer, geometry, material, mesh, prevFrameTime = 0, nextFrameTime = 0, deltaFrameTime = 0
-let controls, angle = 0, speed = 0
-let pauseScreenBox
-let ball
-let inPause = false
+let controls, speed = 0
+let pauseScreenBox, ball, inPause = false, wireframe = false
 
 const background = '#000000'
 
@@ -21,13 +19,12 @@ const pauseScreenProperties = {
 }
 
 const groundProperties = {
-    side: 20,
+    side: 30,
     height: 1,
     repeatSquares: 10,
     color: "#ffffff",
     textureUrl: 'assets/grass_pattern.png',
     bumpUrl: 'assets/grass_bump.jpg',
-    wireframe: false,
     ballProperties: {
         radius: 0.5,
         velocity: 1,
@@ -37,14 +34,12 @@ const groundProperties = {
         textureUrl: 'assets/golfball.jpg',
         bumpUrl: 'assets/golfball.jpg',
         bumpScale: 0.1,
-        wireframe: false,
         specular: '#ffffff',
         shininess: 100,
     },
     golfFlagProperties: {
         radius: 0.1,
         height: 7,
-        wireframe: false,
         rotationVelocity: 3, 
         flagPoleProperties: {
             color: "#ffffff",
@@ -67,7 +62,6 @@ const initialPositions = {
     ballx: 0,
     bally: groundProperties.height/2 + groundProperties.ballProperties.radius,
     ballz: 0
-
 }
 
 // draws the object on the canvas
@@ -76,7 +70,7 @@ function render() {
 }
 
 function createPauseScreen(obj, x, y, z) {
-    const geometry = new THREE.CubeGeometry(pauseScreenProperties.width, pauseScreenProperties.height, pauseScreenProperties.lenght)
+    const geometry = new THREE.BoxGeometry(pauseScreenProperties.width, pauseScreenProperties.height, pauseScreenProperties.lenght)
 
     const material = new THREE.MeshBasicMaterial(
         {
@@ -95,7 +89,7 @@ function createBall(obj, x, y, z) {
     const ball = new THREE.Object3D()
 
     ball.userData = {
-        rotating: true
+        rotating: false
     }
 
     geometry = new THREE.SphereGeometry(groundProperties.ballProperties.radius,groundProperties.ballProperties.segments,groundProperties.ballProperties.segments);
@@ -106,7 +100,7 @@ function createBall(obj, x, y, z) {
 
     const phongMaterial = new THREE.MeshPhongMaterial({
         name: "phong",
-        wireframe: groundProperties.ballProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
         bumpMap: bump,
         bumpScale: groundProperties.ballProperties.bumpScale,
@@ -116,7 +110,7 @@ function createBall(obj, x, y, z) {
 
     const basicMaterial = new THREE.MeshBasicMaterial({
         name: "basic",
-        wireframe: groundProperties.ballProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
     })
 
@@ -155,14 +149,14 @@ function createFlag(obj, x, y, z) {
 
     let phongMaterial = new THREE.MeshPhongMaterial({ 
         name: "phong",
-        wireframe: groundProperties.golfFlagProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
         bumpMap: bump,
     })
 
     let basicMaterial = new THREE.MeshBasicMaterial({ 
         name: "basic",
-        wireframe: groundProperties.golfFlagProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
     })
 
@@ -187,7 +181,7 @@ function createFlag(obj, x, y, z) {
 
     phongMaterial = new THREE.MeshPhongMaterial({            
         name: "phong",
-        wireframe: groundProperties.golfFlagProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
         bumpMap: bump,
         side: THREE.DoubleSide,
@@ -195,7 +189,7 @@ function createFlag(obj, x, y, z) {
 
     basicMaterial = new THREE.MeshBasicMaterial({
         name: "basic",
-        wireframe: groundProperties.golfFlagProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
         side: THREE.DoubleSide,
     })
@@ -243,7 +237,7 @@ function createGround(obj, x, y, z) {
     const phongMaterial = new THREE.MeshPhongMaterial({           
         color: groundProperties.color, 
         name: "phong",
-        wireframe: groundProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
         bumpMap: bump,
     })
@@ -251,7 +245,7 @@ function createGround(obj, x, y, z) {
     const basicMaterial = new THREE.MeshBasicMaterial({
         color: groundProperties.color, 
         name: "basic",
-        wireframe: groundProperties.wireframe,
+        wireframe: wireframe,
         map: texture,
     })
 
@@ -343,12 +337,12 @@ function moveGolfFlag(golfFlag) {
 function moveBall(ball) {
     speed += groundProperties.ballProperties.velocity * deltaFrameTime
     const maxPositions = {
-        x: groundProperties.side / 4,
+        x: groundProperties.side / 8,
     }
 
-    const newX = Math.cos(speed) * maxPositions.x
+    const newX = Math.sin(speed) * maxPositions.x
     
-    const newZ = calculateParabolicMovement(newX, 0.5, -groundProperties.side / 4)
+    const newZ = calculateParabolicMovement(newX, 0.5, 0)
     
     const vx = (newX - ball.position.x) / deltaFrameTime
     const vz = (newZ - ball.position.z) / deltaFrameTime
@@ -472,12 +466,21 @@ function switchWireframes(obj) {
 
     if (obj.material) {
         if (obj.material.name == "phong" || obj.material.name == "basic") {
-            if (obj.material.wireframe) {
-                obj.material.wireframe = false
-            }
-            else {
-                obj.material.wireframe = true
-            }
+            obj.material.wireframe = !obj.material.wireframe
+        }
+    }
+    for (let i = 0; i < obj.children.length; i++) {
+        switchWireframes(obj.children[i])
+    }
+    return 
+}
+
+function resetWireframes(obj) {
+    if (obj == undefined) return
+
+    if (obj.material) {
+        if (obj.material.name == "phong" || obj.material.name == "basic") {
+            obj.material.wireframe = wireframe
         }
     }
     for (let i = 0; i < obj.children.length; i++) {
@@ -537,9 +540,7 @@ function resetScene() {
         resetBallAndFlag()
         updateCameraPosition(perspectiveCamera, groundProperties.side / 2, 15, groundProperties.side / 2, scene.position)
         inPause = false
-    }
-    else {
-        
+        resetWireframes(scene)
     }
 }
 
@@ -549,17 +550,19 @@ function resetBallAndFlag() {
             element.children.forEach(element => {
                 if (element.name == "ball") {
                     console.log("ball")
-                    element.position.x = 0
+                    element.position.x = initialPositions.ballx
                     element.position.y = initialPositions.bally
-                    element.position.z = 0
+                    element.position.z = initialPositions.ballz
                 }
-                if (element.name == "golfFlag") {
+                else if (element.name == "golfFlag") {
                     console.log("flag")
                     element.position.x = initialPositions.flagx
                     element.position.y = initialPositions.flagy
                     element.position.z = initialPositions.flagz
+                    element.rotation.set(0,0,0)
                 }
             })
         }
     })
+    speed = 0
 }

@@ -1,3 +1,5 @@
+'use strict'
+
 let camera, orthoCamera, perspectiveCamera
 
 const frustumSize = pauseScreenProperties.length*2

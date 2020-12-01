@@ -3,6 +3,8 @@
 *
 */
 
+'use strict'
+
 let dDPress = {
     state: false,
     //liga ou desliga a fonte de luz direccional
@@ -78,7 +80,7 @@ let actionKeys = [
 
 //checks for pressed keys
 function keysPressedChecker() {
-    for (i = 0; i < actionKeys.length; i++) {
+    for (let i = 0; i < actionKeys.length; i++) {
         if (actionKeys[i].state == true) {
             actionKeys[i].action()
         }

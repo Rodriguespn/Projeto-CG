@@ -1,3 +1,5 @@
+'use strict'
+
 const skyboxProperties = {
     width:  groundProperties.side * 3,
     lenght:  groundProperties.side * 3 ,
@@ -11,7 +13,7 @@ const skyboxProperties = {
 }
 
 function createSkybox(obj, x, y, z) {
-    const geometry = new THREE.CubeGeometry(skyboxProperties.width, skyboxProperties.height, skyboxProperties.lenght)
+    const geometry = new THREE.BoxGeometry(skyboxProperties.width, skyboxProperties.height, skyboxProperties.lenght)
 
     const textures = [
         skyboxProperties.firstSideTextureURl, 

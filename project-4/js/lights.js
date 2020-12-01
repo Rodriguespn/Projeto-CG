@@ -1,4 +1,5 @@
-// teste
+'use strict'
+
 const directionalLightProperties = {
     intensityOff: 0,
     intensityOn: 0.5,
