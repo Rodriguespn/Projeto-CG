@@ -14,7 +14,7 @@ function updateCameraPosition(obj, x, y, z, lookAt) {
 }
 
 function createPerspectiveCamera() {
-    perspectiveCamera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 100)
+    perspectiveCamera = new THREE.PerspectiveCamera(45, windowWidth / windowHeight, 1, 1000)
 
     updateCameraPosition(perspectiveCamera, groundProperties.side / 2, 15, groundProperties.side / 2, scene.position)
 }
